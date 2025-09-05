@@ -33,7 +33,7 @@ export class HubWorldScene extends Phaser.Scene {
   private otherPlayers: Map<string, Player> = new Map()
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
   private wasd!: any
-  private fountain!: Phaser.GameObjects.Sprite
+  private fountain!: Phaser.Physics.Arcade.Sprite
   private interactKey!: Phaser.Input.Keyboard.Key
   private gameContext: any
   private lastPosition = { x: 0, y: 0 }
