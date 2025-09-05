@@ -23,10 +23,10 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Initialize gambling API
+    // Initialize gambling API - hardcoded URLs since env vars aren't loading in production
     this.gamblingAPI = new WishGamblingAPI(
-      process.env.NEXT_PUBLIC_WORKER_URL || 'https://wish-well-worker.stealthbundlebot.workers.dev',
-      process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet-beta.solana.com'
+      'https://wish-well-worker.stealthbundlebot.workers.dev',
+      'https://api.mainnet-beta.solana.com'
     )
     
     // Add village background - center it properly
@@ -164,7 +164,8 @@ export class TestScene extends Phaser.Scene {
       
       // Create burn transaction
       text.setText('Preparing burn...')
-      const tokenMint = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || 'YOUR_TOKEN_MINT_HERE')
+      const tokenMintAddress = '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump' // Hardcoded for now since env vars aren't loading properly
+      const tokenMint = new PublicKey(tokenMintAddress)
       const burnTransaction = await this.gamblingAPI.createBurnTransaction(
         wallet.publicKey,
         tokenMint,

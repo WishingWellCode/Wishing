@@ -53,7 +53,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const connectToGame = async () => {
     if (!publicKey) return
 
-    const workerUrl = process.env.NEXT_PUBLIC_WORKER_URL || 'wss://wish-well-worker.YOUR_DOMAIN.workers.dev'
+    // Hardcode the worker URL since env vars aren't loading in production
+    const workerUrl = 'wss://wish-well-worker.stealthbundlebot.workers.dev'
     const socket = new WebSocket(`${workerUrl}/game`)
     
     socket.onopen = () => {
@@ -117,7 +118,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       throw new Error('Wallet not connected')
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_WORKER_URL}/api/gamble`, {
+    const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/gamble`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
