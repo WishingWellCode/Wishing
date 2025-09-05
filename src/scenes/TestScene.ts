@@ -1,4 +1,6 @@
 import Phaser from 'phaser'
+import { WishGamblingAPI, GamblingSession, GamblingResult } from '../lib/solanaUtils'
+import { PublicKey } from '@solana/web3.js'
 
 export class TestScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
@@ -8,6 +10,8 @@ export class TestScene extends Phaser.Scene {
   private fountainArea!: Phaser.GameObjects.Arc
   private isNearFountain: boolean = false
   private gamblingUI!: Phaser.GameObjects.Container
+  private gamblingAPI!: WishGamblingAPI
+  private currentSession: GamblingSession | null = null
   
   constructor() {
     super({ key: 'TestScene' })
@@ -19,6 +23,12 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
+    // Initialize gambling API
+    this.gamblingAPI = new WishGamblingAPI(
+      'https://wish-well-worker.your-subdomain.workers.dev', // TODO: Replace with actual worker URL
+      'https://api.mainnet-beta.solana.com'
+    )
+    
     // Add village background - center it properly
     const villageBackground = this.add.image(
       this.cameras.main.centerX, 
@@ -130,19 +140,96 @@ export class TestScene extends Phaser.Scene {
     const text = this.gamblingUI.list[3] as Phaser.GameObjects.Text
     
     button.setFillStyle(0x6b7280) // Gray out
-    text.setText('Processing...')
+    text.setText('Creating session...')
     button.disableInteractive()
-    
-    // Use exact probabilities as specified
-    this.time.delayedCall(2000, () => {
-      const result = this.calculateGamblingResult()
-      this.showGamblingResult(result)
+
+    try {
+      // Check if wallet is connected
+      const wallet = (window as any).solana
+      if (!wallet?.isConnected) {
+        text.setText('Connect wallet first!')
+        this.time.delayedCall(2000, () => {
+          button.setFillStyle(0x4ade80)
+          text.setText('Throw 1,000 $WISH')
+          button.setInteractive()
+        })
+        return
+      }
+
+      const walletAddress = wallet.publicKey.toString()
+      
+      // Start gambling session with worker
+      text.setText('Starting session...')
+      this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+      
+      // Create burn transaction
+      text.setText('Preparing burn...')
+      const tokenMint = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || 'YOUR_TOKEN_MINT_HERE')
+      const burnTransaction = await this.gamblingAPI.createBurnTransaction(
+        wallet.publicKey,
+        tokenMint,
+        1000
+      )
+      
+      // Sign and send burn transaction
+      text.setText('Sign to burn tokens...')
+      const signedTx = await wallet.signTransaction(burnTransaction)
+      const signature = await this.gamblingAPI.connection.sendRawTransaction(signedTx.serialize())
+      
+      // Wait for confirmation
+      text.setText('Confirming burn...')
+      await this.gamblingAPI.connection.confirmTransaction(signature)
+      
+      // Resolve gambling session
+      text.setText('Rolling dice...')
+      const result = await this.gamblingAPI.resolveGamblingSession(this.currentSession.sessionId, signature)
+      
+      // Show result
+      this.showGamblingResult({
+        tier: result.result.tier,
+        multiplier: result.result.multiplier,
+        message: result.result.message || this.getResultMessage(result.result.tier)
+      })
       
       // Re-enable button
       button.setFillStyle(0x4ade80)
       text.setText('Throw 1,000 $WISH')
       button.setInteractive()
-    })
+      
+    } catch (error) {
+      console.error('Gambling error:', error)
+      
+      // Show error message
+      let errorMessage = 'Error - Try again'
+      if (error.message.includes('insufficient')) {
+        errorMessage = 'Insufficient $WISH'
+      } else if (error.message.includes('rejected')) {
+        errorMessage = 'Transaction rejected'
+      }
+      
+      button.setFillStyle(0x4ade80)
+      text.setText(errorMessage)
+      button.setInteractive()
+      
+      this.time.delayedCall(3000, () => {
+        text.setText('Throw 1,000 $WISH')
+      })
+    }
+  }
+
+  getResultMessage(tier: string): string {
+    const messages: { [key: string]: string } = {
+      'JACKPOT': '🌟 LEGENDARY JACKPOT!!! 🌟',
+      'MAJOR WIN': '💎 MAJOR WIN! 💎',
+      'LARGE WIN': '🎉 LARGE WIN! 🎉',
+      'MEDIUM WIN': '✨ MEDIUM WIN! ✨',
+      'SMALL WIN C': 'Nice win!',
+      'SMALL WIN B': 'Small profit!',
+      'SMALL WIN A': 'Small gain!',
+      'BREAK EVEN': 'Your coins return!',
+      'LOSE': 'The fountain keeps your wishes...'
+    }
+    return messages[tier] || 'Unknown result'
   }
 
   calculateGamblingResult() {

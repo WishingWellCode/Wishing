@@ -1,5 +1,6 @@
 # Dependencies
 /node_modules
+worker/node_modules
 /.pnp
 .pnp.js
 
@@ -37,3 +38,6 @@ next-env.d.ts
 # Cloudflare
 .wrangler
 .dev.vars
+
+# Claude Code
+.claude/

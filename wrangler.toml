@@ -5,21 +5,27 @@ compatibility_date = "2024-01-01"
 [vars]
 SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
 WISH_TOKEN_MINT = "YOUR_WISH_TOKEN_MINT_ADDRESS"
+BURN_ADDRESS = "11111111111111111111111111111111"
+POOL_WALLET_PUBLIC = "YOUR_POOL_WALLET_PUBLIC_KEY"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# POOL_WALLET_PRIVATE_KEY = "your-pool-wallet-private-key-base58"
 
 [[kv_namespaces]]
 binding = "FOUNTAIN_POOL"
-id = "YOUR_KV_NAMESPACE_ID_1"
-preview_id = "YOUR_KV_PREVIEW_ID_1"
+id = "7b95ac0e07a8424d9718e9689e8529d6"
 
 [[kv_namespaces]]
 binding = "GAMBLE_LOGS"
-id = "YOUR_KV_NAMESPACE_ID_2"
-preview_id = "YOUR_KV_PREVIEW_ID_2"
+id = "1a2a4451989547ffa78166bbafc93620"
 
 [[kv_namespaces]]
 binding = "USER_STATS"
-id = "YOUR_KV_NAMESPACE_ID_3"
-preview_id = "YOUR_KV_PREVIEW_ID_3"
+id = "a242d55e8bbf4b478b5d6018aa3244b3"
+
+[[kv_namespaces]]
+binding = "GAMBLING_SESSIONS"
+id = "afb73024aeed42638a844fa90c68c5ca"
 
 [[durable_objects.bindings]]
 name = "GAME_STATE"

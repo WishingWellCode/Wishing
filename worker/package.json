@@ -1,0 +1,9 @@
+{
+  "name": "wish-well-worker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@solana/web3.js": "^1.91.7",
+    "@solana/spl-token": "^0.4.6"
+  }
+}

@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "worker:dev": "wrangler dev worker/index.js",
-    "worker:deploy": "wrangler publish worker/index.js"
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy"
   },
   "dependencies": {
     "@solana/wallet-adapter-base": "^0.9.23",
@@ -17,6 +17,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.91.7",
+    "@solana/spl-token": "^0.4.6",
     "next": "14.2.5",
     "phaser": "^3.70.0",
     "react": "^18.3.1",

@@ -9,7 +9,11 @@
       "Bash(git config:*)",
       "Bash(git push:*)",
       "Bash(git branch:*)",
-      "Bash(git remote set-url origin https://github.com/WishingWellCode/Wishing.git)"
+      "Bash(git remote set-url origin https://github.com/WishingWellCode/Wishing.git)",
+      "Bash(npm run:*)",
+      "Bash(npm install)",
+      "Bash(wrangler kv:namespace create:*)",
+      "Bash(wrangler kv namespace create:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,4 +1,19 @@
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { 
+  Connection, 
+  PublicKey, 
+  Transaction, 
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+  Keypair
+} from '@solana/web3.js'
+
+import { 
+  createBurnInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID
+} from '@solana/spl-token'
 
 export default {
   async fetch(request, env, ctx) {
@@ -10,8 +25,12 @@ export default {
     }
     
     // Handle API routes
-    if (url.pathname === '/api/gamble') {
-      return handleGamble(request, env)
+    if (url.pathname === '/api/fountain/start') {
+      return handleFountainStart(request, env)
+    }
+    
+    if (url.pathname === '/api/fountain/resolve') {
+      return handleFountainResolve(request, env)
     }
     
     if (url.pathname === '/api/stats') {
@@ -124,71 +143,188 @@ async function handleWebSocketSession(websocket, env) {
   })
 }
 
-async function handleGamble(request, env) {
-  const { walletAddress, amount } = await request.json()
+async function handleFountainStart(request, env) {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
+
+  const { walletAddress, clientSeed } = await request.json()
   
-  if (amount !== 1000) {
-    return new Response(JSON.stringify({ error: 'Must gamble exactly 1000 $WISH' }), {
+  if (!walletAddress) {
+    return new Response(JSON.stringify({ error: 'Wallet address required' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     })
   }
-  
-  // Generate cryptographically secure random number
-  const randomBytes = new Uint8Array(4)
-  crypto.getRandomValues(randomBytes)
-  const randomValue = randomBytes[0] / 255
-  
-  // Determine outcome based on probability weights
-  let result = { won: false, amount: 0, tier: 'lose' }
-  
-  if (randomValue < 0.00001) {
-    // 0.001% - Jackpot (1,000,000 $WISH)
-    result = { won: true, amount: 1000000, tier: 'jackpot' }
-  } else if (randomValue < 0.00015) {
-    // 0.014% - Major win (100,000 $WISH)
-    result = { won: true, amount: 100000, tier: 'major' }
-  } else if (randomValue < 0.0005) {
-    // 0.35% - Large win (10,000 $WISH)
-    result = { won: true, amount: 10000, tier: 'large' }
-  } else if (randomValue < 0.001) {
-    // 0.5% - Medium win (5,000 $WISH)
-    result = { won: true, amount: 5000, tier: 'medium' }
-  } else if (randomValue < 0.4) {
-    // 39% - Break even or small gain
-    const gains = [1000, 1100, 1200, 1500]
-    result = { 
-      won: true, 
-      amount: gains[Math.floor(Math.random() * gains.length)], 
-      tier: 'small' 
-    }
-  } else {
-    // 60% - Lose
-    result = { won: false, amount: 0, tier: 'lose' }
+
+  // Check for existing pending session
+  const existingSession = await env.GAMBLING_SESSIONS.get(`pending:${walletAddress}`)
+  if (existingSession) {
+    return new Response(JSON.stringify({ error: 'Already have pending session' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
   }
+
+  // Generate server seed and commit
+  const serverSeed = crypto.randomUUID() + crypto.randomUUID()
+  const serverCommit = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(serverSeed))
+  const serverCommitHex = Array.from(new Uint8Array(serverCommit))
+    .map(b => b.toString(16).padStart(2, '0')).join('')
+
+  // Generate session ID
+  const sessionId = crypto.randomUUID()
   
-  // Update fountain pool
-  await updateFountainPool(env, amount, result.amount)
-  
-  // Log gambling event
-  await logGambleEvent(env, {
+  // Generate client seed if not provided
+  const finalClientSeed = clientSeed || crypto.randomUUID()
+
+  // Store session
+  const session = {
+    sessionId,
     walletAddress,
+    serverSeed,
+    serverCommit: serverCommitHex,
+    clientSeed: finalClientSeed,
     timestamp: Date.now(),
-    amountGambled: amount,
-    result
-  })
-  
-  // If won, initiate payout from dev wallet
-  if (result.won && result.amount > 0) {
-    // Note: Actual Solana transaction would be initiated here
-    // For now, we'll just return the result
-    console.log(`Payout ${result.amount} $WISH to ${walletAddress}`)
+    status: 'pending'
   }
-  
+
+  await env.GAMBLING_SESSIONS.put(`pending:${walletAddress}`, JSON.stringify(session))
+  await env.GAMBLING_SESSIONS.put(`session:${sessionId}`, JSON.stringify(session))
+
   return new Response(JSON.stringify({
     success: true,
-    ...result,
-    message: getResultMessage(result.tier),
+    sessionId,
+    serverCommit: serverCommitHex,
+    clientSeed: finalClientSeed,
+    burnAddress: env.BURN_ADDRESS || '11111111111111111111111111111111', // Null address for burn
+    exactStake: 1000,
+    message: 'Send exactly 1000 $WISH tokens to burn address, then call /resolve'
+  }), {
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    }
+  })
+}
+
+async function handleFountainResolve(request, env) {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
+
+  const { sessionId, txSignature } = await request.json()
+  
+  if (!sessionId || !txSignature) {
+    return new Response(JSON.stringify({ error: 'Session ID and transaction signature required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
+  }
+
+  // Get session
+  const sessionData = await env.GAMBLING_SESSIONS.get(`session:${sessionId}`)
+  if (!sessionData) {
+    return new Response(JSON.stringify({ error: 'Invalid session' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
+  }
+
+  const session = JSON.parse(sessionData)
+  
+  if (session.status !== 'pending') {
+    return new Response(JSON.stringify({ error: 'Session already resolved' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
+  }
+
+  // Verify burn transaction on Solana
+  const connection = new Connection(env.SOLANA_RPC_URL)
+  let burnVerified = false
+  
+  try {
+    const tx = await connection.getTransaction(txSignature, {
+      commitment: 'confirmed'
+    })
+    
+    if (tx && !tx.meta?.err) {
+      // TODO: Add more specific verification:
+      // 1. Check if transaction burns exactly 1000 tokens
+      // 2. Verify burn is from correct wallet
+      // 3. Verify token mint matches WISH token
+      burnVerified = true
+      console.log('✅ Burn transaction verified:', txSignature)
+    } else {
+      console.log('❌ Burn transaction failed or not found:', txSignature)
+    }
+  } catch (error) {
+    console.error('Error verifying burn transaction:', error)
+  }
+  
+  if (!burnVerified) {
+    return new Response(JSON.stringify({ error: 'Burn transaction not verified' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
+  }
+
+  // Generate result using commit-reveal
+  const result = await calculateGamblingResult(session.serverSeed, session.clientSeed, txSignature)
+  
+  // Calculate payout
+  const payout = Math.floor(1000 * result.multiplier)
+  
+  // Send payout if won (from pool wallet)
+  let payoutTx = null
+  if (payout > 0) {
+    try {
+      payoutTx = await sendPayout(env, session.walletAddress, payout)
+      console.log(`✅ Sent ${payout} $WISH payout to ${session.walletAddress}: ${payoutTx}`)
+    } catch (error) {
+      console.error('❌ Failed to send payout:', error)
+      // Continue without payout - log for manual processing
+      payoutTx = 'FAILED_' + crypto.randomUUID()
+    }
+  }
+
+  // Update session
+  session.status = 'resolved'
+  session.result = result
+  session.payout = payout
+  session.payoutTx = payoutTx
+  session.burnTx = txSignature
+  
+  await env.GAMBLING_SESSIONS.put(`session:${sessionId}`, JSON.stringify(session))
+  await env.GAMBLING_SESSIONS.delete(`pending:${session.walletAddress}`)
+
+  // Log the gambling event
+  await logGambleEvent(env, {
+    walletAddress: session.walletAddress,
+    timestamp: Date.now(),
+    sessionId,
+    amountGambled: 1000,
+    result: {
+      ...result,
+      amount: payout
+    }
+  })
+
+  return new Response(JSON.stringify({
+    success: true,
+    sessionId,
+    serverSeed: session.serverSeed,
+    serverCommit: session.serverCommit,
+    clientSeed: session.clientSeed,
+    burnTx: txSignature,
+    payoutTx,
+    result: {
+      tier: result.tier,
+      multiplier: result.multiplier,
+      payout,
+      message: getResultMessage(result.tier)
+    },
     timestamp: Date.now()
   }), {
     headers: { 
@@ -196,6 +332,40 @@ async function handleGamble(request, env) {
       'Access-Control-Allow-Origin': '*'
     }
   })
+}
+
+async function calculateGamblingResult(serverSeed, clientSeed, blockHash) {
+  // Combine seeds and blockhash for randomness
+  const combined = serverSeed + clientSeed + blockHash
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(combined))
+  const hashArray = new Uint8Array(hashBuffer)
+  
+  // Convert first 8 bytes to float in [0,1)
+  let roll = 0
+  for (let i = 0; i < 8; i++) {
+    roll += hashArray[i] / Math.pow(256, i + 1)
+  }
+  
+  // Apply probability tiers (same as frontend)
+  if (roll < 0.0000001) {
+    return { tier: 'JACKPOT', multiplier: 15000 }
+  } else if (roll < 0.0014999) {
+    return { tier: 'MAJOR WIN', multiplier: 180 }
+  } else if (roll < 0.0049999) {
+    return { tier: 'LARGE WIN', multiplier: 25 }
+  } else if (roll < 0.0099999) {
+    return { tier: 'MEDIUM WIN', multiplier: 9 }
+  } else if (roll < 0.0119999) {
+    return { tier: 'SMALL WIN C', multiplier: 1.65 }
+  } else if (roll < 0.0199999) {
+    return { tier: 'SMALL WIN B', multiplier: 1.28 }
+  } else if (roll < 0.0999999) {
+    return { tier: 'SMALL WIN A', multiplier: 1.1 }
+  } else if (roll < 0.3999999) {
+    return { tier: 'BREAK EVEN', multiplier: 1.0 }
+  } else {
+    return { tier: 'LOSE', multiplier: 0 }
+  }
 }
 
 async function handleStats(request, env) {
@@ -279,6 +449,54 @@ async function getLeaderboard(env) {
     mostActive: [],
     luckiest: []
   }
+}
+
+async function sendPayout(env, recipientWalletAddress, amount) {
+  if (!env.POOL_WALLET_PRIVATE_KEY) {
+    throw new Error('Pool wallet private key not configured')
+  }
+  
+  const connection = new Connection(env.SOLANA_RPC_URL)
+  
+  // Create pool wallet keypair from private key
+  const poolWalletPrivateKey = new Uint8Array(JSON.parse(env.POOL_WALLET_PRIVATE_KEY))
+  const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
+  
+  // Get token accounts
+  const tokenMint = new PublicKey(env.WISH_TOKEN_MINT)
+  const recipientWallet = new PublicKey(recipientWalletAddress)
+  
+  const poolTokenAccount = await getAssociatedTokenAddress(tokenMint, poolWallet.publicKey)
+  const recipientTokenAccount = await getAssociatedTokenAddress(tokenMint, recipientWallet)
+  
+  // Create transaction
+  const transaction = new Transaction()
+  
+  // Add transfer instruction
+  const transferInstruction = createTransferInstruction(
+    poolTokenAccount,
+    recipientTokenAccount,
+    poolWallet.publicKey,
+    amount * Math.pow(10, 9), // Assuming 9 decimals
+    [],
+    TOKEN_PROGRAM_ID
+  )
+  
+  transaction.add(transferInstruction)
+  
+  // Set recent blockhash and fee payer
+  const { blockhash } = await connection.getLatestBlockhash()
+  transaction.recentBlockhash = blockhash
+  transaction.feePayer = poolWallet.publicKey
+  
+  // Sign and send transaction
+  transaction.sign(poolWallet)
+  const signature = await connection.sendRawTransaction(transaction.serialize())
+  
+  // Wait for confirmation
+  await connection.confirmTransaction(signature)
+  
+  return signature
 }
 
 function getResultMessage(tier) {
