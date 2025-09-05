@@ -25,8 +25,8 @@ export class TestScene extends Phaser.Scene {
   create() {
     // Initialize gambling API
     this.gamblingAPI = new WishGamblingAPI(
-      'https://wish-well-worker.your-subdomain.workers.dev', // TODO: Replace with actual worker URL
-      'https://api.mainnet-beta.solana.com'
+      process.env.NEXT_PUBLIC_WORKER_URL || 'https://wish-well-worker.stealthbundlebot.workers.dev',
+      process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet-beta.solana.com'
     )
     
     // Add village background - center it properly

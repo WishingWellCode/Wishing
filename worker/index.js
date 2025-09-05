@@ -19,6 +19,18 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
     
+    // Handle CORS preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '86400',
+        }
+      })
+    }
+    
     // Handle WebSocket upgrade for multiplayer
     if (request.headers.get('Upgrade') === 'websocket') {
       return handleWebSocketUpgrade(request, env)
@@ -41,7 +53,10 @@ export default {
       return handleLeaderboard(request, env)
     }
     
-    return new Response('Wish Well API', { status: 200 })
+    return new Response('Wish Well API', { 
+      status: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    })
   }
 }
 
