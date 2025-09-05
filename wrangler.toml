@@ -1,0 +1,30 @@
+name = "wish-well-worker"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+WISH_TOKEN_MINT = "YOUR_WISH_TOKEN_MINT_ADDRESS"
+
+[[kv_namespaces]]
+binding = "FOUNTAIN_POOL"
+id = "YOUR_KV_NAMESPACE_ID_1"
+preview_id = "YOUR_KV_PREVIEW_ID_1"
+
+[[kv_namespaces]]
+binding = "GAMBLE_LOGS"
+id = "YOUR_KV_NAMESPACE_ID_2"
+preview_id = "YOUR_KV_PREVIEW_ID_2"
+
+[[kv_namespaces]]
+binding = "USER_STATS"
+id = "YOUR_KV_NAMESPACE_ID_3"
+preview_id = "YOUR_KV_PREVIEW_ID_3"
+
+[[durable_objects.bindings]]
+name = "GAME_STATE"
+class_name = "GameState"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["GameState"]

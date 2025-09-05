@@ -1,0 +1,231 @@
+{
+  "world": {
+    "width": 1280,
+    "height": 960,
+    "gridSize": 32,
+    "layers": {
+      "background": 0,
+      "environment": 1,
+      "interactive": 2,
+      "characters": 3,
+      "effects": 4,
+      "ui": 5
+    }
+  },
+  "fixedEntities": {
+    "fountain": {
+      "type": "interactive",
+      "sprite": "fountain_base",
+      "animatedSprite": "fountain_water",
+      "position": { "x": 640, "y": 480 },
+      "scale": 2,
+      "layer": "interactive",
+      "collision": true,
+      "interactionRadius": 80
+    },
+    "houses": [
+      {
+        "id": "house_1",
+        "sprite": "house_variant_1",
+        "position": { "x": 200, "y": 200 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "house_2",
+        "sprite": "house_variant_2",
+        "position": { "x": 1080, "y": 200 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "house_3",
+        "sprite": "house_variant_3",
+        "position": { "x": 200, "y": 760 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "house_4",
+        "sprite": "house_variant_4",
+        "position": { "x": 1080, "y": 760 },
+        "scale": 2,
+        "layer": "environment"
+      }
+    ],
+    "lamps": [
+      {
+        "id": "lamp_1",
+        "sprite": "lamp_post",
+        "position": { "x": 320, "y": 320 },
+        "scale": 2,
+        "layer": "environment",
+        "glowEffect": true
+      },
+      {
+        "id": "lamp_2",
+        "sprite": "lamp_post",
+        "position": { "x": 960, "y": 320 },
+        "scale": 2,
+        "layer": "environment",
+        "glowEffect": true
+      },
+      {
+        "id": "lamp_3",
+        "sprite": "lamp_post",
+        "position": { "x": 320, "y": 640 },
+        "scale": 2,
+        "layer": "environment",
+        "glowEffect": true
+      },
+      {
+        "id": "lamp_4",
+        "sprite": "lamp_post",
+        "position": { "x": 960, "y": 640 },
+        "scale": 2,
+        "layer": "environment",
+        "glowEffect": true
+      }
+    ],
+    "benches": [
+      {
+        "id": "bench_1",
+        "sprite": "bench",
+        "position": { "x": 480, "y": 320 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "bench_2",
+        "sprite": "bench",
+        "position": { "x": 800, "y": 320 },
+        "scale": 2,
+        "layer": "environment",
+        "flipX": true
+      },
+      {
+        "id": "bench_3",
+        "sprite": "bench",
+        "position": { "x": 480, "y": 640 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "bench_4",
+        "sprite": "bench",
+        "position": { "x": 800, "y": 640 },
+        "scale": 2,
+        "layer": "environment",
+        "flipX": true
+      }
+    ],
+    "decorations": [
+      {
+        "id": "tree_1",
+        "sprite": "tree_variant_1",
+        "position": { "x": 160, "y": 400 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "tree_2",
+        "sprite": "tree_variant_2",
+        "position": { "x": 1120, "y": 400 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "tree_3",
+        "sprite": "tree_variant_1",
+        "position": { "x": 160, "y": 560 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "tree_4",
+        "sprite": "tree_variant_2",
+        "position": { "x": 1120, "y": 560 },
+        "scale": 2,
+        "layer": "environment"
+      },
+      {
+        "id": "shrub_1",
+        "sprite": "shrub",
+        "position": { "x": 400, "y": 240 },
+        "scale": 1.5,
+        "layer": "environment"
+      },
+      {
+        "id": "shrub_2",
+        "sprite": "shrub",
+        "position": { "x": 880, "y": 240 },
+        "scale": 1.5,
+        "layer": "environment"
+      },
+      {
+        "id": "shrub_3",
+        "sprite": "shrub",
+        "position": { "x": 400, "y": 720 },
+        "scale": 1.5,
+        "layer": "environment"
+      },
+      {
+        "id": "shrub_4",
+        "sprite": "shrub",
+        "position": { "x": 880, "y": 720 },
+        "scale": 1.5,
+        "layer": "environment"
+      }
+    ],
+    "groundTiles": {
+      "type": "tilemap",
+      "pattern": "cobblestone",
+      "center": { "x": 640, "y": 480, "radius": 320 },
+      "layer": "background"
+    }
+  },
+  "spawnPoints": [
+    { "x": 640, "y": 600 },
+    { "x": 540, "y": 580 },
+    { "x": 740, "y": 580 },
+    { "x": 590, "y": 620 },
+    { "x": 690, "y": 620 }
+  ],
+  "characterSprites": [
+    {
+      "id": "character_1",
+      "name": "Cyber Wanderer",
+      "spritePrefix": "character_1"
+    },
+    {
+      "id": "character_2",
+      "name": "Digital Mage",
+      "spritePrefix": "character_2"
+    },
+    {
+      "id": "character_3",
+      "name": "Matrix Knight",
+      "spritePrefix": "character_3"
+    },
+    {
+      "id": "character_4",
+      "name": "Pixel Rogue",
+      "spritePrefix": "character_4"
+    },
+    {
+      "id": "character_5",
+      "name": "Code Wizard",
+      "spritePrefix": "character_5"
+    },
+    {
+      "id": "character_6",
+      "name": "Neon Samurai",
+      "spritePrefix": "character_6"
+    },
+    {
+      "id": "character_7",
+      "name": "Grid Walker",
+      "spritePrefix": "character_7"
+    }
+  ]
+}

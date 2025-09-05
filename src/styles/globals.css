@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+body {
+  overflow: hidden;
+}
+
+.wallet-adapter-button {
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 10px !important;
+  padding: 12px 16px !important;
+}
