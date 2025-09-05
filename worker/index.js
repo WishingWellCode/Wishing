@@ -645,13 +645,23 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   // TODO: Query mint info once Buffer polyfill is available
   const tokenDecimals = 6 // Most SPL tokens use 6 decimals
 
-  // Add transfer instruction with correct decimals - use BigInt for amount
-  const tokenAmount = BigInt(amount * Math.pow(10, tokenDecimals))
+  // Add transfer instruction with correct decimals
+  const rawAmount = Math.floor(amount * Math.pow(10, tokenDecimals))
+  
+  // Create proper 8-byte little-endian buffer for amount
+  const amountBuffer = new ArrayBuffer(8)
+  const amountView = new DataView(amountBuffer)
+  amountView.setBigUint64(0, BigInt(rawAmount), true) // true = little-endian
+  const amountArray = new Uint8Array(amountBuffer)
+  
+  console.log(`🔢 Sending payout: ${amount} tokens = ${rawAmount} base units`)
+  console.log(`🔢 Amount buffer: [${Array.from(amountArray).join(',')}]`)
+  
   const transferInstruction = createTransferInstruction(
     poolTokenAccount,
     recipientTokenAccount,
     poolWallet.publicKey,
-    tokenAmount, // Use BigInt for proper encoding
+    amountArray, // Use 8-byte Uint8Array
     [],
     TOKEN_PROGRAM_ID
   )
