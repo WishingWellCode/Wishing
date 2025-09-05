@@ -9,6 +9,7 @@ const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false
 export default function Home() {
   const { publicKey, connected } = useWallet()
   const [isGameReady, setIsGameReady] = useState(false)
+  const [testMode, setTestMode] = useState(false)
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -31,7 +32,7 @@ export default function Home() {
           <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
         </div>
 
-        {!connected ? (
+        {!connected && !testMode ? (
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center p-8 bg-black/50 rounded-lg">
               <h1 className="text-4xl font-pixel text-yellow-400 mb-8">
@@ -40,16 +41,22 @@ export default function Home() {
               <p className="text-white font-pixel text-sm mb-8">
                 Connect your wallet to enter the magical realm
               </p>
-              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !font-pixel" />
+              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !font-pixel mb-4" />
+              <br />
+              <button 
+                onClick={() => setTestMode(true)}
+                className="bg-green-600 hover:bg-green-700 text-white font-pixel text-sm px-4 py-2 rounded"
+              >
+                TEST MODE (No Wallet)
+              </button>
             </div>
           </div>
         ) : (
           <>
-            {isGameReady && <GameCanvas />}
+            {(isGameReady || testMode) && <GameCanvas />}
             <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs">
-              <p>WASD - Move</p>
-              <p>E - Interact</p>
-              <p>ESC - Menu</p>
+              <p>WASD/Arrow Keys - Move</p>
+              <p>{testMode ? 'TEST MODE' : 'E - Interact'}</p>
             </div>
           </>
         )}
