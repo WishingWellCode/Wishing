@@ -45,6 +45,10 @@ export default {
       return handleFountainResolve(request, env)
     }
     
+    if (url.pathname === '/api/fountain/clear') {
+      return handleClearSession(request, env)
+    }
+    
     if (url.pathname === '/api/stats') {
       return handleStats(request, env)
     }
@@ -175,10 +179,21 @@ async function handleFountainStart(request, env) {
   // Check for existing pending session
   const existingSession = await env.GAMBLING_SESSIONS.get(`pending:${walletAddress}`)
   if (existingSession) {
-    return new Response(JSON.stringify({ error: 'Already have pending session' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    })
+    const session = JSON.parse(existingSession)
+    // If session is older than 5 minutes, delete it
+    if (Date.now() - session.timestamp > 5 * 60 * 1000) {
+      await env.GAMBLING_SESSIONS.delete(`pending:${walletAddress}`)
+      await env.GAMBLING_SESSIONS.delete(`session:${session.sessionId}`)
+    } else {
+      return new Response(JSON.stringify({ 
+        error: 'Already have pending session',
+        sessionId: session.sessionId,
+        age: Date.now() - session.timestamp
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      })
+    }
   }
 
   // Generate server seed and commit
@@ -396,6 +411,36 @@ async function handleStats(request, env) {
 async function handleLeaderboard(request, env) {
   const leaderboard = await getLeaderboard(env)
   return new Response(JSON.stringify(leaderboard), {
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    }
+  })
+}
+
+async function handleClearSession(request, env) {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
+
+  const { walletAddress } = await request.json()
+  
+  if (!walletAddress) {
+    return new Response(JSON.stringify({ error: 'Wallet address required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    })
+  }
+
+  // Clear any pending session
+  const existingSession = await env.GAMBLING_SESSIONS.get(`pending:${walletAddress}`)
+  if (existingSession) {
+    const session = JSON.parse(existingSession)
+    await env.GAMBLING_SESSIONS.delete(`pending:${walletAddress}`)
+    await env.GAMBLING_SESSIONS.delete(`session:${session.sessionId}`)
+  }
+
+  return new Response(JSON.stringify({ success: true, message: 'Session cleared' }), {
     headers: { 
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'

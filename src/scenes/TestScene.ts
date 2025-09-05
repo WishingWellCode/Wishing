@@ -160,7 +160,19 @@ export class TestScene extends Phaser.Scene {
       
       // Start gambling session with worker
       text.setText('Starting session...')
-      this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+      try {
+        this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+      } catch (sessionError: any) {
+        if (sessionError?.message?.includes('Already have pending session')) {
+          // Clear the pending session by attempting to resolve with a dummy signature
+          text.setText('Clearing old session...')
+          // For now, just wait and retry
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+        } else {
+          throw sessionError
+        }
+      }
       
       // Create burn transaction
       text.setText('Preparing burn...')
