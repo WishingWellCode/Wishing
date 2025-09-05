@@ -81,12 +81,27 @@ export class WishGamblingAPI {
 
     transaction.add(burnInstruction)
 
-    // Set recent blockhash and fee payer
-    const { blockhash } = await this.connection.getLatestBlockhash()
-    transaction.recentBlockhash = blockhash
-    transaction.feePayer = userWallet
-
-    return transaction
+    // Set recent blockhash and fee payer with retry logic
+    let retries = 3
+    let lastError = null
+    
+    while (retries > 0) {
+      try {
+        const { blockhash } = await this.connection.getLatestBlockhash('finalized')
+        transaction.recentBlockhash = blockhash
+        transaction.feePayer = userWallet
+        return transaction
+      } catch (error) {
+        console.warn(`RPC error (${retries} retries left):`, error)
+        lastError = error
+        retries--
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+      }
+    }
+    
+    throw lastError || new Error('Failed to get blockhash after retries')
   }
 
   async resolveGamblingSession(sessionId: string, txSignature: string): Promise<GamblingResult> {

@@ -23,10 +23,19 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Initialize gambling API - using Helius RPC for better reliability
+    // Initialize gambling API - using multiple RPC endpoints for reliability
+    const rpcEndpoints = [
+      'https://api.mainnet-beta.solana.com',
+      'https://solana-api.projectserum.com',
+      'https://rpc.ankr.com/solana'
+    ]
+    
+    // Randomly select an endpoint to distribute load
+    const selectedRpc = rpcEndpoints[Math.floor(Math.random() * rpcEndpoints.length)]
+    
     this.gamblingAPI = new WishGamblingAPI(
       'https://wish-well-worker.stealthbundlebot.workers.dev',
-      'https://mainnet.helius-rpc.com/?api-key=f8ad63d9-00de-4187-b48a-f8b7dbce9e96' // Free tier Helius RPC
+      selectedRpc
     )
     
     // Add village background - center it properly

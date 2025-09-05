@@ -13,7 +13,9 @@
       "Bash(npm run:*)",
       "Bash(npm install)",
       "Bash(wrangler kv:namespace create:*)",
-      "Bash(wrangler kv namespace create:*)"
+      "Bash(wrangler kv namespace create:*)",
+      "Bash(wrangler kv:key:*)",
+      "Bash(wrangler kv key list:*)"
     ],
     "deny": [],
     "ask": []
