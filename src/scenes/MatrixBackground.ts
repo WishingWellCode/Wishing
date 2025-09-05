@@ -20,12 +20,10 @@ export class MatrixBackground {
     const width = this.scene.cameras.main.width
     const height = this.scene.cameras.main.height
     
-    // Dark background
-    this.graphics.fillStyle(0x000000, 1)
-    this.graphics.fillRect(0, 0, width, height)
+    // No solid background - let the village image show through
     
-    // Matrix green grid lines with perspective
-    this.gridLines.lineStyle(1, 0x00ff00, 0.3)
+    // Very subtle grid lines 
+    this.gridLines.lineStyle(1, 0x00ff00, 0.05)
     
     // Horizon line
     const horizon = height * this.perspectiveY

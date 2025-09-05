@@ -11,8 +11,8 @@ export class PreloadScene extends Phaser.Scene {
     // Load hub configuration first
     this.load.json('hubConfig', '/hub-config.json')
     
-    // Matrix grid background (optional - we generate it programmatically)
-    this.load.image('matrix-grid', '/assets/backgrounds/matrix_grid.png')
+    // Temporary village background
+    this.load.image('village-background', '/assets/backgrounds/temp_village.jpg')
     
     // Fountain
     this.load.image('fountain_base', '/assets/sprites/fountain_base.png')

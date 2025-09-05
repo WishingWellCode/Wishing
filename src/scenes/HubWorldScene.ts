@@ -85,14 +85,16 @@ export class HubWorldScene extends Phaser.Scene {
   }
 
   createMatrixBackground() {
-    // Create the Matrix-style grid background
-    this.matrixBg = new MatrixBackground(this)
-    
-    // Add to background layer
+    // Use the temporary village background image
     const bgLayer = this.layers.get('background')
     if (bgLayer) {
-      // Matrix background is drawn directly, not added to container
+      const villageBackground = this.add.image(640, 480, 'village-background')
+      villageBackground.setScale(1.2) // Scale to fit screen
+      bgLayer.add(villageBackground)
     }
+    
+    // Still create matrix background for effects (but make it subtle)
+    this.matrixBg = new MatrixBackground(this)
   }
 
   loadFixedEntities() {
