@@ -5,8 +5,14 @@ import { HubWorldScene } from '@/scenes/HubWorldScene'
 import { PreloadScene } from '@/scenes/PreloadScene'
 import { CharacterSelectScene } from '@/scenes/CharacterSelectScene'
 import { TestScene } from '@/scenes/TestScene'
+import { LandingScene } from '@/scenes/LandingScene'
 
-export default function GameCanvas() {
+interface GameCanvasProps {
+  isWalletConnected?: boolean
+  testMode?: boolean
+}
+
+export default function GameCanvas({ isWalletConnected = false, testMode = false }: GameCanvasProps) {
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { gameState, updatePlayerPosition, throwCoins } = useGame()
@@ -27,7 +33,7 @@ export default function GameCanvas() {
           debug: false
         }
       },
-      scene: [TestScene],
+      scene: testMode ? [TestScene] : [LandingScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH

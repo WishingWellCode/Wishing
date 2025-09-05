@@ -90,9 +90,10 @@ export class TestScene extends Phaser.Scene {
       }
     }
     
-    // Keep player on screen - use actual camera bounds
-    const bounds = this.cameras.main.getBounds()
-    this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, bounds.width - 16)
-    this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, bounds.height - 16)
+    // Keep player on screen - use camera dimensions
+    const width = this.cameras.main.width
+    const height = this.cameras.main.height
+    this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
+    this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
   }
 }

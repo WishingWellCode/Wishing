@@ -32,33 +32,28 @@ export default function Home() {
           <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
         </div>
 
-        {!connected && !testMode ? (
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center p-8 bg-black/50 rounded-lg">
-              <h1 className="text-4xl font-pixel text-yellow-400 mb-8">
-                $WISH Wishing Well
-              </h1>
-              <p className="text-white font-pixel text-sm mb-8">
-                Connect your wallet to enter the magical realm
-              </p>
-              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !font-pixel mb-4" />
+        <GameCanvas isWalletConnected={connected} testMode={testMode} />
+        
+        <div className="absolute top-4 left-4 z-50">
+          {!connected && !testMode && (
+            <div className="bg-black/70 p-4 rounded-lg">
+              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700 !font-pixel mb-2" />
               <br />
               <button 
                 onClick={() => setTestMode(true)}
-                className="bg-green-600 hover:bg-green-700 text-white font-pixel text-sm px-4 py-2 rounded"
+                className="bg-green-600 hover:bg-green-700 text-white font-pixel text-xs px-3 py-2 rounded"
               >
-                TEST MODE (No Wallet)
+                TEST MODE
               </button>
             </div>
+          )}
+        </div>
+
+        {(connected || testMode) && (
+          <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
+            <p>WASD/Arrow Keys - Move</p>
+            <p>{testMode ? 'TEST MODE ACTIVE' : 'E - Interact'}</p>
           </div>
-        ) : (
-          <>
-            {(isGameReady || testMode) && <GameCanvas />}
-            <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs">
-              <p>WASD/Arrow Keys - Move</p>
-              <p>{testMode ? 'TEST MODE' : 'E - Interact'}</p>
-            </div>
-          </>
         )}
       </div>
     </>
