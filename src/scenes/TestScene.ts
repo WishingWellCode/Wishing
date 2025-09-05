@@ -133,17 +133,9 @@ export class TestScene extends Phaser.Scene {
     text.setText('Processing...')
     button.disableInteractive()
     
-    // TODO: Implement actual gambling logic
-    // For now, just simulate a result after 2 seconds
+    // Use exact probabilities as specified
     this.time.delayedCall(2000, () => {
-      const outcomes = [
-        { tier: 'Lose', multiplier: 0, message: 'Better luck next time!' },
-        { tier: 'Break Even', multiplier: 1, message: 'Your coins return!' },
-        { tier: 'Small Win', multiplier: 1.1, message: 'Small fortune!' },
-        { tier: 'JACKPOT', multiplier: 15000, message: '🌟 LEGENDARY JACKPOT! 🌟' }
-      ]
-      
-      const result = Phaser.Math.RND.pick(outcomes)
+      const result = this.calculateGamblingResult()
       this.showGamblingResult(result)
       
       // Re-enable button
@@ -151,6 +143,41 @@ export class TestScene extends Phaser.Scene {
       text.setText('Throw 1,000 $WISH')
       button.setInteractive()
     })
+  }
+
+  calculateGamblingResult() {
+    // Generate random float in [0,1)
+    const roll = Math.random()
+    
+    // Exact probabilities as specified:
+    if (roll < 0.00001) {
+      // 0.00001% - Jackpot (15,000×)
+      return { tier: 'JACKPOT', multiplier: 15000, message: '🌟 LEGENDARY JACKPOT!!! 🌟' }
+    } else if (roll < 0.0014999) {
+      // 0.14999% - Major (180×)
+      return { tier: 'MAJOR WIN', multiplier: 180, message: '💎 MAJOR WIN! 💎' }
+    } else if (roll < 0.0049999) {
+      // 0.35% - Large (25×)
+      return { tier: 'LARGE WIN', multiplier: 25, message: '🎉 LARGE WIN! 🎉' }
+    } else if (roll < 0.0099999) {
+      // 0.5% - Medium (9×)
+      return { tier: 'MEDIUM WIN', multiplier: 9, message: '✨ MEDIUM WIN! ✨' }
+    } else if (roll < 0.0119999) {
+      // 0.2% - Small gain C (1.65×)
+      return { tier: 'SMALL WIN C', multiplier: 1.65, message: 'Nice win!' }
+    } else if (roll < 0.0199999) {
+      // 0.8% - Small gain B (1.28×)
+      return { tier: 'SMALL WIN B', multiplier: 1.28, message: 'Small profit!' }
+    } else if (roll < 0.0999999) {
+      // 8% - Small gain A (1.10×)
+      return { tier: 'SMALL WIN A', multiplier: 1.1, message: 'Small gain!' }
+    } else if (roll < 0.3999999) {
+      // 30% - Break even (1.0×)
+      return { tier: 'BREAK EVEN', multiplier: 1.0, message: 'Your coins return!' }
+    } else {
+      // 60% - Lose (0.0×)
+      return { tier: 'LOSE', multiplier: 0, message: 'The fountain keeps your wishes...' }
+    }
   }
 
   showGamblingResult(result: any) {
@@ -163,9 +190,15 @@ export class TestScene extends Phaser.Scene {
     const bg = this.add.rectangle(0, 0, 500, 200, 0x000000, 0.9)
     bg.setStrokeStyle(4, result.tier === 'JACKPOT' ? 0xffd700 : 0xffffff)
     
-    // Result text
-    const tierColor = result.tier === 'Lose' ? '#ff4444' : 
-                     result.tier === 'JACKPOT' ? '#ffd700' : '#44ff44'
+    // Result text with tier-specific colors
+    let tierColor = '#ffffff' // Default white
+    if (result.tier === 'LOSE') tierColor = '#ff4444' // Red
+    else if (result.tier === 'BREAK EVEN') tierColor = '#888888' // Gray  
+    else if (result.tier.includes('SMALL WIN')) tierColor = '#44ff44' // Green
+    else if (result.tier === 'MEDIUM WIN') tierColor = '#00ffff' // Cyan
+    else if (result.tier === 'LARGE WIN') tierColor = '#ff00ff' // Magenta
+    else if (result.tier === 'MAJOR WIN') tierColor = '#ff8800' // Orange
+    else if (result.tier === 'JACKPOT') tierColor = '#ffd700' // Gold
     
     const tierText = this.add.text(0, -40, result.tier.toUpperCase(), {
       fontSize: '24px',
