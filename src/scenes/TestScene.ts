@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 export class TestScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+  private wasd!: any
   private testPlayer!: Phaser.GameObjects.Rectangle
   private instructions!: Phaser.GameObjects.Text
   
@@ -15,13 +16,21 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Add village background
-    const villageBackground = this.add.image(640, 480, 'village-background')
-    villageBackground.setScale(1.2)
+    // Add village background - center it properly
+    const villageBackground = this.add.image(
+      this.cameras.main.centerX, 
+      this.cameras.main.centerY, 
+      'village-background'
+    )
+    villageBackground.setScale(1)
     villageBackground.setDepth(0)
     
     // Create a simple colored rectangle as test player
-    this.testPlayer = this.add.rectangle(640, 480, 32, 32, 0x00ff00)
+    this.testPlayer = this.add.rectangle(
+      this.cameras.main.centerX, 
+      this.cameras.main.centerY, 
+      32, 32, 0x00ff00
+    )
     this.testPlayer.setDepth(1)
     
     // Add instructions
@@ -39,6 +48,7 @@ export class TestScene extends Phaser.Scene {
     // Setup controls
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys()
+      this.wasd = this.input.keyboard.addKeys('W,A,S,D')
     }
     
     // Camera setup
@@ -50,6 +60,7 @@ export class TestScene extends Phaser.Scene {
     // Simple movement for the test rectangle
     const speed = 5
     
+    // Arrow keys
     if (this.cursors) {
       if (this.cursors.left.isDown) {
         this.testPlayer.x -= speed
@@ -60,6 +71,21 @@ export class TestScene extends Phaser.Scene {
       if (this.cursors.up.isDown) {
         this.testPlayer.y -= speed
       } else if (this.cursors.down.isDown) {
+        this.testPlayer.y += speed
+      }
+    }
+    
+    // WASD keys
+    if (this.wasd) {
+      if (this.wasd.A.isDown) {
+        this.testPlayer.x -= speed
+      } else if (this.wasd.D.isDown) {
+        this.testPlayer.x += speed
+      }
+      
+      if (this.wasd.W.isDown) {
+        this.testPlayer.y -= speed
+      } else if (this.wasd.S.isDown) {
         this.testPlayer.y += speed
       }
     }
