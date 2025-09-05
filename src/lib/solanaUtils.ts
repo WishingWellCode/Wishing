@@ -3,6 +3,7 @@ import {
   createBurnInstruction,
   createTransferInstruction, 
   getAssociatedTokenAddress,
+  getMint,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token'
@@ -36,7 +37,11 @@ export class WishGamblingAPI {
 
   constructor(workerUrl: string, rpcUrl: string) {
     this.workerUrl = workerUrl
-    this.connection = new Connection(rpcUrl, 'confirmed')
+    this.connection = new Connection(rpcUrl, {
+      commitment: 'confirmed',
+      confirmTransactionInitialTimeout: 90000, // 90 seconds
+      wsEndpoint: undefined, // Disable websockets to avoid subscription errors
+    })
   }
 
   async startGamblingSession(walletAddress: string, clientSeed?: string): Promise<GamblingSession> {
@@ -69,12 +74,16 @@ export class WishGamblingAPI {
 
     const transaction = new Transaction()
 
-    // Create burn instruction
+    // Get the actual decimals for this token
+    const mintInfo = await getMint(this.connection, tokenMint)
+    const actualDecimals = mintInfo.decimals
+    
+    // Create burn instruction with correct decimals
     const burnInstruction = createBurnInstruction(
       userTokenAccount,
       tokenMint,
       userWallet,
-      amount * Math.pow(10, 9), // Assuming 9 decimals
+      amount * Math.pow(10, actualDecimals), // Use actual token decimals
       [],
       TOKEN_PROGRAM_ID
     )

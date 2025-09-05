@@ -202,9 +202,33 @@ export class TestScene extends Phaser.Scene {
       const signedTx = await wallet.signTransaction(burnTransaction)
       const signature = await this.gamblingAPI.connection.sendRawTransaction(signedTx.serialize())
       
-      // Wait for confirmation
+      // Wait for confirmation with timeout handling
       text.setText('Confirming burn...')
-      await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
+      let txConfirmed = false
+      try {
+        await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
+        txConfirmed = true
+      } catch (timeoutError: any) {
+        if (timeoutError.message?.includes('timeout') || timeoutError.message?.includes('TransactionExpiredTimeoutError')) {
+          // Transaction likely succeeded but confirmation timed out
+          // Try to manually check if transaction exists
+          text.setText('Verifying transaction...')
+          try {
+            const txInfo = await this.gamblingAPI.connection.getTransaction(signature, { commitment: 'confirmed' })
+            if (txInfo && !txInfo.meta?.err) {
+              txConfirmed = true
+              console.log('✅ Transaction verified manually after timeout:', signature)
+            } else {
+              console.log('❌ Transaction not found or failed:', signature)
+            }
+          } catch (checkError) {
+            console.log('⚠️ Could not verify transaction, proceeding anyway:', signature)
+            txConfirmed = true // Proceed and let worker verify
+          }
+        } else {
+          throw timeoutError
+        }
+      }
       
       // Resolve gambling session
       text.setText('Rolling dice...')

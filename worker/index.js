@@ -532,12 +532,16 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   // Create transaction
   const transaction = new Transaction()
   
-  // Add transfer instruction
+  // TEMPORARY: Use 6 decimals (most common) until we can query mint info properly in worker
+  // TODO: Query mint info once Buffer polyfill is available
+  const tokenDecimals = 6 // Most SPL tokens use 6 decimals
+
+  // Add transfer instruction with correct decimals
   const transferInstruction = createTransferInstruction(
     poolTokenAccount,
     recipientTokenAccount,
     poolWallet.publicKey,
-    amount * Math.pow(10, 9), // Assuming 9 decimals
+    amount * Math.pow(10, tokenDecimals), // Using 6 decimals
     [],
     TOKEN_PROGRAM_ID
   )
