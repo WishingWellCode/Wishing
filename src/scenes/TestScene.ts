@@ -5,7 +5,7 @@ export class TestScene extends Phaser.Scene {
   private wasd!: any
   private testPlayer!: Phaser.GameObjects.Rectangle
   private instructions!: Phaser.GameObjects.Text
-  private fountainArea!: Phaser.GameObjects.Circle
+  private fountainArea!: Phaser.GameObjects.Arc
   private isNearFountain: boolean = false
   private gamblingUI!: Phaser.GameObjects.Container
   
@@ -28,14 +28,14 @@ export class TestScene extends Phaser.Scene {
     villageBackground.setScale(1)
     villageBackground.setDepth(0)
     
-    // Create fountain interaction area (invisible)
+    // Create fountain interaction area (invisible circle)
     this.fountainArea = this.add.circle(
       this.cameras.main.centerX,
-      this.cameras.main.centerY - 50, // Fountain is slightly above center
+      this.cameras.main.centerY - 50, // Fountain is slightly above center  
       120, // 120px radius for interaction
       0xff0000,
       0 // Invisible
-    )
+    ) as Phaser.GameObjects.Arc
     this.fountainArea.setDepth(0)
 
     // Create a simple colored rectangle as test player
