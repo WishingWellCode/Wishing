@@ -16,6 +16,40 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token'
 
+// Base58 conversion without Buffer dependency
+function base58ToUint8Array(base58String) {
+  const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+  const decoded = []
+  
+  for (let i = 0; i < base58String.length; i++) {
+    const char = base58String[i]
+    const charIndex = alphabet.indexOf(char)
+    
+    if (charIndex === -1) {
+      throw new Error('Invalid base58 character: ' + char)
+    }
+    
+    let carry = charIndex
+    for (let j = 0; j < decoded.length; j++) {
+      carry += decoded[j] * 58
+      decoded[j] = carry & 0xff
+      carry >>= 8
+    }
+    
+    while (carry) {
+      decoded.push(carry & 0xff)
+      carry >>= 8
+    }
+  }
+  
+  // Count leading zeros
+  for (let i = 0; i < base58String.length && base58String[i] === '1'; i++) {
+    decoded.push(0)
+  }
+  
+  return new Uint8Array(decoded.reverse())
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
@@ -521,8 +555,9 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   
   const connection = new Connection(env.SOLANA_RPC_URL)
   
-  // Create pool wallet keypair from private key
-  const poolWalletPrivateKey = new Uint8Array(JSON.parse(env.POOL_WALLET_PRIVATE_KEY))
+  // Create pool wallet keypair from base58 private key string
+  // Convert base58 to Uint8Array without using Buffer
+  const poolWalletPrivateKey = base58ToUint8Array(env.POOL_WALLET_PRIVATE_KEY)
   const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
   
   // Get token accounts

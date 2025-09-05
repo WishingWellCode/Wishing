@@ -16,7 +16,8 @@
       "Bash(wrangler kv namespace create:*)",
       "Bash(wrangler kv:key:*)",
       "Bash(wrangler kv key list:*)",
-      "Bash(wrangler tail:*)"
+      "Bash(wrangler tail:*)",
+      "Bash(wrangler deploy:*)"
     ],
     "deny": [],
     "ask": []
