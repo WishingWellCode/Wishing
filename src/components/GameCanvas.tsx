@@ -33,7 +33,7 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
           debug: false
         }
       },
-      scene: testMode ? [TestScene] : [LandingScene],
+      scene: [LandingScene, TestScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
@@ -64,6 +64,31 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
       }
     }
   }, [])
+
+  // Handle wallet connection changes
+  useEffect(() => {
+    if (gameRef.current && gameRef.current.scene) {
+      const sceneManager = gameRef.current.scene
+      
+      if (isWalletConnected || testMode) {
+        // Switch to TestScene when wallet connects
+        if (sceneManager.getScene('LandingScene')?.scene.isActive()) {
+          sceneManager.stop('LandingScene')
+        }
+        if (!sceneManager.getScene('TestScene')?.scene.isActive()) {
+          sceneManager.start('TestScene')
+        }
+      } else {
+        // Switch to LandingScene when wallet disconnects  
+        if (sceneManager.getScene('TestScene')?.scene.isActive()) {
+          sceneManager.stop('TestScene')
+        }
+        if (!sceneManager.getScene('LandingScene')?.scene.isActive()) {
+          sceneManager.start('LandingScene')
+        }
+      }
+    }
+  }, [isWalletConnected, testMode])
 
   useEffect(() => {
     if (gameRef.current) {
