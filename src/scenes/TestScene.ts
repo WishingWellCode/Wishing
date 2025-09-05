@@ -164,11 +164,22 @@ export class TestScene extends Phaser.Scene {
         this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
       } catch (sessionError: any) {
         if (sessionError?.message?.includes('Already have pending session')) {
-          // Clear the pending session by attempting to resolve with a dummy signature
+          // Clear the pending session
           text.setText('Clearing old session...')
-          // For now, just wait and retry
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+          try {
+            const clearResponse = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/fountain/clear', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ walletAddress })
+            })
+            await clearResponse.json()
+            // Wait a moment then retry
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            this.currentSession = await this.gamblingAPI.startGamblingSession(walletAddress)
+          } catch (clearError) {
+            console.error('Failed to clear session:', clearError)
+            throw sessionError
+          }
         } else {
           throw sessionError
         }
