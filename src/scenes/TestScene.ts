@@ -196,14 +196,14 @@ export class TestScene extends Phaser.Scene {
       text.setText('Throw 1,000 $WISH')
       button.setInteractive()
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Gambling error:', error)
       
       // Show error message
       let errorMessage = 'Error - Try again'
-      if (error.message.includes('insufficient')) {
+      if (error?.message?.includes('insufficient')) {
         errorMessage = 'Insufficient $WISH'
-      } else if (error.message.includes('rejected')) {
+      } else if (error?.message?.includes('rejected')) {
         errorMessage = 'Transaction rejected'
       }
       
