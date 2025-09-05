@@ -11,6 +11,7 @@ import {
   createBurnInstruction,
   createTransferInstruction,
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token'
@@ -310,10 +311,12 @@ async function handleFountainResolve(request, env) {
   let payoutTx = null
   if (payout > 0) {
     try {
+      console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
       payoutTx = await sendPayout(env, session.walletAddress, payout)
-      console.log(`✅ Sent ${payout} $WISH payout to ${session.walletAddress}: ${payoutTx}`)
+      console.log(`✅ Successfully sent ${payout} $WISH payout: ${payoutTx}`)
     } catch (error) {
-      console.error('❌ Failed to send payout:', error)
+      console.error('❌ Failed to send payout:', error.message || error)
+      console.error('❌ Full error:', error)
       // Continue without payout - log for manual processing
       payoutTx = 'FAILED_' + crypto.randomUUID()
     }
@@ -529,8 +532,24 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   const poolTokenAccount = await getAssociatedTokenAddress(tokenMint, poolWallet.publicKey)
   const recipientTokenAccount = await getAssociatedTokenAddress(tokenMint, recipientWallet)
   
+  // Check if recipient token account exists, create if not
+  const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount)
+  const needsTokenAccount = !recipientAccountInfo
+  
   // Create transaction
   const transaction = new Transaction()
+  
+  // Create recipient token account if needed
+  if (needsTokenAccount) {
+    console.log(`Creating token account for recipient: ${recipientWalletAddress}`)
+    const createAccountInstruction = createAssociatedTokenAccountInstruction(
+      poolWallet.publicKey, // payer
+      recipientTokenAccount,
+      recipientWallet, // owner
+      tokenMint
+    )
+    transaction.add(createAccountInstruction)
+  }
   
   // TEMPORARY: Use 6 decimals (most common) until we can query mint info properly in worker
   // TODO: Query mint info once Buffer polyfill is available
