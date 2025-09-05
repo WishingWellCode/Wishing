@@ -4,9 +4,9 @@ compatibility_date = "2024-01-01"
 
 [vars]
 SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
-WISH_TOKEN_MINT = "YOUR_WISH_TOKEN_MINT_ADDRESS"
+WISH_TOKEN_MINT = "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump"
 BURN_ADDRESS = "11111111111111111111111111111111"
-POOL_WALLET_PUBLIC = "YOUR_POOL_WALLET_PUBLIC_KEY"
+POOL_WALLET_PUBLIC = "8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTC4w27y8"
 
 # Secrets (set via: wrangler secret put SECRET_NAME)
 # POOL_WALLET_PRIVATE_KEY = "your-pool-wallet-private-key-base58"
