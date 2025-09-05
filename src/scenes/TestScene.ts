@@ -178,7 +178,7 @@ export class TestScene extends Phaser.Scene {
       
       // Wait for confirmation
       text.setText('Confirming burn...')
-      await this.gamblingAPI.connection.confirmTransaction(signature)
+      await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
       
       // Resolve gambling session
       text.setText('Rolling dice...')

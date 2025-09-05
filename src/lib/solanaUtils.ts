@@ -32,7 +32,7 @@ export interface GamblingResult {
 
 export class WishGamblingAPI {
   private workerUrl: string
-  private connection: Connection
+  public connection: Connection
 
   constructor(workerUrl: string, rpcUrl: string) {
     this.workerUrl = workerUrl
