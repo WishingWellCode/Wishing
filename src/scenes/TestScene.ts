@@ -23,10 +23,10 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Initialize gambling API - hardcoded URLs since env vars aren't loading in production
+    // Initialize gambling API - using Helius RPC for better reliability
     this.gamblingAPI = new WishGamblingAPI(
       'https://wish-well-worker.stealthbundlebot.workers.dev',
-      'https://api.mainnet-beta.solana.com'
+      'https://mainnet.helius-rpc.com/?api-key=f8ad63d9-00de-4187-b48a-f8b7dbce9e96' // Free tier Helius RPC
     )
     
     // Add village background - center it properly

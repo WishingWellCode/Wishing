@@ -3,7 +3,7 @@ main = "worker/index.js"
 compatibility_date = "2024-01-01"
 
 [vars]
-SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+SOLANA_RPC_URL = "https://mainnet.helius-rpc.com/?api-key=f8ad63d9-00de-4187-b48a-f8b7dbce9e96"
 WISH_TOKEN_MINT = "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump"
 BURN_ADDRESS = "11111111111111111111111111111111"
 POOL_WALLET_PUBLIC = "8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTC4w27y8"
