@@ -1,3 +1,49 @@
+// Polyfill Buffer for Cloudflare Workers
+if (typeof Buffer === 'undefined') {
+  globalThis.Buffer = class Buffer extends Uint8Array {
+    constructor(input, encoding) {
+      if (typeof input === 'string') {
+        const bytes = new TextEncoder().encode(input)
+        super(bytes)
+      } else if (typeof input === 'number') {
+        super(input)
+      } else if (input instanceof ArrayBuffer || input instanceof Uint8Array) {
+        super(input)
+      } else if (Array.isArray(input)) {
+        super(input)
+      } else {
+        super(0)
+      }
+    }
+
+    static from(input, encoding) {
+      return new Buffer(input, encoding)
+    }
+
+    static alloc(size) {
+      return new Buffer(size)
+    }
+
+    static allocUnsafe(size) {
+      return new Buffer(size)
+    }
+
+    toString(encoding) {
+      if (encoding === 'hex') {
+        return Array.from(this, byte => byte.toString(16).padStart(2, '0')).join('')
+      } else if (encoding === 'base64') {
+        return btoa(String.fromCharCode(...this))
+      } else {
+        return new TextDecoder().decode(this)
+      }
+    }
+
+    static isBuffer(obj) {
+      return obj instanceof Buffer
+    }
+  }
+}
+
 import { 
   Connection, 
   PublicKey, 
@@ -555,9 +601,18 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   
   const connection = new Connection(env.SOLANA_RPC_URL)
   
-  // Create pool wallet keypair from base58 private key string
-  // Convert base58 to Uint8Array without using Buffer
-  const poolWalletPrivateKey = base58ToUint8Array(env.POOL_WALLET_PRIVATE_KEY)
+  // Create pool wallet keypair from private key
+  let poolWalletPrivateKey
+  
+  // Handle different private key formats
+  if (env.POOL_WALLET_PRIVATE_KEY.startsWith('[')) {
+    // JSON array format like [1,2,3,...]
+    poolWalletPrivateKey = new Uint8Array(JSON.parse(env.POOL_WALLET_PRIVATE_KEY))
+  } else {
+    // Base58 string format
+    poolWalletPrivateKey = base58ToUint8Array(env.POOL_WALLET_PRIVATE_KEY)
+  }
+  
   const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
   
   // Get token accounts
