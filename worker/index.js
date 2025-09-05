@@ -647,21 +647,15 @@ async function sendPayout(env, recipientWalletAddress, amount) {
 
   // Add transfer instruction with correct decimals
   const rawAmount = Math.floor(amount * Math.pow(10, tokenDecimals))
+  const tokenAmount = BigInt(rawAmount)
   
-  // Create proper 8-byte little-endian buffer for amount
-  const amountBuffer = new ArrayBuffer(8)
-  const amountView = new DataView(amountBuffer)
-  amountView.setBigUint64(0, BigInt(rawAmount), true) // true = little-endian
-  const amountArray = new Uint8Array(amountBuffer)
-  
-  console.log(`🔢 Sending payout: ${amount} tokens = ${rawAmount} base units`)
-  console.log(`🔢 Amount buffer: [${Array.from(amountArray).join(',')}]`)
+  console.log(`🔢 Sending payout: ${amount} tokens = ${rawAmount} base units = ${tokenAmount}n`)
   
   const transferInstruction = createTransferInstruction(
     poolTokenAccount,
     recipientTokenAccount,
     poolWallet.publicKey,
-    amountArray, // Use 8-byte Uint8Array
+    tokenAmount, // Use BigInt directly - library handles encoding
     [],
     TOKEN_PROGRAM_ID
   )
