@@ -12,7 +12,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.json('hubConfig', '/hub-config.json')
     
     // Temporary village background
-    this.load.image('village-background', '/assets/backgrounds/temp_village.jpg')
+    this.load.image('village-background', '/assets/backgrounds/tempback.png')
     
     // Fountain
     this.load.image('fountain_base', '/assets/sprites/fountain_base.png')
