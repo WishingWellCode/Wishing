@@ -23,19 +23,13 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Initialize gambling API - using multiple RPC endpoints for reliability
-    const rpcEndpoints = [
-      'https://api.mainnet-beta.solana.com',
-      'https://solana-api.projectserum.com',
-      'https://rpc.ankr.com/solana'
-    ]
-    
-    // Randomly select an endpoint to distribute load
-    const selectedRpc = rpcEndpoints[Math.floor(Math.random() * rpcEndpoints.length)]
+    // Initialize gambling API - using QuickNode free tier RPC
+    // This provides 10 million requests/month which is plenty for testing
+    const rpcUrl = 'https://skilled-wild-forest.solana-mainnet.quiknode.pro/7b0e7659df2e6e4f8a96e8c69e4ae6e6e7db3d3f/'
     
     this.gamblingAPI = new WishGamblingAPI(
       'https://wish-well-worker.stealthbundlebot.workers.dev',
-      selectedRpc
+      rpcUrl
     )
     
     // Add village background - center it properly
