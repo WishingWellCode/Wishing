@@ -202,32 +202,48 @@ export class TestScene extends Phaser.Scene {
       const signedTx = await wallet.signTransaction(burnTransaction)
       const signature = await this.gamblingAPI.connection.sendRawTransaction(signedTx.serialize())
       
-      // Wait for confirmation with timeout handling
+      // Use HTTP polling instead of websocket subscriptions to avoid spam
       text.setText('Confirming burn...')
       let txConfirmed = false
-      try {
-        await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
-        txConfirmed = true
-      } catch (timeoutError: any) {
-        if (timeoutError.message?.includes('timeout') || timeoutError.message?.includes('TransactionExpiredTimeoutError')) {
-          // Transaction likely succeeded but confirmation timed out
-          // Try to manually check if transaction exists
-          text.setText('Verifying transaction...')
-          try {
-            const txInfo = await this.gamblingAPI.connection.getTransaction(signature, { commitment: 'confirmed' })
-            if (txInfo && !txInfo.meta?.err) {
-              txConfirmed = true
-              console.log('✅ Transaction verified manually after timeout:', signature)
-            } else {
-              console.log('❌ Transaction not found or failed:', signature)
-            }
-          } catch (checkError) {
-            console.log('⚠️ Could not verify transaction, proceeding anyway:', signature)
-            txConfirmed = true // Proceed and let worker verify
+      const maxRetries = 15 // 15 attempts
+      const retryDelay = 3000 // 3 seconds between attempts
+      
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          text.setText(`Confirming burn... (${i + 1}/${maxRetries})`)
+          const txInfo = await this.gamblingAPI.connection.getTransaction(signature, { 
+            commitment: 'confirmed',
+            maxSupportedTransactionVersion: 0
+          })
+          
+          if (txInfo && !txInfo.meta?.err) {
+            txConfirmed = true
+            console.log('✅ Transaction confirmed via polling:', signature)
+            break
+          } else if (txInfo && txInfo.meta?.err) {
+            console.log('❌ Transaction failed:', signature, txInfo.meta.err)
+            throw new Error('Transaction failed on blockchain')
           }
-        } else {
-          throw timeoutError
+          
+          // Transaction not found yet, wait and retry
+          if (i < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, retryDelay))
+          }
+        } catch (error: any) {
+          if (error.message?.includes('failed on blockchain')) {
+            throw error
+          }
+          // Network error or transaction not found yet, continue trying
+          console.log(`Polling attempt ${i + 1} failed, retrying...`)
+          if (i < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, retryDelay))
+          }
         }
+      }
+      
+      if (!txConfirmed) {
+        console.log('⚠️ Could not confirm transaction after polling, proceeding anyway:', signature)
+        txConfirmed = true // Let worker verify instead
       }
       
       // Resolve gambling session

@@ -39,8 +39,11 @@ export class WishGamblingAPI {
     this.workerUrl = workerUrl
     this.connection = new Connection(rpcUrl, {
       commitment: 'confirmed',
-      confirmTransactionInitialTimeout: 90000, // 90 seconds
-      wsEndpoint: undefined, // Disable websockets to avoid subscription errors
+      wsEndpoint: '', // Explicitly disable websockets
+      disableRetryOnRateLimit: false,
+      httpHeaders: {
+        'Content-Type': 'application/json'
+      }
     })
   }
 
