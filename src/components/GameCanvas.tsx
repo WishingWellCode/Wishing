@@ -4,6 +4,7 @@ import { useGame } from '@/lib/GameContext'
 import { HubWorldScene } from '@/scenes/HubWorldScene'
 import { PreloadScene } from '@/scenes/PreloadScene'
 import { CharacterSelectScene } from '@/scenes/CharacterSelectScene'
+import { TestScene } from '@/scenes/TestScene'
 
 export default function GameCanvas() {
   const gameRef = useRef<Phaser.Game | null>(null)
@@ -26,7 +27,7 @@ export default function GameCanvas() {
           debug: false
         }
       },
-      scene: [PreloadScene, CharacterSelectScene, HubWorldScene],
+      scene: [TestScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
