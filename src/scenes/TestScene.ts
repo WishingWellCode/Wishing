@@ -23,11 +23,10 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
-    // Initialize gambling API - we'll use the user's wallet connection for RPC
-    // This avoids all RPC endpoint issues since Phantom provides its own
+    // Initialize gambling API with Alchemy RPC for production
     this.gamblingAPI = new WishGamblingAPI(
       'https://wish-well-worker.stealthbundlebot.workers.dev',
-      'https://api.mainnet-beta.solana.com' // Fallback, we'll use wallet's connection instead
+      'https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki'
     )
     
     // Add village background - center it properly
@@ -191,34 +190,21 @@ export class TestScene extends Phaser.Scene {
       const tokenMintAddress = '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump'
       const tokenMint = new PublicKey(tokenMintAddress)
       
-      // TEMPORARY: Skip actual burn for testing - just generate a mock signature
-      // This allows testing the gambling flow without RPC issues
-      const SKIP_BURN = true // Set to false when ready for production
+      // Real burn transaction
+      const burnTransaction = await this.gamblingAPI.createBurnTransaction(
+        wallet.publicKey,
+        tokenMint,
+        1000
+      )
       
-      let signature: string
+      // Sign and send burn transaction
+      text.setText('Sign to burn tokens...')
+      const signedTx = await wallet.signTransaction(burnTransaction)
+      const signature = await this.gamblingAPI.connection.sendRawTransaction(signedTx.serialize())
       
-      if (SKIP_BURN) {
-        // Mock burn for testing
-        text.setText('Mock burn (testing mode)...')
-        signature = 'TEST_' + crypto.randomUUID() + '_BURN_SKIPPED'
-        await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate transaction time
-      } else {
-        // Real burn transaction
-        const burnTransaction = await this.gamblingAPI.createBurnTransaction(
-          wallet.publicKey,
-          tokenMint,
-          1000
-        )
-        
-        // Sign and send burn transaction
-        text.setText('Sign to burn tokens...')
-        const signedTx = await wallet.signTransaction(burnTransaction)
-        signature = await this.gamblingAPI.connection.sendRawTransaction(signedTx.serialize())
-      
-        // Wait for confirmation
-        text.setText('Confirming burn...')
-        await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
-      }
+      // Wait for confirmation
+      text.setText('Confirming burn...')
+      await this.gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
       
       // Resolve gambling session
       text.setText('Rolling dice...')

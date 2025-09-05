@@ -271,33 +271,26 @@ async function handleFountainResolve(request, env) {
   }
 
   // Verify burn transaction on Solana
+  const connection = new Connection(env.SOLANA_RPC_URL)
   let burnVerified = false
   
-  // TEMPORARY: Accept test signatures for development
-  if (txSignature.startsWith('TEST_') && txSignature.includes('_BURN_SKIPPED')) {
-    burnVerified = true
-    console.log('⚠️ Test mode - accepting mock burn:', txSignature)
-  } else {
-    // Real verification
-    const connection = new Connection(env.SOLANA_RPC_URL)
-    try {
-      const tx = await connection.getTransaction(txSignature, {
-        commitment: 'confirmed'
-      })
-      
-      if (tx && !tx.meta?.err) {
-        // TODO: Add more specific verification:
-        // 1. Check if transaction burns exactly 1000 tokens
-        // 2. Verify burn is from correct wallet
-        // 3. Verify token mint matches WISH token
-        burnVerified = true
-        console.log('✅ Burn transaction verified:', txSignature)
-      } else {
-        console.log('❌ Burn transaction failed or not found:', txSignature)
-      }
-    } catch (error) {
-      console.error('Error verifying burn transaction:', error)
+  try {
+    const tx = await connection.getTransaction(txSignature, {
+      commitment: 'confirmed'
+    })
+    
+    if (tx && !tx.meta?.err) {
+      // TODO: Add more specific verification:
+      // 1. Check if transaction burns exactly 1000 tokens
+      // 2. Verify burn is from correct wallet
+      // 3. Verify token mint matches WISH token
+      burnVerified = true
+      console.log('✅ Burn transaction verified:', txSignature)
+    } else {
+      console.log('❌ Burn transaction failed or not found:', txSignature)
     }
+  } catch (error) {
+    console.error('Error verifying burn transaction:', error)
   }
   
   if (!burnVerified) {
