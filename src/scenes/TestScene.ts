@@ -281,8 +281,76 @@ export class TestScene extends Phaser.Scene {
   }
 
   onPortalEnter(portalName: string) {
-    // Portal enter logic - customize per portal later
-    console.log(`✨ Portal "${portalName}" activated - functionality to be added`)
+    console.log(`✨ Portal "${portalName}" activated`)
+    
+    // Portal 3 - Winners page with confirmation
+    if (portalName === 'Portal 3') {
+      // Create confirmation dialog
+      const dialogBg = this.add.rectangle(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        400,
+        200,
+        0x000000,
+        0.9
+      )
+      dialogBg.setDepth(1000)
+      dialogBg.setStrokeStyle(2, 0xff00ff)
+      
+      const title = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 60,
+        'PORTAL TO WINNERS HALL',
+        {
+          fontSize: '18px',
+          fontFamily: '"Press Start 2P"',
+          color: '#ff00ff',
+          align: 'center'
+        }
+      )
+      title.setOrigin(0.5)
+      title.setDepth(1001)
+      
+      const message = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 10,
+        'View the hall of lucky winners?\nPress Y to continue or N to stay',
+        {
+          fontSize: '12px',
+          fontFamily: '"Press Start 2P"',
+          color: '#ffffff',
+          align: 'center'
+        }
+      )
+      message.setOrigin(0.5)
+      message.setDepth(1001)
+      
+      // Store dialog elements for cleanup
+      const dialogElements = [dialogBg, title, message]
+      
+      // Handle keyboard input
+      const handleKey = (event: KeyboardEvent) => {
+        if (event.key.toLowerCase() === 'y') {
+          // Navigate to winners page
+          window.location.href = '/winners'
+        } else if (event.key.toLowerCase() === 'n') {
+          // Close dialog
+          dialogElements.forEach(el => el.destroy())
+          this.input.keyboard?.off('keydown')
+        }
+      }
+      
+      this.input.keyboard?.on('keydown', handleKey)
+      
+      // Auto-close after 10 seconds
+      this.time.delayedCall(10000, () => {
+        dialogElements.forEach(el => {
+          if (el && el.active) el.destroy()
+        })
+        this.input.keyboard?.off('keydown', handleKey)
+      })
+    }
+    // Add other portal functionality here for Portal 1, 2, and 4
   }
 
   onPortalLeave(portalName: string) {
