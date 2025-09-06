@@ -129,7 +129,7 @@ export class TestScene extends Phaser.Scene {
       }
       
       // Force re-render
-      this.sys.game.renderer.render(this.sys.game.scene.scenes.filter(s => s.scene.isActive()))
+      this.renderer.render(this.children, this.cameras.main)
     })
   }
 
