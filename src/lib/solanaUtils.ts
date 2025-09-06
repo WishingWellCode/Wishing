@@ -152,19 +152,47 @@ export class WishGamblingAPI {
       if (!response.ok) {
         throw new Error(`Failed to fetch winners data: ${response.status} ${response.statusText}`)
       }
-      const data = await response.json()
-      console.log('🎯 Winners API Response:', {
+      const rawData = await response.json()
+      console.log('🎯 Raw API Response:', {
         url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`,
         status: response.status,
+        rawData: rawData,
+        type: typeof rawData,
+        isArray: Array.isArray(rawData)
+      })
+      
+      // Handle different response formats
+      let data: any[] = []
+      if (Array.isArray(rawData)) {
+        data = rawData
+      } else if (rawData && typeof rawData === 'object') {
+        // Check if it's an object with an array property
+        if (rawData.winners && Array.isArray(rawData.winners)) {
+          data = rawData.winners
+        } else if (rawData.results && Array.isArray(rawData.results)) {
+          data = rawData.results
+        } else if (rawData.data && Array.isArray(rawData.data)) {
+          data = rawData.data
+        } else {
+          // Try to convert object values to array
+          data = Object.values(rawData).filter(item => 
+            typeof item === 'object' && item !== null
+          ) as any[]
+        }
+      }
+      
+      console.log('🎯 Processed Winners Data:', {
         dataLength: data.length,
         data: data
       })
       
       // Log break-even entries specifically
-      const breakEvenEntries = data.filter((entry: any) => 
-        entry.payout !== undefined && entry.payout <= (entry.stake || 1000000000)
-      )
-      console.log('🎯 Break-even entries found:', breakEvenEntries)
+      if (Array.isArray(data)) {
+        const breakEvenEntries = data.filter((entry: any) => 
+          entry.payout !== undefined && entry.payout <= (entry.stake || 1000000000)
+        )
+        console.log('🎯 Break-even entries found:', breakEvenEntries)
+      }
       
       return data
     } catch (error) {
