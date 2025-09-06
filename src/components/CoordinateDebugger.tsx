@@ -125,9 +125,10 @@ export default function CoordinateDebugger() {
 
   if (!showDebugger) {
     return (
-      <div className="fixed bottom-4 right-4 z-[100]">
-        <div className="bg-black/80 text-white p-2 rounded text-xs">
-          Press Ctrl+D to show coordinate debugger
+      <div className="fixed top-20 right-4 z-[100]">
+        <div className="bg-black/90 text-white p-3 rounded-lg border border-gray-600 text-sm shadow-xl">
+          <div className="font-bold mb-1">Coordinate Debugger</div>
+          <div>Press <kbd className="bg-gray-700 px-1 rounded">Ctrl+D</kbd> to activate</div>
         </div>
       </div>
     )
@@ -160,19 +161,22 @@ export default function CoordinateDebugger() {
     <>
       {/* Click overlay */}
       <div 
-        className="fixed inset-0 z-[90]"
+        className="fixed inset-0 z-[90] pointer-events-auto"
         onClick={handleClick}
-        style={{ cursor: isDefiningArea ? 'crosshair' : 'pointer' }}
+        style={{ 
+          cursor: isDefiningArea ? 'crosshair' : 'pointer',
+          backgroundColor: 'transparent'
+        }}
       />
 
       {/* Mouse coordinates */}
-      <div className="fixed top-4 left-4 z-[100] bg-black/90 text-white p-3 rounded font-mono text-sm">
-        <div>Mouse: ({mousePos.x}, {mousePos.y})</div>
+      <div className="fixed bottom-4 left-4 z-[100] bg-black/95 text-white p-3 rounded-lg border border-gray-600 font-mono text-sm shadow-xl">
+        <div className="font-bold text-green-400">Mouse: ({mousePos.x}, {mousePos.y})</div>
         <div className="text-blue-400 mt-1">
-          Mode: {areaType} | Press R/C to switch
+          Mode: <span className="font-bold">{areaType}</span> | Press R/C to switch
         </div>
         <div className="text-yellow-400 mt-1">
-          {isDefiningArea ? 'Click to finish area' : 'Click to start defining area'}
+          {isDefiningArea ? '🎯 Click to finish area' : '🖱️ Click to start defining area'}
         </div>
       </div>
 
@@ -225,61 +229,72 @@ export default function CoordinateDebugger() {
       })}
 
       {/* Control panel */}
-      <div className="fixed bottom-4 left-4 z-[100] bg-black/90 text-white p-4 rounded max-w-sm">
-        <div className="text-lg font-bold mb-2">Portal Area Debugger</div>
+      <div className="fixed top-20 right-4 z-[100] bg-black/95 text-white p-3 rounded-lg border border-gray-600 w-80 shadow-xl">
+        <div className="text-sm font-bold mb-2 text-center">🎯 Portal Area Debugger</div>
         
-        <div className="space-y-2 text-sm">
-          <div>Areas defined: {portalAreas.length}</div>
+        <div className="space-y-2 text-xs">
+          <div className="text-center">Areas: <span className="text-green-400 font-bold">{portalAreas.length}</span></div>
           
-          <div className="flex gap-2 mb-2">
+          <div className="grid grid-cols-2 gap-2">
             <button
-              className={`px-3 py-1 rounded text-xs ${
-                areaType === 'rectangle' ? 'bg-red-600' : 'bg-gray-600 hover:bg-gray-700'
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                areaType === 'rectangle' ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
               }`}
               onClick={() => setAreaType('rectangle')}
             >
-              Rectangle (R)
+              📐 Rectangle (R)
             </button>
             <button
-              className={`px-3 py-1 rounded text-xs ${
-                areaType === 'circle' ? 'bg-green-600' : 'bg-gray-600 hover:bg-gray-700'
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                areaType === 'circle' ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
               }`}
               onClick={() => setAreaType('circle')}
             >
-              Circle (C)
+              ⭕ Circle (C)
             </button>
           </div>
           
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-1">
             <button
-              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs"
+              className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs font-semibold"
               onClick={() => setPortalAreas([])}
             >
-              Clear All
+              🗑️ Clear
             </button>
             <button
-              className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs"
+              className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs font-semibold"
               onClick={exportAreas}
             >
-              Export Areas
+              📋 Export
             </button>
             <button
-              className="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-xs"
+              className="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs font-semibold"
               onClick={() => setShowDebugger(false)}
             >
-              Hide (Ctrl+D)
+              ❌ Hide
             </button>
           </div>
         </div>
 
         {portalAreas.length > 0 && (
-          <div className="mt-3 max-h-32 overflow-y-auto">
-            <div className="text-xs text-gray-300 mb-1">Areas:</div>
+          <div className="mt-2 max-h-24 overflow-y-auto bg-gray-800 rounded p-2">
+            <div className="text-xs text-gray-400 mb-1 font-semibold">Defined Areas:</div>
             {portalAreas.map((area) => (
-              <div key={area.id} className="text-xs font-mono bg-gray-800 p-1 rounded mb-1">
-                {area.label}: ({area.x}, {area.y}, {
-                  area.type === 'circle' ? `r${Math.round(area.radius || 0)}` : `${area.width}×${area.height}`
-                })
+              <div key={area.id} className="text-xs font-mono bg-gray-700 p-1 rounded mb-1 flex justify-between items-center">
+                <span className="text-white">
+                  {area.label}: ({area.x}, {area.y}, {
+                    area.type === 'circle' ? `r${Math.round(area.radius || 0)}` : `${area.width}×${area.height}`
+                  })
+                </span>
+                <button
+                  className="text-red-400 hover:text-red-300 ml-2"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeArea(area.id)
+                  }}
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>

@@ -13,19 +13,8 @@ export class LandingScene extends Phaser.Scene {
   }
 
   create() {
-    // Add vaporwave background - center it properly and scale to fit
-    const vaporwaveBackground = this.add.image(
-      this.cameras.main.centerX, 
-      this.cameras.main.centerY, 
-      'vaporwave-background'
-    )
-    
-    // Scale to cover the entire screen properly
-    const scaleX = this.cameras.main.width / vaporwaveBackground.width
-    const scaleY = this.cameras.main.height / vaporwaveBackground.height
-    const scale = Math.max(scaleX, scaleY)
-    vaporwaveBackground.setScale(scale)
-    vaporwaveBackground.setDepth(0)
+    // No background needed - CSS handles it now
+    // Removed Phaser background to prevent conflicts
     
     // Add overlay text
     this.instructions = this.add.text(
