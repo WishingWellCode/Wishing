@@ -5,6 +5,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
+const CoordinateDebugger = dynamic(() => import('@/components/CoordinateDebugger'), { ssr: false })
 
 export default function Home() {
   const { publicKey, connected } = useWallet()
@@ -25,6 +26,19 @@ export default function Home() {
     }, 100)
     return () => clearTimeout(timer)
   }, [])
+
+  // Auto-enable test mode for development
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 't' && e.ctrlKey) {
+        e.preventDefault()
+        setTestMode(!testMode)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyPress)
+    return () => document.removeEventListener('keydown', handleKeyPress)
+  }, [testMode])
 
   if (isLoading) {
     return <div style={{ background: 'url(/assets/backgrounds/Realbackground.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
@@ -50,19 +64,9 @@ export default function Home() {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Single wallet button - always visible */}
+        {/* Wallet button only */}
         <div className="absolute top-4 right-4 z-50">
-          <div className="flex flex-col gap-2">
-            <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
-            {!connected && (
-              <button 
-                onClick={() => setTestMode(true)}
-                className="bg-green-600 hover:bg-green-700 text-white font-pixel text-xs px-3 py-2 rounded whitespace-nowrap"
-              >
-                TEST MODE
-              </button>
-            )}
-          </div>
+          <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
         </div>
 
         <div className="relative z-10">
@@ -75,6 +79,9 @@ export default function Home() {
             <p>{testMode ? 'TEST MODE ACTIVE' : 'E - Interact'}</p>
           </div>
         )}
+
+        {/* Coordinate Debugger */}
+        <CoordinateDebugger />
       </div>
     </>
   )
