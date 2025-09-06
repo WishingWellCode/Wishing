@@ -1,3 +1,5 @@
+'use client'
+
 import { FC, ReactNode, useMemo } from 'react'
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
@@ -10,7 +12,8 @@ interface Props {
   children: ReactNode
 }
 
-export const WalletProvider: FC<Props> = ({ children }) => {
+// @ts-ignore TypeScript version compatibility issues with React 18 and wallet adapter
+const WalletProviderComponent: FC<Props> = ({ children }) => {
   const endpoint = useMemo(() => {
     return process.env.NEXT_PUBLIC_RPC_URL || clusterApiUrl('mainnet-beta')
   }, [])
@@ -22,6 +25,7 @@ export const WalletProvider: FC<Props> = ({ children }) => {
     []
   )
 
+  // @ts-ignore
   return (
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect>
@@ -32,3 +36,5 @@ export const WalletProvider: FC<Props> = ({ children }) => {
     </ConnectionProvider>
   )
 }
+
+export { WalletProviderComponent as WalletProvider }
