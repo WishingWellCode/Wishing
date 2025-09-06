@@ -126,8 +126,46 @@ const HTML_CONTENT = `<!DOCTYPE html>
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: cover;
+            background: #0a0a0a;
+            overflow: hidden;
+        }
+        
+        .background-container::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0,0,0,0.7) 0%, transparent 50%, rgba(0,0,0,0.7) 100%),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 0, 255, 0.03) 2px,
+                    rgba(255, 0, 255, 0.03) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.03) 2px,
+                    rgba(0, 255, 255, 0.03) 4px
+                ),
+                linear-gradient(180deg, #1a0033 0%, #330066 50%, #000000 100%);
+        }
+        
+        .grid-floor {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            bottom: -50%;
+            left: -50%;
+            background-image: 
+                linear-gradient(rgba(255, 0, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.5) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center center;
         }
         
         .background-image {
@@ -136,7 +174,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
             object-fit: cover;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
-            display: none; /* Hidden until we set up proper asset serving */
+            display: none; /* Will be shown when asset serving is set up */
         }
         
         .content {
@@ -203,7 +241,8 @@ const HTML_CONTENT = `<!DOCTYPE html>
 </head>
 <body>
     <div class="background-container">
-        <img src="/assets/backgrounds/Realbackground.png" alt="Wish Well Background" class="background-image">
+        <div class="grid-floor"></div>
+        <img src="/assets/backgrounds/Realbackground.jpg" alt="Wish Well Background" class="background-image">
     </div>
     
     <div class="content">
