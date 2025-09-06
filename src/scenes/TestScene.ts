@@ -19,6 +19,7 @@ export class TestScene extends Phaser.Scene {
   private debugToggleKey!: Phaser.Input.Keyboard.Key
   private pinMarkers: Phaser.GameObjects.GameObject[] = []
   private pinCoordinates: { x: number, y: number }[] = []
+  private fountainPolygon: { x: number, y: number }[] = []
   
   constructor() {
     super({ key: 'TestScene' })
@@ -36,9 +37,13 @@ export class TestScene extends Phaser.Scene {
     // Add the vaporwave background image with proper scaling
     const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
     
+    // Get original texture dimensions for proper scaling
+    const originalWidth = background.texture.source[0].width
+    const originalHeight = background.texture.source[0].height
+    
     // Calculate scale to cover entire screen while maintaining aspect ratio
-    const scaleX = this.cameras.main.width / background.width
-    const scaleY = this.cameras.main.height / background.height
+    const scaleX = this.cameras.main.width / originalWidth
+    const scaleY = this.cameras.main.height / originalHeight
     const scale = Math.max(scaleX, scaleY)
     
     background.setScale(scale)
@@ -54,14 +59,20 @@ export class TestScene extends Phaser.Scene {
     // No background needed - CSS handles it now
     // Removed Phaser background to prevent conflicts
     
-    // Create fountain interaction area (invisible circle)
-    this.fountainArea = this.add.circle(
-      this.cameras.main.centerX,
-      this.cameras.main.centerY - 50, // Fountain is slightly above center  
-      120, // 120px radius for interaction
-      0xff0000,
-      0 // Invisible
-    ) as Phaser.GameObjects.Arc
+    // Define fountain polygon using your coordinates
+    const fountainCoords = [
+      {x: 670, y: 726}, {x: 736, y: 695}, {x: 831, y: 677}, {x: 921, y: 671},
+      {x: 1021, y: 672}, {x: 1103, y: 683}, {x: 1173, y: 696}, {x: 1227, y: 715},
+      {x: 1269, y: 749}, {x: 1247, y: 793}, {x: 1174, y: 821}, {x: 1072, y: 840},
+      {x: 959, y: 846}, {x: 827, y: 837}, {x: 738, y: 820}, {x: 672, y: 793},
+      {x: 646, y: 762}, {x: 654, y: 739}
+    ]
+    
+    // Store fountain coordinates for vicinity detection
+    this.fountainPolygon = fountainCoords
+    
+    // Create invisible fountain area for reference (optional visual debug)
+    this.fountainArea = this.add.circle(950, 760, 100, 0x00ff00, 0) as Phaser.GameObjects.Arc
     this.fountainArea.setDepth(0)
 
     // Create a simple colored rectangle as test player
@@ -92,12 +103,20 @@ export class TestScene extends Phaser.Scene {
     
     // Handle window resize
     this.events.on('resize', (width: number, height: number) => {
+      // Force camera update first
+      this.cameras.main.setSize(width, height)
+      this.cameras.main.setViewport(0, 0, width, height)
+      
       // Update background to new dimensions with proper scaling
       const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
       if (background) {
+        // Get original texture dimensions
+        const originalWidth = background.texture.source[0].width
+        const originalHeight = background.texture.source[0].height
+        
         // Calculate scale to cover entire screen while maintaining aspect ratio
-        const scaleX = width / background.width
-        const scaleY = height / background.height
+        const scaleX = width / originalWidth
+        const scaleY = height / originalHeight
         const scale = Math.max(scaleX, scaleY)
         
         background.setScale(scale)
@@ -108,6 +127,9 @@ export class TestScene extends Phaser.Scene {
       if (this.gamblingUI) {
         this.gamblingUI.setPosition(width / 2, height - 120)
       }
+      
+      // Force re-render
+      this.sys.game.renderer.render(this.sys.game.scene.scenes.filter(s => s.scene.isActive()))
     })
   }
 
@@ -255,6 +277,26 @@ export class TestScene extends Phaser.Scene {
     this.pinCoordinates = []
     
     console.log(`🧹 Cleared all pins. Ready for next shape.`)
+  }
+
+  // Point-in-polygon detection using ray casting algorithm
+  isPointInPolygon(point: { x: number, y: number }, polygon: { x: number, y: number }[]): boolean {
+    let isInside = false
+    const x = point.x
+    const y = point.y
+    
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x
+      const yi = polygon[i].y
+      const xj = polygon[j].x
+      const yj = polygon[j].y
+      
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+        isInside = !isInside
+      }
+    }
+    
+    return isInside
   }
 
   async startGambling() {
@@ -560,14 +602,12 @@ export class TestScene extends Phaser.Scene {
       }
     }
     
-    // Check fountain proximity
-    const distance = Phaser.Math.Distance.Between(
-      this.testPlayer.x, this.testPlayer.y,
-      this.fountainArea.x, this.fountainArea.y
-    )
-    
+    // Check fountain proximity using polygon detection
     const wasNearFountain = this.isNearFountain
-    this.isNearFountain = distance < 120 // Within fountain radius
+    this.isNearFountain = this.isPointInPolygon(
+      { x: this.testPlayer.x, y: this.testPlayer.y },
+      this.fountainPolygon
+    )
     
     // Show/hide gambling UI based on proximity
     if (this.isNearFountain && !wasNearFountain) {
