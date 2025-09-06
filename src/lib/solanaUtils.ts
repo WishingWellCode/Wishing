@@ -213,6 +213,20 @@ export class WishGamblingAPI {
                   data: additionalData,
                   stringified: JSON.stringify(additionalData, null, 2)
                 })
+                
+                // If this is stats and has data, let's check what's in it
+                if (endpoint === '/api/stats' && additionalData && typeof additionalData === 'object') {
+                  console.log('🎯 Analyzing stats data for possible transaction arrays...')
+                  Object.keys(additionalData).forEach(key => {
+                    if (Array.isArray(additionalData[key])) {
+                      console.log(`📊 stats.${key} has ${additionalData[key].length} items:`, additionalData[key])
+                    } else if (additionalData[key] && typeof additionalData[key] === 'object') {
+                      console.log(`📊 stats.${key} is object:`, additionalData[key])
+                    } else {
+                      console.log(`📊 stats.${key}:`, additionalData[key])
+                    }
+                  })
+                }
               } else {
                 console.log(`❌ ${endpoint} returned ${additionalResponse.status}`)
               }

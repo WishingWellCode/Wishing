@@ -118,8 +118,8 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.setSize(width, height)
       this.cameras.main.setViewport(0, 0, width, height)
       
-      // Handle overlay resize
-      this.handleOverlayResize()
+      // DON'T handle overlay resize to prevent background breaking
+      // this.handleOverlayResize()
       
       // Update existing background (don't create new ones)
       const existingBackground = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
