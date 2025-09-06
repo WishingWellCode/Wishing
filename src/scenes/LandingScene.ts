@@ -13,17 +13,13 @@ export class LandingScene extends Phaser.Scene {
   }
 
   create() {
-    // FORCE transparent background - multiple methods
-    this.cameras.main.setBackgroundColor(0x000000)
+    // Set transparent background to show CSS background
     this.cameras.main.transparent = true
     
-    // Add a completely transparent rectangle to cover any blue background
-    const bg = this.add.rectangle(0, 0, this.cameras.main.width * 2, this.cameras.main.height * 2, 0x000000, 0)
-    bg.setOrigin(0, 0)
-    bg.setDepth(-1000)
-    
-    // No background needed - CSS handles it now
-    // Removed Phaser background to prevent conflicts
+    // Add the vaporwave background image
+    const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
+    background.setDisplaySize(this.cameras.main.width, this.cameras.main.height)
+    background.setDepth(-1000)
     
     // Add overlay text
     this.instructions = this.add.text(
@@ -43,6 +39,5 @@ export class LandingScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
-    this.cameras.main.setBackgroundColor(0x000000) // Transparent black
   }
 }
