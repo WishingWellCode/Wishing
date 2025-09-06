@@ -17,7 +17,7 @@ export class TestScene extends Phaser.Scene {
   private debugInfo!: Phaser.GameObjects.Text
   private debugVisible: boolean = true
   private debugToggleKey!: Phaser.Input.Keyboard.Key
-  private pinMarkers: Phaser.GameObjects.Circle[] = []
+  private pinMarkers: Phaser.GameObjects.GameObject[] = []
   private pinCoordinates: { x: number, y: number }[] = []
   
   constructor() {
