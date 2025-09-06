@@ -307,8 +307,8 @@ export class TestScene extends Phaser.Scene {
     const overlayBg = this.add.rectangle(
       this.cameras.main.centerX,
       this.cameras.main.centerY,
-      this.cameras.main.width * 0.9,
-      this.cameras.main.height * 0.8,
+      this.cameras.main.width * 0.72,
+      this.cameras.main.height * 0.64,
       0x000000,
       0.95
     )
@@ -435,7 +435,7 @@ export class TestScene extends Phaser.Scene {
     this.winnersOverlay?.elements.push(headerBg)
 
     // Headers
-    const headers = ['Date', 'Won (SOL)', 'Tx Link', 'Winner']
+    const headers = ['Won (SOL)', 'Tx Link', 'Date', 'Winner']
     headers.forEach((header, index) => {
       if (!this.winnersOverlay) return
       
@@ -475,12 +475,13 @@ export class TestScene extends Phaser.Scene {
 
       // Format data
       const date = winner.timestamp ? new Date(winner.timestamp).toLocaleDateString() : 'N/A'
-      const amount = winner.payout ? (winner.payout / 1000000000).toFixed(2) : '0.00' // Convert lamports to SOL
-      const txLink = winner.payoutTx ? 'VIEW' : 'N/A'
+      // Show payout amount, including 0 for break-even
+      const amount = winner.payout !== undefined ? (winner.payout / 1000000000).toFixed(2) : '0.00' // Convert lamports to SOL
+      const txLink = winner.payoutTx ? 'VIEW' : (winner.burnTx ? 'BURN' : 'N/A')
       const address = winner.walletAddress ? 
         `${winner.walletAddress.slice(0, 4)}...${winner.walletAddress.slice(-4)}` : 'N/A'
 
-      const rowData = [date, amount, txLink, address]
+      const rowData = [amount, txLink, date, address]
 
       rowData.forEach((data, colIndex) => {
         if (!this.winnersOverlay) return
@@ -490,9 +491,9 @@ export class TestScene extends Phaser.Scene {
           rowY,
           data,
           {
-            fontSize: colIndex === 2 && winner.payoutTx ? '10px' : '11px',
+            fontSize: colIndex === 1 && (winner.payoutTx || winner.burnTx) ? '10px' : '11px',
             fontFamily: colIndex === 3 ? 'monospace' : '"Press Start 2P"',
-            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && winner.payoutTx) ? '#00ffff' : '#ffffff',
+            color: colIndex === 0 ? '#00ff00' : (colIndex === 1 && (winner.payoutTx || winner.burnTx)) ? '#00ffff' : '#ffffff',
             align: 'center'
           }
         )
@@ -500,10 +501,11 @@ export class TestScene extends Phaser.Scene {
         cellText.setDepth(2002)
 
         // Make transaction link clickable
-        if (colIndex === 2 && winner.payoutTx) {
+        if (colIndex === 1 && (winner.payoutTx || winner.burnTx)) {
           cellText.setInteractive({ useHandCursor: true })
           cellText.on('pointerdown', () => {
-            window.open(`https://solscan.io/tx/${winner.payoutTx}`, '_blank')
+            const txHash = winner.payoutTx || winner.burnTx
+            window.open(`https://solscan.io/tx/${txHash}`, '_blank')
           })
           cellText.on('pointerover', () => {
             cellText.setColor('#ffffff')
