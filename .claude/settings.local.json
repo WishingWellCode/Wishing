@@ -18,7 +18,9 @@
       "Bash(wrangler kv key list:*)",
       "Bash(wrangler tail:*)",
       "Bash(wrangler deploy:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(wrangler r2 bucket create:*)",
+      "Bash(wrangler r2 object put:*)"
     ],
     "deny": [],
     "ask": []

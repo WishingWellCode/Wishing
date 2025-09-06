@@ -32,6 +32,10 @@ id = "afb73024aeed42638a844fa90c68c5ca"
 name = "GAME_STATE"
 class_name = "GameState"
 
+[[r2_buckets]]
+bucket_name = "wish-well-assets"
+binding = "ASSETS_BUCKET"
+
 [[migrations]]
 tag = "v1"
 new_classes = ["GameState"]

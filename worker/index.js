@@ -130,51 +130,14 @@ const HTML_CONTENT = `<!DOCTYPE html>
             overflow: hidden;
         }
         
-        .background-container::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(0,0,0,0.7) 0%, transparent 50%, rgba(0,0,0,0.7) 100%),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(255, 0, 255, 0.03) 2px,
-                    rgba(255, 0, 255, 0.03) 4px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 255, 255, 0.03) 2px,
-                    rgba(0, 255, 255, 0.03) 4px
-                ),
-                linear-gradient(180deg, #1a0033 0%, #330066 50%, #000000 100%);
-        }
-        
-        .grid-floor {
-            position: absolute;
-            width: 200%;
-            height: 100%;
-            bottom: -50%;
-            left: -50%;
-            background-image: 
-                linear-gradient(rgba(255, 0, 255, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 0, 255, 0.5) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg);
-            transform-origin: center center;
-        }
-        
         .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            display: none; /* Will be shown when asset serving is set up */
+            z-index: 1;
         }
         
         .content {
@@ -241,7 +204,6 @@ const HTML_CONTENT = `<!DOCTYPE html>
 </head>
 <body>
     <div class="background-container">
-        <div class="grid-floor"></div>
         <img src="/assets/backgrounds/Realbackground.jpg" alt="Wish Well Background" class="background-image">
     </div>
     
@@ -285,6 +247,39 @@ export default {
           'Access-Control-Max-Age': '86400',
         }
       })
+    }
+    
+    // Serve static assets from R2
+    if (url.pathname.startsWith('/assets/')) {
+      const objectName = url.pathname.slice(1) // Remove leading slash
+      try {
+        const object = await env.ASSETS_BUCKET.get(objectName)
+        
+        if (object) {
+          const headers = new Headers()
+          object.writeHttpMetadata(headers)
+          headers.set('Access-Control-Allow-Origin', '*')
+          
+          // Set appropriate content type based on file extension
+          if (objectName.endsWith('.jpg') || objectName.endsWith('.jpeg')) {
+            headers.set('Content-Type', 'image/jpeg')
+          } else if (objectName.endsWith('.png')) {
+            headers.set('Content-Type', 'image/png')
+          } else if (objectName.endsWith('.gif')) {
+            headers.set('Content-Type', 'image/gif')
+          }
+          
+          headers.set('Cache-Control', 'public, max-age=3600')
+          
+          return new Response(object.body, {
+            headers
+          })
+        }
+      } catch (e) {
+        console.error('Error fetching from R2:', e)
+      }
+      
+      return new Response('Asset not found', { status: 404 })
     }
     
     // Serve HTML for root path
