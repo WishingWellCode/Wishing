@@ -119,42 +119,8 @@ export class TestScene extends Phaser.Scene {
     // Camera setup
     this.cameras.main.setZoom(1)
     
-    // Handle window resize
-    this.events.on('resize', (width: number, height: number) => {
-      // Ensure we're working with the active scene
-      if (!this.scene.isActive()) return
-      
-      // Force camera update first
-      this.cameras.main.setSize(width, height)
-      this.cameras.main.setViewport(0, 0, width, height)
-      
-      // DON'T handle overlay resize to prevent background breaking
-      // this.handleOverlayResize()
-      
-      // Update existing background (don't create new ones)
-      const existingBackground = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
-      if (existingBackground && existingBackground.texture) {
-        // Get original texture dimensions safely
-        const texture = this.textures.get('vaporwave-background')
-        if (texture && texture.source && texture.source.length > 0) {
-          const originalWidth = texture.source[0].width
-          const originalHeight = texture.source[0].height
-          
-          // Calculate scale to cover entire screen while maintaining aspect ratio
-          const scaleX = width / originalWidth
-          const scaleY = height / originalHeight
-          const scale = Math.max(scaleX, scaleY)
-          
-          existingBackground.setScale(scale)
-          existingBackground.setPosition(width / 2, height / 2)
-        }
-      }
-      
-      // Reposition gambling UI
-      if (this.gamblingUI) {
-        this.gamblingUI.setPosition(width / 2, height - 120)
-      }
-    })
+    // DISABLE resize handling completely to prevent background breaking
+    // The CSS background will handle screen resizing instead
   }
 
   initializePortals() {

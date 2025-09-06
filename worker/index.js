@@ -790,14 +790,18 @@ async function getLeaderboard(env) {
         const logData = await env.GAMBLE_LOGS.get(key.name)
         if (logData) {
           const event = JSON.parse(logData)
-          // Only include wins (payout > 0)
-          if (event.payout && event.payout > 0) {
+          // Include ALL gambling events (wins, losses, break-even)
+          if (event.walletAddress && event.timestamp) {
+            const payout = event.payout || 0
+            const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
+            
             logs.push({
               winner: event.walletAddress,
-              amount: Math.round(event.payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
+              amount: Math.round(payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
               tx: event.payoutTx || event.burnTx, // Use payout tx if available, fallback to burn tx
               timestamp: new Date(event.timestamp).toISOString(),
-              tier: event.result?.tier || 'win'
+              tier: event.result?.tier || (payout >= gambledAmount ? 'break-even' : 'loss'),
+              isWin: payout > 0
             })
           }
         }
