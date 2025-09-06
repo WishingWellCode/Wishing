@@ -158,7 +158,9 @@ export class WishGamblingAPI {
         status: response.status,
         rawData: rawData,
         type: typeof rawData,
-        isArray: Array.isArray(rawData)
+        isArray: Array.isArray(rawData),
+        keys: rawData && typeof rawData === 'object' ? Object.keys(rawData) : null,
+        stringified: JSON.stringify(rawData, null, 2)
       })
       
       // Handle different response formats
@@ -183,7 +185,9 @@ export class WishGamblingAPI {
       
       console.log('🎯 Processed Winners Data:', {
         dataLength: data.length,
-        data: data
+        data: data,
+        sampleEntry: data[0] || null,
+        stringifiedData: JSON.stringify(data.slice(0, 3), null, 2)
       })
       
       // Log break-even entries specifically

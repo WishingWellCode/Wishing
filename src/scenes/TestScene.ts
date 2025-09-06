@@ -118,6 +118,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.setSize(width, height)
       this.cameras.main.setViewport(0, 0, width, height)
       
+      // Handle overlay resize
+      this.handleOverlayResize()
+      
       // Update existing background (don't create new ones)
       const existingBackground = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
       if (existingBackground && existingBackground.texture) {
@@ -473,13 +476,30 @@ export class TestScene extends Phaser.Scene {
       rowBg.setDepth(2001)
       this.winnersOverlay.elements.push(rowBg)
 
-      // Format data
-      const date = winner.timestamp ? new Date(winner.timestamp).toLocaleDateString() : 'N/A'
-      // Show payout amount, including 0 for break-even
-      const amount = winner.payout !== undefined ? (winner.payout / 1000000000).toFixed(2) : '0.00' // Convert lamports to SOL
-      const txLink = winner.payoutTx ? 'VIEW' : (winner.burnTx ? 'BURN' : 'N/A')
-      const address = winner.walletAddress ? 
-        `${winner.walletAddress.slice(0, 4)}...${winner.walletAddress.slice(-4)}` : 'N/A'
+      // Format data with flexible field name handling
+      const timestamp = winner.timestamp || winner.createdAt || winner.date || winner.time
+      const date = timestamp ? new Date(timestamp).toLocaleDateString() : 'N/A'
+      
+      // Handle different payout field names and formats
+      const rawPayout = winner.payout ?? winner.payoutAmount ?? winner.winAmount ?? winner.amount ?? 0
+      const amount = typeof rawPayout === 'number' ? 
+        (rawPayout / 1000000000).toFixed(2) : 
+        (parseFloat(rawPayout || '0') / 1000000000).toFixed(2)
+      
+      // Handle different transaction field names
+      const payoutTxId = winner.payoutTx || winner.payoutTxId || winner.payoutTransaction || winner.payout_tx
+      const burnTxId = winner.burnTx || winner.burnTxId || winner.burnTransaction || winner.burn_tx
+      const txLink = payoutTxId ? 'VIEW' : (burnTxId ? 'BURN' : 'N/A')
+      
+      // Handle different address field names
+      const walletAddr = winner.walletAddress || winner.wallet || winner.address || winner.user || winner.userWallet
+      const address = walletAddr ? 
+        `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}` : 'N/A'
+      
+      console.log('🎯 Processing winner entry:', {
+        original: winner,
+        processed: { date, amount, txLink, address, payoutTxId, burnTxId }
+      })
 
       const rowData = [address, amount, txLink, date]
 
@@ -491,9 +511,9 @@ export class TestScene extends Phaser.Scene {
           rowY,
           data,
           {
-            fontSize: colIndex === 2 && (winner.payoutTx || winner.burnTx) ? '10px' : '11px',
+            fontSize: colIndex === 2 && (payoutTxId || burnTxId) ? '10px' : '11px',
             fontFamily: colIndex === 0 ? 'monospace' : '"Press Start 2P"',
-            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && (winner.payoutTx || winner.burnTx)) ? '#00ffff' : '#ffffff',
+            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && (payoutTxId || burnTxId)) ? '#00ffff' : '#ffffff',
             align: 'center'
           }
         )
@@ -501,10 +521,10 @@ export class TestScene extends Phaser.Scene {
         cellText.setDepth(2002)
 
         // Make transaction link clickable
-        if (colIndex === 2 && (winner.payoutTx || winner.burnTx)) {
+        if (colIndex === 2 && (payoutTxId || burnTxId)) {
           cellText.setInteractive({ useHandCursor: true })
           cellText.on('pointerdown', () => {
-            const txHash = winner.payoutTx || winner.burnTx
+            const txHash = payoutTxId || burnTxId
             window.open(`https://solscan.io/tx/${txHash}`, '_blank')
           })
           cellText.on('pointerover', () => {
@@ -555,6 +575,22 @@ export class TestScene extends Phaser.Scene {
 
     this.winnersOverlay = null
     console.log('Winners overlay closed')
+  }
+
+  // Handle window resize for overlay
+  handleOverlayResize() {
+    if (this.winnersOverlay) {
+      // Close and reopen overlay to reposition correctly
+      const wasOpen = true
+      this.closeWinnersOverlay()
+      
+      // Delay reopening to avoid rapid toggling
+      this.time.delayedCall(100, () => {
+        if (this.currentPortal === 'Portal 3') {
+          this.showWinnersOverlay()
+        }
+      })
+    }
   }
 
   onPortalLeave(portalName: string) {
