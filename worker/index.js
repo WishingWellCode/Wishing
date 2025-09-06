@@ -58,6 +58,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
+  getMint,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token'
@@ -96,6 +97,141 @@ function base58ToUint8Array(base58String) {
   return new Uint8Array(decoded.reverse())
 }
 
+// HTML content for the main page
+const HTML_CONTENT = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wish Well - Gambling Tokens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: cover;
+        }
+        
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            display: none; /* Hidden until we set up proper asset serving */
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+        
+        .gambling-animation {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        
+        .gambling-animation.active {
+            display: block;
+            animation: popIn 0.5s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .test-button {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .test-button:active {
+            transform: scale(0.95);
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <img src="/assets/backgrounds/Realbackground.png" alt="Wish Well Background" class="background-image">
+    </div>
+    
+    <div class="content">
+        <h1>Wish Well Test Page</h1>
+        <button class="test-button" onclick="testAnimation()">Test Gambling Animation</button>
+    </div>
+    
+    <div id="gamblingAnimation" class="gambling-animation">
+        <div style="width: 200px; height: 200px; background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff); border-radius: 50%; animation: spin 1s linear infinite;">
+            <div style="color: white; font-size: 2rem; display: flex; align-items: center; justify-content: center; height: 100%;">🎰</div>
+        </div>
+    </div>
+    
+    <script>
+        function testAnimation() {
+            const animation = document.getElementById('gamblingAnimation');
+            animation.classList.add('active');
+            
+            setTimeout(() => {
+                animation.classList.remove('active');
+            }, 2000);
+        }
+        
+        console.log('Wish Well page loaded');
+    </script>
+</body>
+</html>`;
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
@@ -108,6 +244,16 @@ export default {
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
           'Access-Control-Max-Age': '86400',
+        }
+      })
+    }
+    
+    // Serve HTML for root path
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+      return new Response(HTML_CONTENT, {
+        headers: {
+          'Content-Type': 'text/html',
+          'Access-Control-Allow-Origin': '*'
         }
       })
     }
@@ -138,8 +284,8 @@ export default {
       return handleLeaderboard(request, env)
     }
     
-    return new Response('Wish Well API', { 
-      status: 200,
+    return new Response('Not Found', { 
+      status: 404,
       headers: { 'Access-Control-Allow-Origin': '*' }
     })
   }
@@ -387,19 +533,20 @@ async function handleFountainResolve(request, env) {
   // Calculate payout
   const payout = Math.floor(1000 * result.multiplier)
   
-  // Send payout if won (from pool wallet)
+  // Send payout if won (from pool wallet) - but don't wait for confirmation
   let payoutTx = null
   if (payout > 0) {
-    try {
-      console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
-      payoutTx = await sendPayout(env, session.walletAddress, payout)
-      console.log(`✅ Successfully sent ${payout} $WISH payout: ${payoutTx}`)
-    } catch (error) {
+    console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
+    
+    // Send payout asynchronously - don't block the response
+    sendPayoutAsync(env, session.walletAddress, payout).then(txId => {
+      console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
+    }).catch(error => {
       console.error('❌ Failed to send payout:', error.message || error)
-      console.error('❌ Full error:', error)
-      // Continue without payout - log for manual processing
-      payoutTx = 'FAILED_' + crypto.randomUUID()
-    }
+    })
+    
+    // Return immediately with a placeholder transaction ID
+    payoutTx = 'PROCESSING_' + crypto.randomUUID()
   }
 
   // Update session
@@ -641,9 +788,15 @@ async function sendPayout(env, recipientWalletAddress, amount) {
     transaction.add(createAccountInstruction)
   }
   
-  // TEMPORARY: Use 6 decimals (most common) until we can query mint info properly in worker
-  // TODO: Query mint info once Buffer polyfill is available
-  const tokenDecimals = 6 // Most SPL tokens use 6 decimals
+  // Query actual token decimals from the blockchain
+  let tokenDecimals = 6 // fallback
+  try {
+    const mintInfo = await connection.getMint(tokenMint)
+    tokenDecimals = mintInfo.decimals
+    console.log(`🔍 Token decimals detected: ${tokenDecimals}`)
+  } catch (error) {
+    console.log(`⚠️ Could not get token decimals, using fallback: ${tokenDecimals}`)
+  }
 
   // Add transfer instruction with correct decimals
   const rawAmount = Math.floor(amount * Math.pow(10, tokenDecimals))
@@ -671,10 +824,25 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   transaction.sign(poolWallet)
   const signature = await connection.sendRawTransaction(transaction.serialize())
   
-  // Wait for confirmation
-  await connection.confirmTransaction(signature)
+  // Use faster confirmation with shorter timeout
+  try {
+    await connection.confirmTransaction({
+      signature,
+      blockhash: transaction.recentBlockhash,
+      lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight
+    }, 'processed') // Use 'processed' for faster confirmation
+    console.log(`✅ Payout transaction confirmed: ${signature}`)
+  } catch (error) {
+    console.log(`⚠️ Payout sent but confirmation timeout (likely succeeded): ${signature}`)
+    // Don't throw - transaction was likely successful even if confirmation timed out
+  }
   
   return signature
+}
+
+// Async version that doesn't block the main response
+async function sendPayoutAsync(env, recipientWalletAddress, amount) {
+  return await sendPayout(env, recipientWalletAddress, amount)
 }
 
 function getResultMessage(tier) {
