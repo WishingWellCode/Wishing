@@ -435,7 +435,7 @@ export class TestScene extends Phaser.Scene {
     this.winnersOverlay?.elements.push(headerBg)
 
     // Headers
-    const headers = ['Won (SOL)', 'Tx Link', 'Date', 'Winner']
+    const headers = ['Winner', 'Won (SOL)', 'Tx Link', 'Date']
     headers.forEach((header, index) => {
       if (!this.winnersOverlay) return
       
@@ -481,7 +481,7 @@ export class TestScene extends Phaser.Scene {
       const address = winner.walletAddress ? 
         `${winner.walletAddress.slice(0, 4)}...${winner.walletAddress.slice(-4)}` : 'N/A'
 
-      const rowData = [amount, txLink, date, address]
+      const rowData = [address, amount, txLink, date]
 
       rowData.forEach((data, colIndex) => {
         if (!this.winnersOverlay) return
@@ -491,9 +491,9 @@ export class TestScene extends Phaser.Scene {
           rowY,
           data,
           {
-            fontSize: colIndex === 1 && (winner.payoutTx || winner.burnTx) ? '10px' : '11px',
-            fontFamily: colIndex === 3 ? 'monospace' : '"Press Start 2P"',
-            color: colIndex === 0 ? '#00ff00' : (colIndex === 1 && (winner.payoutTx || winner.burnTx)) ? '#00ffff' : '#ffffff',
+            fontSize: colIndex === 2 && (winner.payoutTx || winner.burnTx) ? '10px' : '11px',
+            fontFamily: colIndex === 0 ? 'monospace' : '"Press Start 2P"',
+            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && (winner.payoutTx || winner.burnTx)) ? '#00ffff' : '#ffffff',
             align: 'center'
           }
         )
@@ -501,7 +501,7 @@ export class TestScene extends Phaser.Scene {
         cellText.setDepth(2002)
 
         // Make transaction link clickable
-        if (colIndex === 1 && (winner.payoutTx || winner.burnTx)) {
+        if (colIndex === 2 && (winner.payoutTx || winner.burnTx)) {
           cellText.setInteractive({ useHandCursor: true })
           cellText.on('pointerdown', () => {
             const txHash = winner.payoutTx || winner.burnTx

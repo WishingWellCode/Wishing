@@ -150,10 +150,22 @@ export class WishGamblingAPI {
     try {
       const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`)
       if (!response.ok) {
-        throw new Error('Failed to fetch winners data')
+        throw new Error(`Failed to fetch winners data: ${response.status} ${response.statusText}`)
       }
       const data = await response.json()
-      console.log('Winners data received:', data)
+      console.log('🎯 Winners API Response:', {
+        url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`,
+        status: response.status,
+        dataLength: data.length,
+        data: data
+      })
+      
+      // Log break-even entries specifically
+      const breakEvenEntries = data.filter((entry: any) => 
+        entry.payout !== undefined && entry.payout <= (entry.stake || 1000000000)
+      )
+      console.log('🎯 Break-even entries found:', breakEvenEntries)
+      
       return data
     } catch (error) {
       console.error('Error fetching winners:', error)
