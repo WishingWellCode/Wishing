@@ -14,6 +14,9 @@ export class TestScene extends Phaser.Scene {
   private currentSession: GamblingSession | null = null
   private coordinateDebugger!: Phaser.GameObjects.Text
   private mouseCoords!: Phaser.GameObjects.Text
+  private debugInfo!: Phaser.GameObjects.Text
+  private debugVisible: boolean = true
+  private debugToggleKey!: Phaser.Input.Keyboard.Key
   
   constructor() {
     super({ key: 'TestScene' })
@@ -73,6 +76,7 @@ export class TestScene extends Phaser.Scene {
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys()
       this.wasd = this.input.keyboard.addKeys('W,A,S,D')
+      this.debugToggleKey = this.input.keyboard.addKey('H') // H to toggle debug info
     }
     
     // Camera setup
@@ -131,45 +135,57 @@ export class TestScene extends Phaser.Scene {
   }
 
   createCoordinateDebugger() {
-    // Player coordinate display
+    // Player coordinate display (minimal and translucent)
     this.coordinateDebugger = this.add.text(10, 10, 'Player: (0, 0)', {
-      fontSize: '16px',
-      fontFamily: 'Courier New',
-      color: '#00ff00',
-      backgroundColor: '#000000',
-      padding: { x: 10, y: 5 }
-    })
-    this.coordinateDebugger.setScrollFactor(0)
-    this.coordinateDebugger.setDepth(1000)
-    
-    // Mouse coordinate display
-    this.mouseCoords = this.add.text(10, 40, 'Mouse: (0, 0)', {
-      fontSize: '16px',
-      fontFamily: 'Courier New', 
-      color: '#00ffff',
-      backgroundColor: '#000000',
-      padding: { x: 10, y: 5 }
-    })
-    this.mouseCoords.setScrollFactor(0)
-    this.mouseCoords.setDepth(1000)
-    
-    // Additional coordinate info
-    const coordsInfo = this.add.text(10, 70, 'Click to log coordinates to console', {
       fontSize: '14px',
       fontFamily: 'Courier New',
-      color: '#ffff00',
-      backgroundColor: '#000000', 
-      padding: { x: 10, y: 5 }
+      color: '#00ff00',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)', // Much more transparent
+      padding: { x: 5, y: 2 }
     })
-    coordsInfo.setScrollFactor(0)
-    coordsInfo.setDepth(1000)
+    this.coordinateDebugger.setScrollFactor(0)
+    this.coordinateDebugger.setDepth(999)
+    this.coordinateDebugger.setAlpha(0.7) // Semi-transparent
     
-    // Click to log coordinates
+    // Mouse coordinate display (minimal and translucent)
+    this.mouseCoords = this.add.text(10, 30, 'Mouse: (0, 0)', {
+      fontSize: '14px',
+      fontFamily: 'Courier New', 
+      color: '#00ffff',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)', // Much more transparent
+      padding: { x: 5, y: 2 }
+    })
+    this.mouseCoords.setScrollFactor(0)
+    this.mouseCoords.setDepth(999)
+    this.mouseCoords.setAlpha(0.7) // Semi-transparent
+    
+    // Minimal instruction (more transparent)
+    this.debugInfo = this.add.text(10, 50, 'Click for portal coords | H = hide/show debug', {
+      fontSize: '12px',
+      fontFamily: 'Courier New',
+      color: '#ffff00',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+      padding: { x: 5, y: 2 }
+    })
+    this.debugInfo.setScrollFactor(0)
+    this.debugInfo.setDepth(999)
+    this.debugInfo.setAlpha(0.6) // Even more transparent
+    
+    // Click to log coordinates for portals
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const worldX = pointer.worldX
       const worldY = pointer.worldY
-      console.log(`🎯 Clicked coordinates: { x: ${Math.round(worldX)}, y: ${Math.round(worldY)} }`)
-      console.log(`Copy this for hub-config.json: "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} }`)
+      console.log(`🚪 Portal coordinates: { x: ${Math.round(worldX)}, y: ${Math.round(worldY)} }`)
+      console.log(`For config: "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} }`)
+      console.log(`Portal area example:`)
+      console.log(`{
+  "type": "portal",
+  "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} },
+  "width": 80,
+  "height": 80,
+  "action": "navigate",
+  "target": "/some-page"
+}`)
     })
   }
 
@@ -515,13 +531,21 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
     
+    // Toggle debug visibility with H key
+    if (this.debugToggleKey && Phaser.Input.Keyboard.JustDown(this.debugToggleKey)) {
+      this.debugVisible = !this.debugVisible
+      this.coordinateDebugger.setVisible(this.debugVisible)
+      this.mouseCoords.setVisible(this.debugVisible)
+      this.debugInfo.setVisible(this.debugVisible)
+    }
+    
     // Update coordinate debugger
-    if (this.coordinateDebugger) {
+    if (this.coordinateDebugger && this.debugVisible) {
       this.coordinateDebugger.setText(`Player: (${Math.round(this.testPlayer.x)}, ${Math.round(this.testPlayer.y)})`)
     }
     
     // Update mouse coordinates
-    if (this.mouseCoords && this.input.activePointer) {
+    if (this.mouseCoords && this.input.activePointer && this.debugVisible) {
       const mouseX = this.input.activePointer.worldX
       const mouseY = this.input.activePointer.worldY
       this.mouseCoords.setText(`Mouse: (${Math.round(mouseX)}, ${Math.round(mouseY)})`)
