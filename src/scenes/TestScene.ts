@@ -17,6 +17,8 @@ export class TestScene extends Phaser.Scene {
   private debugInfo!: Phaser.GameObjects.Text
   private debugVisible: boolean = true
   private debugToggleKey!: Phaser.Input.Keyboard.Key
+  private pinMarkers: Phaser.GameObjects.Circle[] = []
+  private pinCoordinates: { x: number, y: number }[] = []
   
   constructor() {
     super({ key: 'TestScene' })
@@ -31,9 +33,15 @@ export class TestScene extends Phaser.Scene {
     // Set transparent background to show CSS background
     this.cameras.main.transparent = true
     
-    // Add the vaporwave background image
+    // Add the vaporwave background image with proper scaling
     const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
-    background.setDisplaySize(this.cameras.main.width, this.cameras.main.height)
+    
+    // Calculate scale to cover entire screen while maintaining aspect ratio
+    const scaleX = this.cameras.main.width / background.width
+    const scaleY = this.cameras.main.height / background.height
+    const scale = Math.max(scaleX, scaleY)
+    
+    background.setScale(scale)
     background.setDepth(-1000)
     background.setName('vaporwaveBackground') // Name for resize handling
     
@@ -84,10 +92,15 @@ export class TestScene extends Phaser.Scene {
     
     // Handle window resize
     this.events.on('resize', (width: number, height: number) => {
-      // Update background to new dimensions
+      // Update background to new dimensions with proper scaling
       const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
       if (background) {
-        background.setDisplaySize(width, height)
+        // Calculate scale to cover entire screen while maintaining aspect ratio
+        const scaleX = width / background.width
+        const scaleY = height / background.height
+        const scale = Math.max(scaleX, scaleY)
+        
+        background.setScale(scale)
         background.setPosition(width / 2, height / 2)
       }
       
@@ -174,7 +187,7 @@ export class TestScene extends Phaser.Scene {
     this.mouseCoords.setAlpha(0.7) // Semi-transparent
     
     // Minimal instruction (more transparent)
-    this.debugInfo = this.add.text(10, 50, 'Click for exact pin coords | H = hide/show debug', {
+    this.debugInfo = this.add.text(10, 50, 'Left click = pin | Right click = clear pins | H = hide debug', {
       fontSize: '12px',
       fontFamily: 'Courier New',
       color: '#ffff00',
@@ -185,13 +198,63 @@ export class TestScene extends Phaser.Scene {
     this.debugInfo.setDepth(999)
     this.debugInfo.setAlpha(0.6) // Even more transparent
     
-    // Click to log exact pin coordinates for irregular portal shapes
+    // Left click to add pin, right click to clear all pins
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const worldX = Math.round(pointer.worldX)
-      const worldY = Math.round(pointer.worldY)
-      console.log(`📍 Pin: [${worldX}, ${worldY}]`)
-      console.log(`   Copy: { x: ${worldX}, y: ${worldY} }`)
+      if (pointer.rightButtonDown()) {
+        // Right click - clear all pins
+        this.clearAllPins()
+      } else {
+        // Left click - add pin
+        const worldX = Math.round(pointer.worldX)
+        const worldY = Math.round(pointer.worldY)
+        
+        // Add visual pin marker
+        this.addPinMarker(worldX, worldY)
+        
+        // Log coordinates
+        console.log(`📍 Pin ${this.pinCoordinates.length}: [${worldX}, ${worldY}]`)
+        console.log(`   Copy: { x: ${worldX}, y: ${worldY} }`)
+        
+        // Log all pins when we have multiple
+        if (this.pinCoordinates.length > 1) {
+          console.log(`🔗 All pins for this shape:`)
+          console.log(JSON.stringify(this.pinCoordinates, null, 2))
+        }
+      }
     })
+  }
+
+  addPinMarker(x: number, y: number) {
+    // Create visual pin marker
+    const pinMarker = this.add.circle(x, y, 6, 0xff0066, 0.8) // Pink/red pin
+    pinMarker.setStrokeStyle(2, 0xffffff) // White border
+    pinMarker.setDepth(1000) // Above everything
+    
+    // Add pin number text
+    const pinNumber = this.add.text(x, y - 15, `${this.pinCoordinates.length + 1}`, {
+      fontSize: '12px',
+      fontFamily: 'Courier New',
+      color: '#ffffff',
+      backgroundColor: 'rgba(255, 0, 102, 0.8)',
+      padding: { x: 3, y: 1 }
+    })
+    pinNumber.setOrigin(0.5)
+    pinNumber.setDepth(1001)
+    
+    // Store marker and coordinates
+    this.pinMarkers.push(pinMarker, pinNumber as any) // Store both circle and text
+    this.pinCoordinates.push({ x, y })
+    
+    console.log(`✅ Added pin ${this.pinCoordinates.length} at (${x}, ${y})`)
+  }
+
+  clearAllPins() {
+    // Remove all visual markers
+    this.pinMarkers.forEach(marker => marker.destroy())
+    this.pinMarkers = []
+    this.pinCoordinates = []
+    
+    console.log(`🧹 Cleared all pins. Ready for next shape.`)
   }
 
   async startGambling() {
