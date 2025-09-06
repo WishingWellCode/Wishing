@@ -15,11 +15,14 @@ export class TestScene extends Phaser.Scene {
   private coordinateDebugger!: Phaser.GameObjects.Text
   private mouseCoords!: Phaser.GameObjects.Text
   private debugInfo!: Phaser.GameObjects.Text
+  private portalDebugger!: Phaser.GameObjects.Text
   private debugVisible: boolean = true
   private debugToggleKey!: Phaser.Input.Keyboard.Key
   private pinMarkers: Phaser.GameObjects.GameObject[] = []
   private pinCoordinates: { x: number, y: number }[] = []
   private fountainPolygon: { x: number, y: number }[] = []
+  private portals: { [key: string]: { coords: { x: number, y: number }[], isActive: boolean } } = {}
+  private currentPortal: string | null = null
   
   constructor() {
     super({ key: 'TestScene' })
@@ -70,6 +73,9 @@ export class TestScene extends Phaser.Scene {
     
     // Store fountain coordinates for vicinity detection
     this.fountainPolygon = fountainCoords
+    
+    // Initialize portal system with all your coordinates
+    this.initializePortals()
     
     // Create invisible fountain area for reference (optional visual debug)
     this.fountainArea = this.add.circle(950, 760, 100, 0x00ff00, 0) as Phaser.GameObjects.Arc
@@ -128,6 +134,49 @@ export class TestScene extends Phaser.Scene {
         this.gamblingUI.setPosition(width / 2, height - 120)
       }
     })
+  }
+
+  initializePortals() {
+    // Define all portal areas with your coordinates
+    this.portals = {
+      'Portal 1': {
+        coords: [
+          {x: 219, y: 679}, {x: 214, y: 659}, {x: 204, y: 662}, {x: 197, y: 544},
+          {x: 208, y: 542}, {x: 208, y: 534}, {x: 292, y: 527}, {x: 295, y: 536},
+          {x: 298, y: 535}, {x: 298, y: 636}, {x: 289, y: 640}, {x: 290, y: 661},
+          {x: 223, y: 678}
+        ],
+        isActive: false
+      },
+      'Portal 2': {
+        coords: [
+          {x: 624, y: 435}, {x: 624, y: 486}, {x: 623, y: 544}, {x: 622, y: 572},
+          {x: 679, y: 559}, {x: 730, y: 547}, {x: 728, y: 468}, {x: 724, y: 423},
+          {x: 680, y: 425}, {x: 628, y: 433}
+        ],
+        isActive: false
+      },
+      'Portal 3': {
+        coords: [
+          {x: 1157, y: 500}, {x: 1173, y: 361}, {x: 1375, y: 379}, {x: 1353, y: 551},
+          {x: 1157, y: 501}
+        ],
+        isActive: false
+      },
+      'Portal 4': {
+        coords: [
+          {x: 1616, y: 654}, {x: 1621, y: 629}, {x: 1631, y: 608}, {x: 1649, y: 600},
+          {x: 1667, y: 595}, {x: 1682, y: 600}, {x: 1699, y: 608}, {x: 1717, y: 623},
+          {x: 1727, y: 640}, {x: 1736, y: 666}, {x: 1736, y: 680}, {x: 1730, y: 703},
+          {x: 1720, y: 720}, {x: 1706, y: 725}, {x: 1687, y: 728}, {x: 1669, y: 725},
+          {x: 1648, y: 710}, {x: 1632, y: 696}, {x: 1624, y: 682}, {x: 1618, y: 670},
+          {x: 1614, y: 652}
+        ],
+        isActive: false
+      }
+    }
+    
+    console.log('🚪 Initialized 4 portals:', Object.keys(this.portals))
   }
 
   createGamblingUI() {
@@ -217,6 +266,18 @@ export class TestScene extends Phaser.Scene {
     this.debugInfo.setDepth(999)
     this.debugInfo.setAlpha(0.6) // Even more transparent
     
+    // Portal detection display
+    this.portalDebugger = this.add.text(10, 70, 'Portal: None', {
+      fontSize: '14px',
+      fontFamily: 'Courier New', 
+      color: '#ff00ff',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      padding: { x: 5, y: 2 }
+    })
+    this.portalDebugger.setScrollFactor(0)
+    this.portalDebugger.setDepth(999)
+    this.portalDebugger.setAlpha(0.7)
+    
     // Left click to add pin, right click to clear all pins
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (pointer.rightButtonDown()) {
@@ -294,6 +355,48 @@ export class TestScene extends Phaser.Scene {
     }
     
     return isInside
+  }
+
+  checkPortalProximity() {
+    const playerPos = { x: this.testPlayer.x, y: this.testPlayer.y }
+    let foundPortal: string | null = null
+    
+    // Check each portal
+    for (const [portalName, portal] of Object.entries(this.portals)) {
+      const isInsidePortal = this.isPointInPolygon(playerPos, portal.coords)
+      
+      if (isInsidePortal) {
+        foundPortal = portalName
+        if (!portal.isActive) {
+          // Entering portal
+          portal.isActive = true
+          console.log(`🚪 Entered ${portalName}`)
+          this.onPortalEnter(portalName)
+        }
+        break
+      } else if (portal.isActive) {
+        // Leaving portal
+        portal.isActive = false
+        console.log(`🚪 Left ${portalName}`)
+        this.onPortalLeave(portalName)
+      }
+    }
+    
+    // Update current portal and debug display
+    this.currentPortal = foundPortal
+    if (this.portalDebugger && this.debugVisible) {
+      this.portalDebugger.setText(foundPortal ? `Portal: ${foundPortal}` : 'Portal: None')
+    }
+  }
+
+  onPortalEnter(portalName: string) {
+    // Portal enter logic - customize per portal later
+    console.log(`✨ Portal "${portalName}" activated - functionality to be added`)
+  }
+
+  onPortalLeave(portalName: string) {
+    // Portal leave logic - customize per portal later
+    console.log(`👋 Left portal "${portalName}"`)
   }
 
   async startGambling() {
@@ -606,6 +709,9 @@ export class TestScene extends Phaser.Scene {
       this.fountainPolygon
     )
     
+    // Check portal proximity
+    this.checkPortalProximity()
+    
     // Show/hide gambling UI based on proximity
     if (this.isNearFountain && !wasNearFountain) {
       this.gamblingUI.setVisible(true)
@@ -642,6 +748,7 @@ export class TestScene extends Phaser.Scene {
       this.coordinateDebugger.setVisible(this.debugVisible)
       this.mouseCoords.setVisible(this.debugVisible)
       this.debugInfo.setVisible(this.debugVisible)
+      this.portalDebugger.setVisible(this.debugVisible)
     }
     
     // Update coordinate debugger
