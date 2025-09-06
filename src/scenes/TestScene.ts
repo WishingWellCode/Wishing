@@ -382,7 +382,7 @@ export class TestScene extends Phaser.Scene {
         const noDataText = this.add.text(
           this.cameras.main.centerX,
           this.cameras.main.centerY,
-          'No winners data available yet.',
+          'No winners yet! Be the first to try your luck.\nYour recent transactions will appear here.',
           {
             fontSize: '14px',
             fontFamily: '"Press Start 2P"',
@@ -580,21 +580,9 @@ export class TestScene extends Phaser.Scene {
   // Handle window resize for overlay
   handleOverlayResize() {
     if (this.winnersOverlay) {
-      console.log('🔧 Handling overlay resize')
-      
-      // Store the current state
-      const wasOpen = true
-      
-      // Clean up existing overlay
-      this.closeWinnersOverlay()
-      
-      // Wait for viewport to stabilize, then recreate overlay
-      this.time.delayedCall(200, () => {
-        if (this.currentPortal === 'Portal 3') {
-          console.log('🔧 Recreating overlay after resize')
-          this.showWinnersOverlay()
-        }
-      })
+      console.log('🔧 Handling overlay resize - NOT recreating to prevent background issues')
+      // Don't recreate the overlay on resize to prevent background duplication
+      // The overlay will be repositioned by the camera updates
     }
   }
 
