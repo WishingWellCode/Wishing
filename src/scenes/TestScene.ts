@@ -15,6 +15,7 @@ export class TestScene extends Phaser.Scene {
   private fountainPolygon: { x: number, y: number }[] = []
   private portals: { [key: string]: { coords: { x: number, y: number }[], isActive: boolean } } = {}
   private currentPortal: string | null = null
+  private winnersOverlay: any = null
   
   constructor() {
     super({ key: 'TestScene' })
@@ -283,79 +284,272 @@ export class TestScene extends Phaser.Scene {
   onPortalEnter(portalName: string) {
     console.log(`✨ Portal "${portalName}" activated`)
     
-    // Portal 3 - Winners page with confirmation
+    // Portal 3 - Winners overlay
     if (portalName === 'Portal 3') {
-      // Create confirmation dialog
-      const dialogBg = this.add.rectangle(
-        this.cameras.main.centerX,
-        this.cameras.main.centerY,
-        400,
-        200,
-        0x000000,
-        0.9
-      )
-      dialogBg.setDepth(1000)
-      dialogBg.setStrokeStyle(2, 0xff00ff)
+      this.showWinnersOverlay()
+    }
+    // Add other portal functionality here for Portal 1, 2, and 4
+  }
+
+  async showWinnersOverlay() {
+    // Prevent multiple overlays
+    if (this.winnersOverlay) return
+
+    console.log('📊 Loading winners data...')
+
+    // Create overlay background
+    const overlayBg = this.add.rectangle(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY,
+      this.cameras.main.width * 0.9,
+      this.cameras.main.height * 0.8,
+      0x000000,
+      0.95
+    )
+    overlayBg.setDepth(2000)
+    overlayBg.setStrokeStyle(3, 0xff00ff)
+
+    // Create title
+    const title = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - (overlayBg.height / 2) + 40,
+      'RECENT WINNERS',
+      {
+        fontSize: '24px',
+        fontFamily: '"Press Start 2P"',
+        color: '#ff00ff',
+        align: 'center'
+      }
+    )
+    title.setOrigin(0.5)
+    title.setDepth(2001)
+
+    // Loading message
+    const loadingText = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY,
+      'Loading winners data...',
+      {
+        fontSize: '16px',
+        fontFamily: '"Press Start 2P"',
+        color: '#ffffff',
+        align: 'center'
+      }
+    )
+    loadingText.setOrigin(0.5)
+    loadingText.setDepth(2001)
+
+    // Close instruction
+    const closeText = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY + (overlayBg.height / 2) - 30,
+      'Press ESC to close',
+      {
+        fontSize: '12px',
+        fontFamily: '"Press Start 2P"',
+        color: '#888888',
+        align: 'center'
+      }
+    )
+    closeText.setOrigin(0.5)
+    closeText.setDepth(2001)
+
+    // Store overlay elements
+    this.winnersOverlay = {
+      background: overlayBg,
+      title: title,
+      closeText: closeText,
+      elements: [overlayBg, title, loadingText, closeText]
+    }
+
+    try {
+      // Fetch real winners data
+      const winnersData = await this.gamblingAPI.getWinnersData(100)
       
-      const title = this.add.text(
-        this.cameras.main.centerX,
-        this.cameras.main.centerY - 60,
-        'PORTAL TO WINNERS HALL',
+      // Remove loading text
+      loadingText.destroy()
+
+      if (winnersData.length === 0) {
+        const noDataText = this.add.text(
+          this.cameras.main.centerX,
+          this.cameras.main.centerY,
+          'No winners data available yet.',
+          {
+            fontSize: '14px',
+            fontFamily: '"Press Start 2P"',
+            color: '#888888',
+            align: 'center'
+          }
+        )
+        noDataText.setOrigin(0.5)
+        noDataText.setDepth(2001)
+        this.winnersOverlay.elements.push(noDataText)
+      } else {
+        // Create scrollable winners table
+        this.createWinnersTable(winnersData, overlayBg)
+      }
+
+    } catch (error) {
+      console.error('Failed to load winners data:', error)
+      loadingText.setText('Failed to load winners data')
+    }
+
+    // Handle ESC key to close
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        this.closeWinnersOverlay()
+      }
+    }
+
+    this.input.keyboard?.on('keydown', handleEscKey)
+    this.winnersOverlay.keyHandler = handleEscKey
+  }
+
+  createWinnersTable(winnersData: any[], overlayBg: Phaser.GameObjects.Rectangle) {
+    if (!this.winnersOverlay) return
+
+    const tableStartY = overlayBg.y - overlayBg.height/2 + 80
+    const rowHeight = 25
+    const maxVisibleRows = Math.floor((overlayBg.height - 160) / rowHeight)
+
+    // Table headers
+    const headerY = tableStartY
+    const colWidth = overlayBg.width / 4
+
+    // Header background
+    const headerBg = this.add.rectangle(
+      overlayBg.x,
+      headerY,
+      overlayBg.width - 20,
+      rowHeight,
+      0x330066,
+      0.8
+    )
+    headerBg.setDepth(2001)
+    this.winnersOverlay.elements.push(headerBg)
+
+    // Headers
+    const headers = ['Date', 'Won (SOL)', 'Tx Link', 'Winner']
+    headers.forEach((header, index) => {
+      const headerText = this.add.text(
+        overlayBg.x - overlayBg.width/2 + 10 + (colWidth * index) + colWidth/2,
+        headerY,
+        header,
         {
-          fontSize: '18px',
+          fontSize: '12px',
           fontFamily: '"Press Start 2P"',
           color: '#ff00ff',
           align: 'center'
         }
       )
-      title.setOrigin(0.5)
-      title.setDepth(1001)
+      headerText.setOrigin(0.5)
+      headerText.setDepth(2002)
+      this.winnersOverlay.elements.push(headerText)
+    })
+
+    // Create rows for winners data
+    winnersData.slice(0, maxVisibleRows).forEach((winner, rowIndex) => {
+      const rowY = headerY + ((rowIndex + 1) * rowHeight)
       
-      const message = this.add.text(
-        this.cameras.main.centerX,
-        this.cameras.main.centerY - 10,
-        'View the hall of lucky winners?\nPress Y to continue or N to stay',
+      // Row background (alternating colors)
+      const rowBg = this.add.rectangle(
+        overlayBg.x,
+        rowY,
+        overlayBg.width - 20,
+        rowHeight,
+        rowIndex % 2 === 0 ? 0x111111 : 0x222222,
+        0.6
+      )
+      rowBg.setDepth(2001)
+      this.winnersOverlay.elements.push(rowBg)
+
+      // Format data
+      const date = winner.timestamp ? new Date(winner.timestamp).toLocaleDateString() : 'N/A'
+      const amount = winner.payout ? (winner.payout / 1000000000).toFixed(2) : '0.00' // Convert lamports to SOL
+      const txLink = winner.payoutTx ? 'VIEW' : 'N/A'
+      const address = winner.walletAddress ? 
+        `${winner.walletAddress.slice(0, 4)}...${winner.walletAddress.slice(-4)}` : 'N/A'
+
+      const rowData = [date, amount, txLink, address]
+
+      rowData.forEach((data, colIndex) => {
+        const cellText = this.add.text(
+          overlayBg.x - overlayBg.width/2 + 10 + (colWidth * colIndex) + colWidth/2,
+          rowY,
+          data,
+          {
+            fontSize: colIndex === 2 && winner.payoutTx ? '10px' : '11px',
+            fontFamily: colIndex === 3 ? 'monospace' : '"Press Start 2P"',
+            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && winner.payoutTx) ? '#00ffff' : '#ffffff',
+            align: 'center'
+          }
+        )
+        cellText.setOrigin(0.5)
+        cellText.setDepth(2002)
+
+        // Make transaction link clickable
+        if (colIndex === 2 && winner.payoutTx) {
+          cellText.setInteractive({ useHandCursor: true })
+          cellText.on('pointerdown', () => {
+            window.open(`https://solscan.io/tx/${winner.payoutTx}`, '_blank')
+          })
+          cellText.on('pointerover', () => {
+            cellText.setColor('#ffffff')
+          })
+          cellText.on('pointerout', () => {
+            cellText.setColor('#00ffff')
+          })
+        }
+
+        this.winnersOverlay.elements.push(cellText)
+      })
+    })
+
+    // Scroll indicator if more data exists
+    if (winnersData.length > maxVisibleRows) {
+      const scrollText = this.add.text(
+        overlayBg.x,
+        overlayBg.y + overlayBg.height/2 - 60,
+        `Showing ${maxVisibleRows} of ${winnersData.length} winners`,
         {
-          fontSize: '12px',
+          fontSize: '10px',
           fontFamily: '"Press Start 2P"',
-          color: '#ffffff',
+          color: '#888888',
           align: 'center'
         }
       )
-      message.setOrigin(0.5)
-      message.setDepth(1001)
-      
-      // Store dialog elements for cleanup
-      const dialogElements = [dialogBg, title, message]
-      
-      // Handle keyboard input
-      const handleKey = (event: KeyboardEvent) => {
-        if (event.key.toLowerCase() === 'y') {
-          // Navigate to winners page
-          window.location.href = '/winners'
-        } else if (event.key.toLowerCase() === 'n') {
-          // Close dialog
-          dialogElements.forEach(el => el.destroy())
-          this.input.keyboard?.off('keydown')
-        }
-      }
-      
-      this.input.keyboard?.on('keydown', handleKey)
-      
-      // Auto-close after 10 seconds
-      this.time.delayedCall(10000, () => {
-        dialogElements.forEach(el => {
-          if (el && el.active) el.destroy()
-        })
-        this.input.keyboard?.off('keydown', handleKey)
-      })
+      scrollText.setOrigin(0.5)
+      scrollText.setDepth(2002)
+      this.winnersOverlay.elements.push(scrollText)
     }
-    // Add other portal functionality here for Portal 1, 2, and 4
+  }
+
+  closeWinnersOverlay() {
+    if (!this.winnersOverlay) return
+
+    // Clean up all elements
+    this.winnersOverlay.elements.forEach(element => {
+      if (element && element.destroy) {
+        element.destroy()
+      }
+    })
+
+    // Remove keyboard handler
+    if (this.winnersOverlay.keyHandler) {
+      this.input.keyboard?.off('keydown', this.winnersOverlay.keyHandler)
+    }
+
+    this.winnersOverlay = null
+    console.log('Winners overlay closed')
   }
 
   onPortalLeave(portalName: string) {
-    // Portal leave logic - customize per portal later
     console.log(`👋 Left portal "${portalName}"`)
+    
+    // Close winners overlay when leaving Portal 3
+    if (portalName === 'Portal 3' && this.winnersOverlay) {
+      this.closeWinnersOverlay()
+    }
   }
 
   createPlayer() {

@@ -145,4 +145,17 @@ export class WishGamblingAPI {
       return false
     }
   }
+
+  async getWinnersData(limit: number = 100): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch winners data')
+      }
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching winners:', error)
+      return []
+    }
+  }
 }
