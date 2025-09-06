@@ -432,11 +432,13 @@ export class TestScene extends Phaser.Scene {
       0.8
     )
     headerBg.setDepth(2001)
-    this.winnersOverlay.elements.push(headerBg)
+    this.winnersOverlay?.elements.push(headerBg)
 
     // Headers
     const headers = ['Date', 'Won (SOL)', 'Tx Link', 'Winner']
     headers.forEach((header, index) => {
+      if (!this.winnersOverlay) return
+      
       const headerText = this.add.text(
         overlayBg.x - overlayBg.width/2 + 10 + (colWidth * index) + colWidth/2,
         headerY,
@@ -455,6 +457,8 @@ export class TestScene extends Phaser.Scene {
 
     // Create rows for winners data
     winnersData.slice(0, maxVisibleRows).forEach((winner, rowIndex) => {
+      if (!this.winnersOverlay) return
+      
       const rowY = headerY + ((rowIndex + 1) * rowHeight)
       
       // Row background (alternating colors)
@@ -479,6 +483,8 @@ export class TestScene extends Phaser.Scene {
       const rowData = [date, amount, txLink, address]
 
       rowData.forEach((data, colIndex) => {
+        if (!this.winnersOverlay) return
+        
         const cellText = this.add.text(
           overlayBg.x - overlayBg.width/2 + 10 + (colWidth * colIndex) + colWidth/2,
           rowY,
@@ -512,7 +518,7 @@ export class TestScene extends Phaser.Scene {
     })
 
     // Scroll indicator if more data exists
-    if (winnersData.length > maxVisibleRows) {
+    if (winnersData.length > maxVisibleRows && this.winnersOverlay) {
       const scrollText = this.add.text(
         overlayBg.x,
         overlayBg.y + overlayBg.height/2 - 60,
