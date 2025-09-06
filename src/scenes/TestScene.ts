@@ -127,9 +127,6 @@ export class TestScene extends Phaser.Scene {
       if (this.gamblingUI) {
         this.gamblingUI.setPosition(width / 2, height - 120)
       }
-      
-      // Force re-render
-      this.renderer.render(this.children, this.cameras.main)
     })
   }
 
