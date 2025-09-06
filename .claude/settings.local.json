@@ -20,7 +20,9 @@
       "Bash(wrangler deploy:*)",
       "Bash(npm install:*)",
       "Bash(wrangler r2 bucket create:*)",
-      "Bash(wrangler r2 object put:*)"
+      "Bash(wrangler r2 object put:*)",
+      "Bash(wrangler r2 object list:*)",
+      "Bash(wrangler r2 object get:*)"
     ],
     "deny": [],
     "ask": []

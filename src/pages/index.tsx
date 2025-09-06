@@ -27,15 +27,16 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen relative">
-        {/* Background Image */}
-        <div className="fixed inset-0 z-0">
-          <img 
-            src="/assets/backgrounds/Realbackground.jpg" 
-            alt="Wish Well Background" 
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <div 
+        className="min-h-screen w-full relative"
+        style={{
+          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
+        }}
+      >
         <div className="absolute top-4 right-4 z-50">
           <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
         </div>

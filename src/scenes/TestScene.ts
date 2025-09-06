@@ -18,8 +18,8 @@ export class TestScene extends Phaser.Scene {
   }
 
   preload() {
-    // Only load the village background - no other assets needed
-    this.load.image('village-background', '/assets/backgrounds/tempback.png')
+    // Load the real vaporwave background
+    this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
   }
 
   create() {
@@ -29,14 +29,19 @@ export class TestScene extends Phaser.Scene {
       'https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki'
     )
     
-    // Add village background - center it properly
-    const villageBackground = this.add.image(
+    // Add vaporwave background - center it properly and scale to fit
+    const vaporwaveBackground = this.add.image(
       this.cameras.main.centerX, 
       this.cameras.main.centerY, 
-      'village-background'
+      'vaporwave-background'
     )
-    villageBackground.setScale(1)
-    villageBackground.setDepth(0)
+    
+    // Scale to cover the entire screen properly
+    const scaleX = this.cameras.main.width / vaporwaveBackground.width
+    const scaleY = this.cameras.main.height / vaporwaveBackground.height
+    const scale = Math.max(scaleX, scaleY)
+    vaporwaveBackground.setScale(scale)
+    vaporwaveBackground.setDepth(0)
     
     // Create fountain interaction area (invisible circle)
     this.fountainArea = this.add.circle(

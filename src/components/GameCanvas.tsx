@@ -26,6 +26,7 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
       width: window.innerWidth,
       height: window.innerHeight,
       pixelArt: true,
+      transparent: true,
       physics: {
         default: 'arcade',
         arcade: {
@@ -100,5 +101,11 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
     }
   }, [gameState, updatePlayerPosition, throwCoins])
 
-  return <div ref={containerRef} className="w-full h-full" />
+  return (
+    <div 
+      ref={containerRef} 
+      className="w-full h-full"
+      style={{ background: 'transparent' }}
+    />
+  )
 }
