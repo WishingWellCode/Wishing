@@ -43,6 +43,6 @@ export class LandingScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
-    this.cameras.main.setBackgroundColor(0x87CEEB) // Sky blue fallback
+    this.cameras.main.setBackgroundColor(0x000000) // Transparent black
   }
 }

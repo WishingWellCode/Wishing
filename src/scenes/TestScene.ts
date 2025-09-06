@@ -12,6 +12,8 @@ export class TestScene extends Phaser.Scene {
   private gamblingUI!: Phaser.GameObjects.Container
   private gamblingAPI!: WishGamblingAPI
   private currentSession: GamblingSession | null = null
+  private coordinateDebugger!: Phaser.GameObjects.Text
+  private mouseCoords!: Phaser.GameObjects.Text
   
   constructor() {
     super({ key: 'TestScene' })
@@ -64,6 +66,9 @@ export class TestScene extends Phaser.Scene {
     // Create gambling UI (initially hidden)
     this.createGamblingUI()
     
+    // Create coordinate debugger
+    this.createCoordinateDebugger()
+    
     // Setup controls
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys()
@@ -72,7 +77,7 @@ export class TestScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
-    this.cameras.main.setBackgroundColor(0x87CEEB) // Sky blue fallback
+    this.cameras.main.setBackgroundColor(0x000000) // Transparent black
   }
 
   createGamblingUI() {
@@ -123,6 +128,49 @@ export class TestScene extends Phaser.Scene {
     
     // Add all to container
     this.gamblingUI.add([panel, title, gambButton, gambText])
+  }
+
+  createCoordinateDebugger() {
+    // Player coordinate display
+    this.coordinateDebugger = this.add.text(10, 10, 'Player: (0, 0)', {
+      fontSize: '16px',
+      fontFamily: 'Courier New',
+      color: '#00ff00',
+      backgroundColor: '#000000',
+      padding: { x: 10, y: 5 }
+    })
+    this.coordinateDebugger.setScrollFactor(0)
+    this.coordinateDebugger.setDepth(1000)
+    
+    // Mouse coordinate display
+    this.mouseCoords = this.add.text(10, 40, 'Mouse: (0, 0)', {
+      fontSize: '16px',
+      fontFamily: 'Courier New', 
+      color: '#00ffff',
+      backgroundColor: '#000000',
+      padding: { x: 10, y: 5 }
+    })
+    this.mouseCoords.setScrollFactor(0)
+    this.mouseCoords.setDepth(1000)
+    
+    // Additional coordinate info
+    const coordsInfo = this.add.text(10, 70, 'Click to log coordinates to console', {
+      fontSize: '14px',
+      fontFamily: 'Courier New',
+      color: '#ffff00',
+      backgroundColor: '#000000', 
+      padding: { x: 10, y: 5 }
+    })
+    coordsInfo.setScrollFactor(0)
+    coordsInfo.setDepth(1000)
+    
+    // Click to log coordinates
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const worldX = pointer.worldX
+      const worldY = pointer.worldY
+      console.log(`🎯 Clicked coordinates: { x: ${Math.round(worldX)}, y: ${Math.round(worldY)} }`)
+      console.log(`Copy this for hub-config.json: "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} }`)
+    })
   }
 
   async startGambling() {
@@ -466,5 +514,17 @@ export class TestScene extends Phaser.Scene {
     const height = this.cameras.main.height
     this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
+    
+    // Update coordinate debugger
+    if (this.coordinateDebugger) {
+      this.coordinateDebugger.setText(`Player: (${Math.round(this.testPlayer.x)}, ${Math.round(this.testPlayer.y)})`)
+    }
+    
+    // Update mouse coordinates
+    if (this.mouseCoords && this.input.activePointer) {
+      const mouseX = this.input.activePointer.worldX
+      const mouseY = this.input.activePointer.worldY
+      this.mouseCoords.setText(`Mouse: (${Math.round(mouseX)}, ${Math.round(mouseY)})`)
+    }
   }
 }
