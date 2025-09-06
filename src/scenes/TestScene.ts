@@ -23,6 +23,9 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
+    // Set transparent background so CSS background shows through
+    this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)')
+    
     // Initialize gambling API with Alchemy RPC for production
     this.gamblingAPI = new WishGamblingAPI(
       'https://wish-well-worker.stealthbundlebot.workers.dev',

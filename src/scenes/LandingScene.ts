@@ -13,6 +13,9 @@ export class LandingScene extends Phaser.Scene {
   }
 
   create() {
+    // Set transparent background so CSS background shows through
+    this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)')
+    
     // No background needed - CSS handles it now
     // Removed Phaser background to prevent conflicts
     

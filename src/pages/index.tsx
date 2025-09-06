@@ -40,6 +40,12 @@ export default function Home() {
     return () => document.removeEventListener('keydown', handleKeyPress)
   }, [testMode])
 
+  // Auto-enable test mode on load for development
+  useEffect(() => {
+    // Enable test mode by default for debugging
+    setTestMode(true)
+  }, [])
+
   if (isLoading) {
     return <div style={{ background: 'url(/assets/backgrounds/Realbackground.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
   }
