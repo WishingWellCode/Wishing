@@ -152,6 +152,7 @@ export class WishGamblingAPI {
       if (!response.ok) {
         throw new Error(`Failed to fetch winners data: ${response.status} ${response.statusText}`)
       }
+      
       const rawData = await response.json()
       console.log('🎯 Raw API Response:', {
         url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`,
@@ -168,18 +169,26 @@ export class WishGamblingAPI {
       if (Array.isArray(rawData)) {
         data = rawData
       } else if (rawData && typeof rawData === 'object') {
+        console.log('🔍 API Response Object Keys:', Object.keys(rawData))
+        console.log('🔍 API Response Object Values:', Object.values(rawData))
+        
         // Check if it's an object with an array property
         if (rawData.winners && Array.isArray(rawData.winners)) {
           data = rawData.winners
+          console.log('✅ Using rawData.winners')
         } else if (rawData.results && Array.isArray(rawData.results)) {
           data = rawData.results
+          console.log('✅ Using rawData.results')
         } else if (rawData.data && Array.isArray(rawData.data)) {
           data = rawData.data
+          console.log('✅ Using rawData.data')
+        } else if (rawData.leaderboard && Array.isArray(rawData.leaderboard)) {
+          data = rawData.leaderboard
+          console.log('✅ Using rawData.leaderboard')
         } else {
-          // Try to convert object values to array
-          data = Object.values(rawData).filter(item => 
-            typeof item === 'object' && item !== null
-          ) as any[]
+          console.log('❌ API returned object with keys:', Object.keys(rawData))
+          console.log('❌ API returned empty or invalid data structure')
+          return []
         }
       }
       

@@ -580,13 +580,18 @@ export class TestScene extends Phaser.Scene {
   // Handle window resize for overlay
   handleOverlayResize() {
     if (this.winnersOverlay) {
-      // Close and reopen overlay to reposition correctly
+      console.log('🔧 Handling overlay resize')
+      
+      // Store the current state
       const wasOpen = true
+      
+      // Clean up existing overlay
       this.closeWinnersOverlay()
       
-      // Delay reopening to avoid rapid toggling
-      this.time.delayedCall(100, () => {
+      // Wait for viewport to stabilize, then recreate overlay
+      this.time.delayedCall(200, () => {
         if (this.currentPortal === 'Portal 3') {
+          console.log('🔧 Recreating overlay after resize')
           this.showWinnersOverlay()
         }
       })
