@@ -21,13 +21,13 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
     if (!containerRef.current || gameRef.current) return
 
     const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
+      type: Phaser.CANVAS,
       parent: containerRef.current,
       width: window.innerWidth,
       height: window.innerHeight,
       pixelArt: true,
       transparent: true,
-      backgroundColor: 'rgba(0, 0, 0, 0)',
+      backgroundColor: 0x000000,
       physics: {
         default: 'arcade',
         arcade: {

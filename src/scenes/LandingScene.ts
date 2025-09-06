@@ -13,8 +13,14 @@ export class LandingScene extends Phaser.Scene {
   }
 
   create() {
-    // Set transparent background so CSS background shows through
-    this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)')
+    // FORCE transparent background - multiple methods
+    this.cameras.main.setBackgroundColor(0x000000)
+    this.cameras.main.transparent = true
+    
+    // Add a completely transparent rectangle to cover any blue background
+    const bg = this.add.rectangle(0, 0, this.cameras.main.width * 2, this.cameras.main.height * 2, 0x000000, 0)
+    bg.setOrigin(0, 0)
+    bg.setDepth(-1000)
     
     // No background needed - CSS handles it now
     // Removed Phaser background to prevent conflicts

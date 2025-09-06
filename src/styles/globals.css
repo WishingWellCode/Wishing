@@ -12,10 +12,11 @@ body {
   overflow: hidden;
 }
 
-/* Force Phaser canvas to be transparent */
+/* Force Phaser canvas background to be transparent */
 canvas {
   background: transparent !important;
-  opacity: 1;
+  background-color: transparent !important;
+  mix-blend-mode: screen !important;
 }
 
 .wallet-adapter-button {
