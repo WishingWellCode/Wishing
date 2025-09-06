@@ -12,6 +12,12 @@ body {
   overflow: hidden;
 }
 
+/* Force Phaser canvas to be transparent */
+canvas {
+  background: transparent !important;
+  opacity: 1;
+}
+
 .wallet-adapter-button {
   font-family: 'Press Start 2P', cursive !important;
   font-size: 10px !important;

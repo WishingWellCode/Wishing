@@ -27,6 +27,7 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
       height: window.innerHeight,
       pixelArt: true,
       transparent: true,
+      backgroundColor: 'rgba(0, 0, 0, 0)',
       physics: {
         default: 'arcade',
         arcade: {
@@ -38,6 +39,9 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
+      },
+      canvas: {
+        alpha: true
       }
     }
 
@@ -105,7 +109,11 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
     <div 
       ref={containerRef} 
       className="w-full h-full"
-      style={{ background: 'transparent' }}
+      style={{ 
+        background: 'transparent',
+        position: 'relative',
+        zIndex: 1
+      }}
     />
   )
 }
