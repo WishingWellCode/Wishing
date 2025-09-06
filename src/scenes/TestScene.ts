@@ -61,17 +61,7 @@ export class TestScene extends Phaser.Scene {
     )
     this.testPlayer.setDepth(1)
     
-    // Add instructions
-    this.instructions = this.add.text(20, 20, 
-      'TEST MODE - Village Background Loaded!\nUse WASD to move green square\nThis confirms the game engine is working', {
-      fontSize: '16px',
-      fontFamily: 'Arial',
-      color: '#ffffff',
-      backgroundColor: '#000000',
-      padding: { x: 10, y: 10 }
-    })
-    this.instructions.setDepth(2)
-    this.instructions.setScrollFactor(0)
+    // Instructions removed - game is now production ready
     
     // Create gambling UI (initially hidden)
     this.createGamblingUI()
