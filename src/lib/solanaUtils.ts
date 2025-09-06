@@ -191,6 +191,36 @@ export class WishGamblingAPI {
           console.log('✅ Using combined arrays:', allArrays.length, 'items')
         } else {
           console.log('❌ No data found in any array property:', Object.keys(rawData))
+          
+          // Try additional endpoints to find where transactions might be stored
+          console.log('🔍 Trying additional endpoints...')
+          
+          const additionalEndpoints = [
+            '/api/stats',
+            '/api/fountain/history',
+            '/api/transactions',
+            '/api/results'
+          ]
+          
+          for (const endpoint of additionalEndpoints) {
+            try {
+              console.log(`🔍 Checking ${endpoint}...`)
+              const additionalResponse = await fetch(`${this.workerUrl}${endpoint}`)
+              if (additionalResponse.ok) {
+                const additionalData = await additionalResponse.json()
+                console.log(`📊 ${endpoint} response:`, {
+                  keys: typeof additionalData === 'object' ? Object.keys(additionalData) : 'not object',
+                  data: additionalData,
+                  stringified: JSON.stringify(additionalData, null, 2)
+                })
+              } else {
+                console.log(`❌ ${endpoint} returned ${additionalResponse.status}`)
+              }
+            } catch (e) {
+              console.log(`❌ ${endpoint} failed:`, e)
+            }
+          }
+          
           return []
         }
       }
