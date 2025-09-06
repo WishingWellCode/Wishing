@@ -4,8 +4,10 @@ interface PortalArea {
   id: string
   x: number
   y: number
-  width: number
-  height: number
+  width?: number
+  height?: number
+  radius?: number
+  type: 'rectangle' | 'circle'
   label: string
 }
 
@@ -16,13 +18,13 @@ export default function CoordinateDebugger() {
   const [startPos, setStartPos] = useState({ x: 0, y: 0 })
   const [currentArea, setCurrentArea] = useState<Partial<PortalArea>>({})
   const [showDebugger, setShowDebugger] = useState(false)
+  const [areaType, setAreaType] = useState<'rectangle' | 'circle'>('rectangle')
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = document.documentElement.getBoundingClientRect()
       setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: e.clientX,
+        y: e.clientY
       })
     }
 
@@ -30,45 +32,77 @@ export default function CoordinateDebugger() {
       // Toggle debugger with 'D' key
       if (e.key.toLowerCase() === 'd' && e.ctrlKey) {
         e.preventDefault()
-        setShowDebugger(!showDebugger)
+        setShowDebugger(prev => !prev)
+        console.log('Debugger toggled:', !showDebugger)
+      }
+      // Toggle area type with 'R' for rectangle, 'C' for circle
+      if (showDebugger && !isDefiningArea) {
+        if (e.key.toLowerCase() === 'r') {
+          setAreaType('rectangle')
+        } else if (e.key.toLowerCase() === 'c') {
+          setAreaType('circle')
+        }
       }
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('keydown', handleKeyPress)
+    const handleResize = () => {
+      // Force re-render on window resize to fix F12 console issues
+      setMousePos(prev => ({ ...prev }))
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('keydown', handleKeyPress)
+    window.addEventListener('resize', handleResize)
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('resize', handleResize)
     }
-  }, [showDebugger])
+  }, [showDebugger, isDefiningArea])
 
   const handleClick = (e: React.MouseEvent) => {
     if (!showDebugger) return
     
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const x = e.clientX
+    const y = e.clientY
 
     if (!isDefiningArea) {
       // Start defining area
       setIsDefiningArea(true)
       setStartPos({ x, y })
-      setCurrentArea({ x, y })
+      setCurrentArea({ x, y, type: areaType })
     } else {
       // Finish defining area
-      const width = Math.abs(x - startPos.x)
-      const height = Math.abs(y - startPos.y)
-      const finalX = Math.min(x, startPos.x)
-      const finalY = Math.min(y, startPos.y)
+      let newArea: PortalArea
 
-      const newArea: PortalArea = {
-        id: `portal-${Date.now()}`,
-        x: finalX,
-        y: finalY,
-        width,
-        height,
-        label: `Portal ${portalAreas.length + 1}`
+      if (areaType === 'rectangle') {
+        const width = Math.abs(x - startPos.x)
+        const height = Math.abs(y - startPos.y)
+        const finalX = Math.min(x, startPos.x)
+        const finalY = Math.min(y, startPos.y)
+
+        newArea = {
+          id: `portal-${Date.now()}`,
+          x: finalX,
+          y: finalY,
+          width,
+          height,
+          type: 'rectangle',
+          label: `Rect ${portalAreas.length + 1}`
+        }
+      } else {
+        // Circle area
+        const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2))
+        
+        newArea = {
+          id: `portal-${Date.now()}`,
+          x: startPos.x,
+          y: startPos.y,
+          radius,
+          type: 'circle',
+          label: `Circle ${portalAreas.length + 1}`
+        }
       }
 
       setPortalAreas([...portalAreas, newArea])
@@ -99,6 +133,29 @@ export default function CoordinateDebugger() {
     )
   }
 
+  // Calculate current preview area
+  const getPreviewStyle = () => {
+    if (!isDefiningArea) return {}
+    
+    if (areaType === 'rectangle') {
+      return {
+        left: Math.min(mousePos.x, startPos.x),
+        top: Math.min(mousePos.y, startPos.y),
+        width: Math.abs(mousePos.x - startPos.x),
+        height: Math.abs(mousePos.y - startPos.y)
+      }
+    } else {
+      const radius = Math.sqrt(Math.pow(mousePos.x - startPos.x, 2) + Math.pow(mousePos.y - startPos.y, 2))
+      return {
+        left: startPos.x - radius,
+        top: startPos.y - radius,
+        width: radius * 2,
+        height: radius * 2,
+        borderRadius: '50%'
+      }
+    }
+  }
+
   return (
     <>
       {/* Click overlay */}
@@ -111,6 +168,9 @@ export default function CoordinateDebugger() {
       {/* Mouse coordinates */}
       <div className="fixed top-4 left-4 z-[100] bg-black/90 text-white p-3 rounded font-mono text-sm">
         <div>Mouse: ({mousePos.x}, {mousePos.y})</div>
+        <div className="text-blue-400 mt-1">
+          Mode: {areaType} | Press R/C to switch
+        </div>
         <div className="text-yellow-400 mt-1">
           {isDefiningArea ? 'Click to finish area' : 'Click to start defining area'}
         </div>
@@ -120,41 +180,49 @@ export default function CoordinateDebugger() {
       {isDefiningArea && (
         <div
           className="fixed border-2 border-yellow-400 bg-yellow-400/20 z-[95] pointer-events-none"
-          style={{
-            left: Math.min(mousePos.x, startPos.x),
-            top: Math.min(mousePos.y, startPos.y),
-            width: Math.abs(mousePos.x - startPos.x),
-            height: Math.abs(mousePos.y - startPos.y)
-          }}
+          style={getPreviewStyle()}
         />
       )}
 
       {/* Defined portal areas */}
-      {portalAreas.map((area) => (
-        <div
-          key={area.id}
-          className="fixed border-2 border-red-500 bg-red-500/20 z-[95]"
-          style={{
-            left: area.x,
-            top: area.y,
-            width: area.width,
-            height: area.height
-          }}
-        >
-          <div className="bg-red-500 text-white px-2 py-1 text-xs whitespace-nowrap">
-            {area.label}
-            <button
-              className="ml-2 text-white hover:text-red-200"
-              onClick={(e) => {
-                e.stopPropagation()
-                removeArea(area.id)
-              }}
-            >
-              ×
-            </button>
+      {portalAreas.map((area) => {
+        const isCircle = area.type === 'circle'
+        const style = isCircle ? {
+          left: area.x - (area.radius || 0),
+          top: area.y - (area.radius || 0),
+          width: (area.radius || 0) * 2,
+          height: (area.radius || 0) * 2,
+          borderRadius: '50%'
+        } : {
+          left: area.x,
+          top: area.y,
+          width: area.width,
+          height: area.height
+        }
+
+        return (
+          <div
+            key={area.id}
+            className={`fixed border-2 z-[95] ${
+              isCircle ? 'border-green-500 bg-green-500/20' : 'border-red-500 bg-red-500/20'
+            }`}
+            style={style}
+          >
+            <div className={`${isCircle ? 'bg-green-500' : 'bg-red-500'} text-white px-2 py-1 text-xs whitespace-nowrap`}>
+              {area.label}
+              <button
+                className="ml-2 text-white hover:text-gray-200"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  removeArea(area.id)
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {/* Control panel */}
       <div className="fixed bottom-4 left-4 z-[100] bg-black/90 text-white p-4 rounded max-w-sm">
@@ -162,6 +230,25 @@ export default function CoordinateDebugger() {
         
         <div className="space-y-2 text-sm">
           <div>Areas defined: {portalAreas.length}</div>
+          
+          <div className="flex gap-2 mb-2">
+            <button
+              className={`px-3 py-1 rounded text-xs ${
+                areaType === 'rectangle' ? 'bg-red-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+              onClick={() => setAreaType('rectangle')}
+            >
+              Rectangle (R)
+            </button>
+            <button
+              className={`px-3 py-1 rounded text-xs ${
+                areaType === 'circle' ? 'bg-green-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+              onClick={() => setAreaType('circle')}
+            >
+              Circle (C)
+            </button>
+          </div>
           
           <div className="flex gap-2">
             <button
@@ -190,7 +277,9 @@ export default function CoordinateDebugger() {
             <div className="text-xs text-gray-300 mb-1">Areas:</div>
             {portalAreas.map((area) => (
               <div key={area.id} className="text-xs font-mono bg-gray-800 p-1 rounded mb-1">
-                {area.label}: ({area.x}, {area.y}, {area.width}×{area.height})
+                {area.label}: ({area.x}, {area.y}, {
+                  area.type === 'circle' ? `r${Math.round(area.radius || 0)}` : `${area.width}×${area.height}`
+                })
               </div>
             ))}
           </div>
