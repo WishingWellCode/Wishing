@@ -185,7 +185,7 @@ export class TestScene extends Phaser.Scene {
     this.debugInfo.setDepth(999)
     this.debugInfo.setAlpha(0.6) // Even more transparent
     
-    // Click to log exact pin coordinates
+    // Click to log exact pin coordinates for irregular portal shapes
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const worldX = Math.round(pointer.worldX)
       const worldY = Math.round(pointer.worldY)
