@@ -52,11 +52,33 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
 
     const handleResize = () => {
       if (gameRef.current) {
-        gameRef.current.scale.resize(window.innerWidth, window.innerHeight)
+        // Debounce resize to prevent rapid firing
+        clearTimeout((window as any)._resizeTimeout)
+        ;(window as any)._resizeTimeout = setTimeout(() => {
+          if (gameRef.current) {
+            const newWidth = window.innerWidth
+            const newHeight = window.innerHeight
+            gameRef.current.scale.resize(newWidth, newHeight)
+            
+            // Force camera update for all active scenes
+            gameRef.current.scene.scenes.forEach(scene => {
+              if (scene.scene.isActive()) {
+                scene.cameras.main.setSize(newWidth, newHeight)
+                // Update any UI elements that need repositioning
+                scene.events.emit('resize', newWidth, newHeight)
+              }
+            })
+          }
+        }, 100)
       }
     }
 
     window.addEventListener('resize', handleResize)
+    
+    // Also listen for dev tools open/close which changes viewport
+    window.addEventListener('beforeunload', () => {
+      clearTimeout((window as any)._resizeTimeout)
+    })
 
     return () => {
       window.removeEventListener('resize', handleResize)

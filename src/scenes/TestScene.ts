@@ -35,6 +35,7 @@ export class TestScene extends Phaser.Scene {
     const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
     background.setDisplaySize(this.cameras.main.width, this.cameras.main.height)
     background.setDepth(-1000)
+    background.setName('vaporwaveBackground') // Name for resize handling
     
     // Initialize gambling API with Alchemy RPC for production
     this.gamblingAPI = new WishGamblingAPI(
@@ -80,6 +81,21 @@ export class TestScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
+    
+    // Handle window resize
+    this.events.on('resize', (width: number, height: number) => {
+      // Update background to new dimensions
+      const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
+      if (background) {
+        background.setDisplaySize(width, height)
+        background.setPosition(width / 2, height / 2)
+      }
+      
+      // Reposition gambling UI
+      if (this.gamblingUI) {
+        this.gamblingUI.setPosition(width / 2, height - 120)
+      }
+    })
   }
 
   createGamblingUI() {
@@ -158,7 +174,7 @@ export class TestScene extends Phaser.Scene {
     this.mouseCoords.setAlpha(0.7) // Semi-transparent
     
     // Minimal instruction (more transparent)
-    this.debugInfo = this.add.text(10, 50, 'Click for portal coords | H = hide/show debug', {
+    this.debugInfo = this.add.text(10, 50, 'Click for exact pin coords | H = hide/show debug', {
       fontSize: '12px',
       fontFamily: 'Courier New',
       color: '#ffff00',
@@ -169,21 +185,12 @@ export class TestScene extends Phaser.Scene {
     this.debugInfo.setDepth(999)
     this.debugInfo.setAlpha(0.6) // Even more transparent
     
-    // Click to log coordinates for portals
+    // Click to log exact pin coordinates
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const worldX = pointer.worldX
-      const worldY = pointer.worldY
-      console.log(`🚪 Portal coordinates: { x: ${Math.round(worldX)}, y: ${Math.round(worldY)} }`)
-      console.log(`For config: "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} }`)
-      console.log(`Portal area example:`)
-      console.log(`{
-  "type": "portal",
-  "position": { "x": ${Math.round(worldX)}, "y": ${Math.round(worldY)} },
-  "width": 80,
-  "height": 80,
-  "action": "navigate",
-  "target": "/some-page"
-}`)
+      const worldX = Math.round(pointer.worldX)
+      const worldY = Math.round(pointer.worldY)
+      console.log(`📍 Pin: [${worldX}, ${worldY}]`)
+      console.log(`   Copy: { x: ${worldX}, y: ${worldY} }`)
     })
   }
 
