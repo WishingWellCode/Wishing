@@ -148,14 +148,14 @@ export class WishGamblingAPI {
 
   async getWinnersData(limit: number = 100): Promise<any[]> {
     try {
-      const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`)
+      const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true&includeAll=true`)
       if (!response.ok) {
         throw new Error(`Failed to fetch winners data: ${response.status} ${response.statusText}`)
       }
       
       const rawData = await response.json()
       console.log('🎯 Raw API Response:', {
-        url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true`,
+        url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true&includeAll=true`,
         status: response.status,
         rawData: rawData,
         type: typeof rawData,
@@ -168,93 +168,58 @@ export class WishGamblingAPI {
       let data: any[] = []
       if (Array.isArray(rawData)) {
         data = rawData
+        console.log('✅ Using direct array response')
       } else if (rawData && typeof rawData === 'object') {
         console.log('🔍 API Response Object Keys:', Object.keys(rawData))
         console.log('🔍 API Response Object Values:', Object.values(rawData))
         
-        // Check if it's an object with an array property
-        if (rawData.winners && Array.isArray(rawData.winners)) {
-          data = rawData.winners
-          console.log('✅ Using rawData.winners')
-        } else if (rawData.results && Array.isArray(rawData.results)) {
-          data = rawData.results
-          console.log('✅ Using rawData.results')
-        } else if (rawData.data && Array.isArray(rawData.data)) {
-          data = rawData.data
-          console.log('✅ Using rawData.data')
-        } else if (rawData.leaderboard && Array.isArray(rawData.leaderboard)) {
-          data = rawData.leaderboard
-          console.log('✅ Using rawData.leaderboard')
-        } else if (rawData.topWinners && Array.isArray(rawData.topWinners)) {
-          data = rawData.topWinners
-          console.log('✅ Using rawData.topWinners')
-        } else if (rawData.mostActive && Array.isArray(rawData.mostActive)) {
-          data = rawData.mostActive
-          console.log('✅ Using rawData.mostActive')
-        } else if (rawData.luckiest && Array.isArray(rawData.luckiest)) {
-          data = rawData.luckiest
-          console.log('✅ Using rawData.luckiest')
+        // Combine all available arrays, checking all possible properties
+        const allArrays: any[] = []
+        
+        // Check all possible array properties
+        const arrayProps = ['topWinners', 'mostActive', 'luckiest', 'winners', 'results', 'data', 'leaderboard', 'history', 'transactions']
+        
+        for (const prop of arrayProps) {
+          if (rawData[prop] && Array.isArray(rawData[prop]) && rawData[prop].length > 0) {
+            console.log(`✅ Found ${rawData[prop].length} items in ${prop}`)
+            allArrays.push(...rawData[prop])
+          }
+        }
+        
+        if (allArrays.length > 0) {
+          data = allArrays
+          console.log('✅ Using combined arrays:', allArrays.length, 'items')
         } else {
-          // Combine all available arrays
-          const allArrays = []
-          if (rawData.topWinners && Array.isArray(rawData.topWinners) && rawData.topWinners.length > 0) {
-            allArrays.push(...rawData.topWinners)
-          }
-          if (rawData.mostActive && Array.isArray(rawData.mostActive) && rawData.mostActive.length > 0) {
-            allArrays.push(...rawData.mostActive)
-          }
-          if (rawData.luckiest && Array.isArray(rawData.luckiest) && rawData.luckiest.length > 0) {
-            allArrays.push(...rawData.luckiest)
-          }
-          
-          if (allArrays.length > 0) {
-            data = allArrays
-            console.log('✅ Using combined arrays:', allArrays.length, 'items')
-          } else {
-            console.log('❌ API returned object with keys:', Object.keys(rawData))
-            console.log('❌ All arrays are empty:', {
-              topWinners: rawData.topWinners?.length || 0,
-              mostActive: rawData.mostActive?.length || 0,
-              luckiest: rawData.luckiest?.length || 0
-            })
-            
-            // Return mock data for testing when API has no real data
-            console.log('📝 Using mock data for testing')
-            return [
-              {
-                walletAddress: '7xKXtg2CJwj3jwb...3Jwb',
-                payout: 1500000000, // 1.5 SOL in lamports
-                payoutTx: '5KJz8QcKQhx9Fj2m3wH7tLqN8uVr6pY1xE3sG9aB2cD4f',
-                timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-                tier: 'Big Win',
-                multiplier: 1.5
-              },
-              {
-                walletAddress: 'BreakEvenTestAddr...TEST',
-                payout: 1000000000, // 1.0 SOL (break even)
-                payoutTx: '8MNz9QdLRhy8Gk3n4xI8tMrO9vWs7qZ2yF4tH0bC3eE5g',
-                timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-                tier: 'Break Even',
-                multiplier: 1.0
-              }
-            ]
-          }
+          console.log('❌ No data found in any array property:', Object.keys(rawData))
+          return []
         }
       }
       
       console.log('🎯 Processed Winners Data:', {
         dataLength: data.length,
-        data: data,
         sampleEntry: data[0] || null,
         stringifiedData: JSON.stringify(data.slice(0, 3), null, 2)
       })
       
       // Log break-even entries specifically
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         const breakEvenEntries = data.filter((entry: any) => 
           entry.payout !== undefined && entry.payout <= (entry.stake || 1000000000)
         )
         console.log('🎯 Break-even entries found:', breakEvenEntries)
+        
+        // Also check for your specific transaction IDs from the logs
+        const yourTransactions = data.filter((entry: any) => {
+          const txIds = ['wbZZWp4JVi6DUgiFY1ZGVGtzN1xKxdyQuNJFQfQWepaVLWv5mewZxkj7SDEAMxobA2ue7RKB1LHpvJoaoMnpzZa',
+                       'qAmBkQnjHoMq1tsecJVKztSENzF3MNwj8jC4hwXeTs2Rzq8PYNP4mmHj19zEB8zaTWQj1fZhHpU3CrWCowQXeqQ',
+                       '4AUYCjFuP6aSgiZFxdaCYocKndmZVWFMSDKxRchnu3V5EBQA6NRCM4TUUJ2Qj7sCdjSzwrH8XDWAADrid5ocM8gc',
+                       '5GAHDcRtuF8UBpVQjzqwydbzJDE4XJUthtMjvkGSvydfU4NidNzbbj9p9sNP4hUtHxLBaQLfDva7SjjQFA9tnvr3']
+          return txIds.some(txId => 
+            entry.burnTx === txId || entry.payoutTx === txId || 
+            entry.txId === txId || entry.transactionId === txId
+          )
+        })
+        console.log('🔍 Your specific transactions found:', yourTransactions)
       }
       
       return data
