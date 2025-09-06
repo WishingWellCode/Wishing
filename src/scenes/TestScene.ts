@@ -12,14 +12,6 @@ export class TestScene extends Phaser.Scene {
   private gamblingUI!: Phaser.GameObjects.Container
   private gamblingAPI!: WishGamblingAPI
   private currentSession: GamblingSession | null = null
-  private coordinateDebugger!: Phaser.GameObjects.Text
-  private mouseCoords!: Phaser.GameObjects.Text
-  private debugInfo!: Phaser.GameObjects.Text
-  private portalDebugger!: Phaser.GameObjects.Text
-  private debugVisible: boolean = true
-  private debugToggleKey!: Phaser.Input.Keyboard.Key
-  private pinMarkers: Phaser.GameObjects.GameObject[] = []
-  private pinCoordinates: { x: number, y: number }[] = []
   private fountainPolygon: { x: number, y: number }[] = []
   private portals: { [key: string]: { coords: { x: number, y: number }[], isActive: boolean } } = {}
   private currentPortal: string | null = null
@@ -94,14 +86,10 @@ export class TestScene extends Phaser.Scene {
     // Create gambling UI (initially hidden)
     this.createGamblingUI()
     
-    // Create coordinate debugger
-    this.createCoordinateDebugger()
-    
     // Setup controls
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys()
       this.wasd = this.input.keyboard.addKeys('W,A,S,D')
-      this.debugToggleKey = this.input.keyboard.addKey('H') // H to toggle debug info
     }
     
     // Camera setup
@@ -109,24 +97,30 @@ export class TestScene extends Phaser.Scene {
     
     // Handle window resize
     this.events.on('resize', (width: number, height: number) => {
+      // Ensure we're working with the active scene
+      if (!this.scene.isActive()) return
+      
       // Force camera update first
       this.cameras.main.setSize(width, height)
       this.cameras.main.setViewport(0, 0, width, height)
       
-      // Update background to new dimensions with proper scaling
-      const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
-      if (background) {
-        // Get original texture dimensions
-        const originalWidth = background.texture.source[0].width
-        const originalHeight = background.texture.source[0].height
-        
-        // Calculate scale to cover entire screen while maintaining aspect ratio
-        const scaleX = width / originalWidth
-        const scaleY = height / originalHeight
-        const scale = Math.max(scaleX, scaleY)
-        
-        background.setScale(scale)
-        background.setPosition(width / 2, height / 2)
+      // Update existing background (don't create new ones)
+      const existingBackground = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
+      if (existingBackground && existingBackground.texture) {
+        // Get original texture dimensions safely
+        const texture = this.textures.get('vaporwave-background')
+        if (texture && texture.source && texture.source.length > 0) {
+          const originalWidth = texture.source[0].width
+          const originalHeight = texture.source[0].height
+          
+          // Calculate scale to cover entire screen while maintaining aspect ratio
+          const scaleX = width / originalWidth
+          const scaleY = height / originalHeight
+          const scale = Math.max(scaleX, scaleY)
+          
+          existingBackground.setScale(scale)
+          existingBackground.setPosition(width / 2, height / 2)
+        }
       }
       
       // Reposition gambling UI
@@ -229,113 +223,6 @@ export class TestScene extends Phaser.Scene {
     this.gamblingUI.add([panel, title, gambButton, gambText])
   }
 
-  createCoordinateDebugger() {
-    // Player coordinate display (minimal and translucent)
-    this.coordinateDebugger = this.add.text(10, 10, 'Player: (0, 0)', {
-      fontSize: '14px',
-      fontFamily: 'Courier New',
-      color: '#00ff00',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)', // Much more transparent
-      padding: { x: 5, y: 2 }
-    })
-    this.coordinateDebugger.setScrollFactor(0)
-    this.coordinateDebugger.setDepth(999)
-    this.coordinateDebugger.setAlpha(0.7) // Semi-transparent
-    
-    // Mouse coordinate display (minimal and translucent)
-    this.mouseCoords = this.add.text(10, 30, 'Mouse: (0, 0)', {
-      fontSize: '14px',
-      fontFamily: 'Courier New', 
-      color: '#00ffff',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)', // Much more transparent
-      padding: { x: 5, y: 2 }
-    })
-    this.mouseCoords.setScrollFactor(0)
-    this.mouseCoords.setDepth(999)
-    this.mouseCoords.setAlpha(0.7) // Semi-transparent
-    
-    // Minimal instruction (more transparent)
-    this.debugInfo = this.add.text(10, 50, 'Left click = pin | Right click = clear pins | H = hide debug', {
-      fontSize: '12px',
-      fontFamily: 'Courier New',
-      color: '#ffff00',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)', 
-      padding: { x: 5, y: 2 }
-    })
-    this.debugInfo.setScrollFactor(0)
-    this.debugInfo.setDepth(999)
-    this.debugInfo.setAlpha(0.6) // Even more transparent
-    
-    // Portal detection display
-    this.portalDebugger = this.add.text(10, 70, 'Portal: None', {
-      fontSize: '14px',
-      fontFamily: 'Courier New', 
-      color: '#ff00ff',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-      padding: { x: 5, y: 2 }
-    })
-    this.portalDebugger.setScrollFactor(0)
-    this.portalDebugger.setDepth(999)
-    this.portalDebugger.setAlpha(0.7)
-    
-    // Left click to add pin, right click to clear all pins
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.rightButtonDown()) {
-        // Right click - clear all pins
-        this.clearAllPins()
-      } else {
-        // Left click - add pin
-        const worldX = Math.round(pointer.worldX)
-        const worldY = Math.round(pointer.worldY)
-        
-        // Add visual pin marker
-        this.addPinMarker(worldX, worldY)
-        
-        // Log coordinates
-        console.log(`📍 Pin ${this.pinCoordinates.length}: [${worldX}, ${worldY}]`)
-        console.log(`   Copy: { x: ${worldX}, y: ${worldY} }`)
-        
-        // Log all pins when we have multiple
-        if (this.pinCoordinates.length > 1) {
-          console.log(`🔗 All pins for this shape:`)
-          console.log(JSON.stringify(this.pinCoordinates, null, 2))
-        }
-      }
-    })
-  }
-
-  addPinMarker(x: number, y: number) {
-    // Create visual pin marker
-    const pinMarker = this.add.circle(x, y, 6, 0xff0066, 0.8) // Pink/red pin
-    pinMarker.setStrokeStyle(2, 0xffffff) // White border
-    pinMarker.setDepth(1000) // Above everything
-    
-    // Add pin number text
-    const pinNumber = this.add.text(x, y - 15, `${this.pinCoordinates.length + 1}`, {
-      fontSize: '12px',
-      fontFamily: 'Courier New',
-      color: '#ffffff',
-      backgroundColor: 'rgba(255, 0, 102, 0.8)',
-      padding: { x: 3, y: 1 }
-    })
-    pinNumber.setOrigin(0.5)
-    pinNumber.setDepth(1001)
-    
-    // Store marker and coordinates
-    this.pinMarkers.push(pinMarker, pinNumber as any) // Store both circle and text
-    this.pinCoordinates.push({ x, y })
-    
-    console.log(`✅ Added pin ${this.pinCoordinates.length} at (${x}, ${y})`)
-  }
-
-  clearAllPins() {
-    // Remove all visual markers
-    this.pinMarkers.forEach(marker => marker.destroy())
-    this.pinMarkers = []
-    this.pinCoordinates = []
-    
-    console.log(`🧹 Cleared all pins. Ready for next shape.`)
-  }
 
   // Point-in-polygon detection using ray casting algorithm
   isPointInPolygon(point: { x: number, y: number }, polygon: { x: number, y: number }[]): boolean {
@@ -382,11 +269,8 @@ export class TestScene extends Phaser.Scene {
       }
     }
     
-    // Update current portal and debug display
+    // Update current portal
     this.currentPortal = foundPortal
-    if (this.portalDebugger && this.debugVisible) {
-      this.portalDebugger.setText(foundPortal ? `Portal: ${foundPortal}` : 'Portal: None')
-    }
   }
 
   onPortalEnter(portalName: string) {
@@ -742,25 +626,5 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
     
-    // Toggle debug visibility with H key
-    if (this.debugToggleKey && Phaser.Input.Keyboard.JustDown(this.debugToggleKey)) {
-      this.debugVisible = !this.debugVisible
-      this.coordinateDebugger.setVisible(this.debugVisible)
-      this.mouseCoords.setVisible(this.debugVisible)
-      this.debugInfo.setVisible(this.debugVisible)
-      this.portalDebugger.setVisible(this.debugVisible)
-    }
-    
-    // Update coordinate debugger
-    if (this.coordinateDebugger && this.debugVisible) {
-      this.coordinateDebugger.setText(`Player: (${Math.round(this.testPlayer.x)}, ${Math.round(this.testPlayer.y)})`)
-    }
-    
-    // Update mouse coordinates
-    if (this.mouseCoords && this.input.activePointer && this.debugVisible) {
-      const mouseX = this.input.activePointer.worldX
-      const mouseY = this.input.activePointer.worldY
-      this.mouseCoords.setText(`Mouse: (${Math.round(mouseX)}, ${Math.round(mouseY)})`)
-    }
   }
 }
