@@ -27,12 +27,22 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-purple-900">
+      <div className="min-h-screen relative">
+        {/* Background Image */}
+        <div className="fixed inset-0 z-0">
+          <img 
+            src="/assets/backgrounds/Realbackground.jpg" 
+            alt="Wish Well Background" 
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="absolute top-4 right-4 z-50">
           <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
         </div>
 
-        <GameCanvas isWalletConnected={connected} testMode={testMode} />
+        <div className="relative z-10">
+          <GameCanvas isWalletConnected={connected} testMode={testMode} />
+        </div>
         
         <div className="absolute top-4 left-4 z-50">
           {!connected && !testMode && (
