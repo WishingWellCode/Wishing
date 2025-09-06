@@ -15,7 +15,13 @@ export class TestScene extends Phaser.Scene {
   private fountainPolygon: { x: number, y: number }[] = []
   private portals: { [key: string]: { coords: { x: number, y: number }[], isActive: boolean } } = {}
   private currentPortal: string | null = null
-  private winnersOverlay: any = null
+  private winnersOverlay: {
+    background: Phaser.GameObjects.Rectangle
+    title: Phaser.GameObjects.Text
+    closeText: Phaser.GameObjects.Text
+    elements: Phaser.GameObjects.GameObject[]
+    keyHandler?: (event: KeyboardEvent) => void
+  } | null = null
   
   constructor() {
     super({ key: 'TestScene' })
@@ -528,7 +534,7 @@ export class TestScene extends Phaser.Scene {
     if (!this.winnersOverlay) return
 
     // Clean up all elements
-    this.winnersOverlay.elements.forEach(element => {
+    this.winnersOverlay.elements.forEach((element: Phaser.GameObjects.GameObject) => {
       if (element && element.destroy) {
         element.destroy()
       }
