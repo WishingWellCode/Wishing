@@ -448,7 +448,7 @@ export class TestScene extends Phaser.Scene {
     this.winnersOverlay?.elements.push(headerBg)
 
     // Headers
-    const headers = ['Winner', 'Won (SOL)', 'Tx Link', 'Date']
+    const headers = ['Winner', 'Won (WISH)', 'Tx Link', 'Date']
     headers.forEach((header, index) => {
       if (!this.winnersOverlay) return
       
@@ -495,8 +495,8 @@ export class TestScene extends Phaser.Scene {
         minute: '2-digit'
       }) : 'N/A'
       
-      // Amount is already formatted as SOL string
-      const amount = winner.amount || '0.00'
+      // Amount is already formatted as WISH token string
+      const amount = winner.amount || '0'
       
       // Transaction ID for Solscan link
       const txId = winner.tx

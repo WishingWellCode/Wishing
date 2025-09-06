@@ -794,7 +794,7 @@ async function getLeaderboard(env) {
           if (event.payout && event.payout > 0) {
             logs.push({
               winner: event.walletAddress,
-              amount: (event.payout / 1000000000).toFixed(2), // Convert lamports to SOL
+              amount: Math.round(event.payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
               tx: event.payoutTx || event.burnTx, // Use payout tx if available, fallback to burn tx
               timestamp: new Date(event.timestamp).toISOString(),
               tier: event.result?.tier || 'win'
