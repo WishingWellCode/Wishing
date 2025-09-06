@@ -39,9 +39,6 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
-      },
-      canvas: {
-        alpha: true
       }
     }
 
