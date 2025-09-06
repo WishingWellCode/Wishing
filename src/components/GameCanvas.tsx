@@ -9,10 +9,9 @@ import { LandingScene } from '@/scenes/LandingScene'
 
 interface GameCanvasProps {
   isWalletConnected?: boolean
-  testMode?: boolean
 }
 
-export default function GameCanvas({ isWalletConnected = false, testMode = false }: GameCanvasProps) {
+export default function GameCanvas({ isWalletConnected = false }: GameCanvasProps) {
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { gameState, updatePlayerPosition, throwCoins } = useGame()
@@ -51,28 +50,25 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
     })
 
     const handleResize = () => {
-      if (gameRef.current) {
-        // Immediate resize without debounce for better responsiveness
+      if (gameRef.current && gameRef.current.scene) {
         const newWidth = window.innerWidth
         const newHeight = window.innerHeight
+        
+        // Only resize if dimensions actually changed
+        if (gameRef.current.scale.width === newWidth && gameRef.current.scale.height === newHeight) {
+          return
+        }
         
         // Resize the game canvas
         gameRef.current.scale.resize(newWidth, newHeight)
         
-        // Force immediate update of all active scenes
+        // Update only active scenes
         gameRef.current.scene.scenes.forEach(scene => {
-          if (scene.scene.isActive()) {
-            // Force camera to new dimensions
-            scene.cameras.main.setSize(newWidth, newHeight)
-            scene.cameras.main.setViewport(0, 0, newWidth, newHeight)
-            
+          if (scene && scene.scene && scene.scene.isActive()) {
             // Trigger resize event for scene-specific handling
             scene.events.emit('resize', newWidth, newHeight)
           }
         })
-        
-        // Force a render update
-        gameRef.current.renderer.resize(newWidth, newHeight)
       }
     }
 
@@ -97,7 +93,7 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
     if (gameRef.current && gameRef.current.scene) {
       const sceneManager = gameRef.current.scene
       
-      if (isWalletConnected || testMode) {
+      if (isWalletConnected) {
         // Switch to TestScene when wallet connects
         if (sceneManager.getScene('LandingScene')?.scene.isActive()) {
           sceneManager.stop('LandingScene')
@@ -115,7 +111,7 @@ export default function GameCanvas({ isWalletConnected = false, testMode = false
         }
       }
     }
-  }, [isWalletConnected, testMode])
+  }, [isWalletConnected])
 
   useEffect(() => {
     if (gameRef.current) {

@@ -73,13 +73,20 @@ export class TestScene extends Phaser.Scene {
     this.fountainArea = this.add.circle(950, 760, 100, 0x00ff00, 0) as Phaser.GameObjects.Arc
     this.fountainArea.setDepth(0)
 
-    // Create a simple colored rectangle as test player
-    this.testPlayer = this.add.rectangle(
-      this.cameras.main.centerX, 
-      this.cameras.main.centerY + 100, // Start below fountain
-      32, 32, 0x00ff00
-    )
-    this.testPlayer.setDepth(1)
+    // Only create player if wallet is connected
+    const wallet = (window as any).solana
+    if (wallet?.isConnected) {
+      // Create a simple colored rectangle as test player
+      this.testPlayer = this.add.rectangle(
+        this.cameras.main.centerX, 
+        this.cameras.main.centerY + 100, // Start below fountain
+        32, 32, 0x00ff00
+      )
+      this.testPlayer.setDepth(1)
+    } else {
+      // Create placeholder for player (will be created when wallet connects)
+      console.log('⏳ Waiting for wallet connection to spawn player...')
+    }
     
     // Instructions removed - game is now production ready
     
@@ -281,6 +288,19 @@ export class TestScene extends Phaser.Scene {
   onPortalLeave(portalName: string) {
     // Portal leave logic - customize per portal later
     console.log(`👋 Left portal "${portalName}"`)
+  }
+
+  createPlayer() {
+    if (this.testPlayer) return // Already created
+    
+    // Create a simple colored rectangle as test player
+    this.testPlayer = this.add.rectangle(
+      this.cameras.main.centerX, 
+      this.cameras.main.centerY + 100, // Start below fountain
+      32, 32, 0x00ff00
+    )
+    this.testPlayer.setDepth(1)
+    console.log('✅ Player spawned after wallet connection')
   }
 
   async startGambling() {
@@ -553,6 +573,16 @@ export class TestScene extends Phaser.Scene {
   }
 
   update() {
+    // Check if player exists before updating
+    if (!this.testPlayer) {
+      // Check if wallet is now connected and create player
+      const wallet = (window as any).solana
+      if (wallet?.isConnected) {
+        this.createPlayer()
+      }
+      return
+    }
+    
     // Simple movement for the test rectangle
     const speed = 5
     

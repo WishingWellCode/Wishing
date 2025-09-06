@@ -10,7 +10,6 @@ const CoordinateDebugger = dynamic(() => import('@/components/CoordinateDebugger
 export default function Home() {
   const { publicKey, connected } = useWallet()
   const [isGameReady, setIsGameReady] = useState(false)
-  const [testMode, setTestMode] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -27,24 +26,6 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Auto-enable test mode for development
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 't' && e.ctrlKey) {
-        e.preventDefault()
-        setTestMode(!testMode)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyPress)
-    return () => document.removeEventListener('keydown', handleKeyPress)
-  }, [testMode])
-
-  // Auto-enable test mode on load for development
-  useEffect(() => {
-    // Enable test mode by default for debugging
-    setTestMode(true)
-  }, [])
 
   if (isLoading) {
     return <div style={{ background: 'url(/assets/backgrounds/Realbackground.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
@@ -72,17 +53,22 @@ export default function Home() {
       >
         {/* Wallet button only */}
         <div className="absolute top-4 right-4 z-50">
-          <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+          <WalletMultiButton 
+            className="!bg-purple-600 hover:!bg-purple-700"
+            style={{ fontSize: '14px' }}
+          >
+            {!connected ? 'Connect Wallet' : undefined}
+          </WalletMultiButton>
         </div>
 
         <div className="relative z-10">
-          <GameCanvas isWalletConnected={connected} testMode={testMode} />
+          <GameCanvas isWalletConnected={connected} />
         </div>
 
-        {(connected || testMode) && (
+        {connected && (
           <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
             <p>WASD/Arrow Keys - Move</p>
-            <p>{testMode ? 'TEST MODE ACTIVE' : 'E - Interact'}</p>
+            <p>E - Interact</p>
           </div>
         )}
 
