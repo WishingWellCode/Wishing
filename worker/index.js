@@ -318,6 +318,18 @@ export default {
       return handleLeaderboard(request, env)
     }
     
+    if (url.pathname === '/api/fountain/history') {
+      return handleLeaderboard(request, env) // Same as leaderboard for now
+    }
+    
+    if (url.pathname === '/api/transactions') {
+      return handleLeaderboard(request, env) // Same as leaderboard for now
+    }
+    
+    if (url.pathname === '/api/results') {
+      return handleLeaderboard(request, env) // Same as leaderboard for now
+    }
+    
     return new Response('Not Found', { 
       status: 404,
       headers: { 'Access-Control-Allow-Origin': '*' }
@@ -767,11 +779,50 @@ async function getGlobalStats(env) {
 }
 
 async function getLeaderboard(env) {
-  // Would query and sort user stats from KV storage
-  return {
-    topWinners: [],
-    mostActive: [],
-    luckiest: []
+  try {
+    // Get all gamble logs from KV storage
+    const logs = []
+    const list = await env.GAMBLE_LOGS.list()
+    
+    // Fetch up to 100 most recent gambling events
+    for (const key of list.keys.slice(0, 100)) {
+      try {
+        const logData = await env.GAMBLE_LOGS.get(key.name)
+        if (logData) {
+          const event = JSON.parse(logData)
+          // Only include wins (payout > 0)
+          if (event.payout && event.payout > 0) {
+            logs.push({
+              winner: event.walletAddress,
+              amount: (event.payout / 1000000000).toFixed(2), // Convert lamports to SOL
+              tx: event.payoutTx || event.burnTx, // Use payout tx if available, fallback to burn tx
+              timestamp: new Date(event.timestamp).toISOString(),
+              tier: event.result?.tier || 'win'
+            })
+          }
+        }
+      } catch (parseError) {
+        console.warn('Failed to parse log entry:', key.name, parseError)
+      }
+    }
+    
+    // Sort by timestamp (most recent first)
+    logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    
+    console.log(`📊 Leaderboard: Found ${logs.length} winning transactions`)
+    
+    return {
+      topWinners: logs.slice(0, 20), // Top 20 winners
+      mostActive: logs.slice(0, 20), // Same data for now
+      luckiest: logs.filter(log => log.tier === 'jackpot' || log.tier === 'major').slice(0, 10)
+    }
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error)
+    return {
+      topWinners: [],
+      mostActive: [],
+      luckiest: []
+    }
   }
 }
 

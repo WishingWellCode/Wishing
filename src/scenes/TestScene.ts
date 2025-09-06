@@ -28,29 +28,39 @@ export class TestScene extends Phaser.Scene {
   }
 
   preload() {
-    // Load the real vaporwave background
-    this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
+    // Check if texture already exists to prevent duplicate loading
+    if (!this.textures.exists('vaporwave-background')) {
+      // Load the real vaporwave background only if not already cached
+      this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
+    }
   }
 
   create() {
     // Set transparent background to show CSS background
     this.cameras.main.transparent = true
     
-    // Add the vaporwave background image with proper scaling
-    const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
-    
-    // Get original texture dimensions for proper scaling
-    const originalWidth = background.texture.source[0].width
-    const originalHeight = background.texture.source[0].height
-    
-    // Calculate scale to cover entire screen while maintaining aspect ratio
-    const scaleX = this.cameras.main.width / originalWidth
-    const scaleY = this.cameras.main.height / originalHeight
-    const scale = Math.max(scaleX, scaleY)
-    
-    background.setScale(scale)
-    background.setDepth(-1000)
-    background.setName('vaporwaveBackground') // Name for resize handling
+    // Only create background if it doesn't already exist
+    let background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
+    if (!background) {
+      // Add the vaporwave background image with proper scaling
+      background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
+      background.setName('vaporwaveBackground') // Name for resize handling
+      background.setDepth(-1000)
+      
+      // Get original texture dimensions for proper scaling
+      const texture = this.textures.get('vaporwave-background')
+      if (texture && texture.source && texture.source.length > 0) {
+        const originalWidth = texture.source[0].width
+        const originalHeight = texture.source[0].height
+        
+        // Calculate scale to cover entire screen while maintaining aspect ratio
+        const scaleX = this.cameras.main.width / originalWidth
+        const scaleY = this.cameras.main.height / originalHeight
+        const scale = Math.max(scaleX, scaleY)
+        
+        background.setScale(scale)
+      }
+    }
     
     // Initialize gambling API with Alchemy RPC for production
     this.gamblingAPI = new WishGamblingAPI(
@@ -476,29 +486,30 @@ export class TestScene extends Phaser.Scene {
       rowBg.setDepth(2001)
       this.winnersOverlay.elements.push(rowBg)
 
-      // Format data with flexible field name handling
-      const timestamp = winner.timestamp || winner.createdAt || winner.date || winner.time
-      const date = timestamp ? new Date(timestamp).toLocaleDateString() : 'N/A'
+      // Format data with new API format
+      const timestamp = winner.timestamp
+      const date = timestamp ? new Date(timestamp).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'N/A'
       
-      // Handle different payout field names and formats
-      const rawPayout = winner.payout ?? winner.payoutAmount ?? winner.winAmount ?? winner.amount ?? 0
-      const amount = typeof rawPayout === 'number' ? 
-        (rawPayout / 1000000000).toFixed(2) : 
-        (parseFloat(rawPayout || '0') / 1000000000).toFixed(2)
+      // Amount is already formatted as SOL string
+      const amount = winner.amount || '0.00'
       
-      // Handle different transaction field names
-      const payoutTxId = winner.payoutTx || winner.payoutTxId || winner.payoutTransaction || winner.payout_tx
-      const burnTxId = winner.burnTx || winner.burnTxId || winner.burnTransaction || winner.burn_tx
-      const txLink = payoutTxId ? 'VIEW' : (burnTxId ? 'BURN' : 'N/A')
+      // Transaction ID for Solscan link
+      const txId = winner.tx
+      const txLink = txId ? 'VIEW' : 'N/A'
       
-      // Handle different address field names
-      const walletAddr = winner.walletAddress || winner.wallet || winner.address || winner.user || winner.userWallet
+      // Winner address formatting
+      const walletAddr = winner.winner
       const address = walletAddr ? 
         `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}` : 'N/A'
       
       console.log('🎯 Processing winner entry:', {
         original: winner,
-        processed: { date, amount, txLink, address, payoutTxId, burnTxId }
+        processed: { date, amount, txLink, address, txId }
       })
 
       const rowData = [address, amount, txLink, date]
@@ -511,9 +522,9 @@ export class TestScene extends Phaser.Scene {
           rowY,
           data,
           {
-            fontSize: colIndex === 2 && (payoutTxId || burnTxId) ? '10px' : '11px',
+            fontSize: colIndex === 2 && txId ? '10px' : '11px',
             fontFamily: colIndex === 0 ? 'monospace' : '"Press Start 2P"',
-            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && (payoutTxId || burnTxId)) ? '#00ffff' : '#ffffff',
+            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && txId) ? '#00ffff' : '#ffffff',
             align: 'center'
           }
         )
@@ -521,11 +532,10 @@ export class TestScene extends Phaser.Scene {
         cellText.setDepth(2002)
 
         // Make transaction link clickable
-        if (colIndex === 2 && (payoutTxId || burnTxId)) {
+        if (colIndex === 2 && txId) {
           cellText.setInteractive({ useHandCursor: true })
           cellText.on('pointerdown', () => {
-            const txHash = payoutTxId || burnTxId
-            window.open(`https://solscan.io/tx/${txHash}`, '_blank')
+            window.open(`https://solscan.io/tx/${txId}?cluster=mainnet`, '_blank')
           })
           cellText.on('pointerover', () => {
             cellText.setColor('#ffffff')
