@@ -59,12 +59,16 @@ export class TestScene extends Phaser.Scene {
       const originalHeight = texture.source[0].height
       
       // Calculate scale to cover entire screen while maintaining aspect ratio
-      const scaleX = this.cameras.main.width / originalWidth
-      const scaleY = this.cameras.main.height / originalHeight
+      // Add extra padding to ensure full coverage even with browser UI changes
+      const scaleX = (this.cameras.main.width * 1.1) / originalWidth
+      const scaleY = (this.cameras.main.height * 1.1) / originalHeight
       const scale = Math.max(scaleX, scaleY)
       
       background.setScale(scale)
     }
+    
+    // Listen for resize events to update background
+    this.scale.on('resize', this.handleResize, this)
     
     // Initialize gambling API with Alchemy RPC for production
     this.gamblingAPI = new WishGamblingAPI(
@@ -122,9 +126,41 @@ export class TestScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
+  }
+
+  handleResize(gameSize: any) {
+    // Update background position and scale on resize
+    const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
+    if (background) {
+      background.setPosition(gameSize.width / 2, gameSize.height / 2)
+      
+      const texture = this.textures.get('vaporwave-background')
+      if (texture && texture.source && texture.source.length > 0) {
+        const originalWidth = texture.source[0].width
+        const originalHeight = texture.source[0].height
+        
+        // Ensure full coverage with extra padding
+        const scaleX = (gameSize.width * 1.1) / originalWidth
+        const scaleY = (gameSize.height * 1.1) / originalHeight
+        const scale = Math.max(scaleX, scaleY)
+        
+        background.setScale(scale)
+      }
+    }
     
-    // DISABLE resize handling completely to prevent background breaking
-    // The CSS background will handle screen resizing instead
+    // Update camera
+    this.cameras.main.setSize(gameSize.width, gameSize.height)
+    
+    // Update UI elements positions if they exist
+    if (this.gamblingUI) {
+      this.gamblingUI.x = gameSize.width / 2
+      this.gamblingUI.y = gameSize.height - 120
+    }
+    
+    // Update overlay if it exists
+    if (this.winnersOverlay) {
+      this.handleOverlayResize()
+    }
   }
 
   initializePortals() {
@@ -358,11 +394,16 @@ export class TestScene extends Phaser.Scene {
       // Remove loading text
       loadingText.destroy()
 
-      if (winnersData.length === 0) {
+      // Filter out losses to check if we have any winners
+      const actualWinners = winnersData.filter(w => w.tier !== 'LOSE')
+
+      if (winnersData.length === 0 || actualWinners.length === 0) {
         const noDataText = this.add.text(
           this.cameras.main.centerX,
           this.cameras.main.centerY,
-          'No winners yet! Be the first to try your luck.\nYour recent transactions will appear here.',
+          actualWinners.length === 0 && winnersData.length > 0 
+            ? 'No winners yet! Only losses so far.\nBe the first to win!'
+            : 'No winners yet! Be the first to try your luck.\nYour winning transactions will appear here.',
           {
             fontSize: '14px',
             fontFamily: '"Press Start 2P"',
@@ -396,6 +437,13 @@ export class TestScene extends Phaser.Scene {
 
   createWinnersTable(winnersData: any[], overlayBg: Phaser.GameObjects.Rectangle) {
     if (!this.winnersOverlay) return
+
+    // Filter out losing transactions (amount = 0 or tier = LOSE)
+    const filteredWinners = winnersData.filter(winner => {
+      const tier = winner.tier
+      // Only show actual wins and break-even
+      return tier !== 'LOSE'
+    })
 
     const tableStartY = overlayBg.y - overlayBg.height/2 + 80
     const rowHeight = 25
@@ -438,8 +486,8 @@ export class TestScene extends Phaser.Scene {
       this.winnersOverlay.elements.push(headerText)
     })
 
-    // Create rows for winners data
-    winnersData.slice(0, maxVisibleRows).forEach((winner, rowIndex) => {
+    // Create rows for filtered winners data
+    filteredWinners.slice(0, maxVisibleRows).forEach((winner, rowIndex) => {
       if (!this.winnersOverlay) return
       
       const rowY = headerY + ((rowIndex + 1) * rowHeight)
@@ -533,11 +581,11 @@ export class TestScene extends Phaser.Scene {
     })
 
     // Scroll indicator if more data exists
-    if (winnersData.length > maxVisibleRows && this.winnersOverlay) {
+    if (filteredWinners.length > maxVisibleRows && this.winnersOverlay) {
       const scrollText = this.add.text(
         overlayBg.x,
         overlayBg.y + overlayBg.height/2 - 60,
-        `Showing ${maxVisibleRows} of ${winnersData.length} winners`,
+        `Showing ${Math.min(maxVisibleRows, filteredWinners.length)} of ${filteredWinners.length} winners`,
         {
           fontSize: '10px',
           fontFamily: '"Press Start 2P"',

@@ -36,8 +36,10 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       },
       scene: [LandingScene, TestScene],
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: '100%',
+        height: '100%'
       }
     }
 
@@ -49,64 +51,10 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       throwCoins
     })
 
-    const handleResize = () => {
-      if (gameRef.current && gameRef.current.scene) {
-        const newWidth = window.innerWidth
-        const newHeight = window.innerHeight
-        
-        // Only resize if dimensions actually changed significantly (more than 10px)
-        const widthDiff = Math.abs(gameRef.current.scale.width - newWidth)
-        const heightDiff = Math.abs(gameRef.current.scale.height - newHeight)
-        
-        if (widthDiff < 10 && heightDiff < 10) {
-          return
-        }
-        
-        // Debounce resize to prevent rapid updates
-        clearTimeout((window as any)._resizeTimeout)
-        ;(window as any)._resizeTimeout = setTimeout(() => {
-          // Resize the game canvas
-          gameRef.current!.scale.resize(newWidth, newHeight)
-          
-          // Update only active scenes without recreating them
-          gameRef.current!.scene.scenes.forEach(scene => {
-            if (scene && scene.scene && scene.scene.isActive()) {
-              // Update camera bounds without recreating scene
-              if (scene.cameras && scene.cameras.main) {
-                scene.cameras.main.setSize(newWidth, newHeight)
-                
-                // Update background if it exists
-                const background = scene.children?.getByName('vaporwaveBackground') as any
-                if (background && background.setPosition) {
-                  background.setPosition(newWidth / 2, newHeight / 2)
-                  
-                  // Recalculate scale
-                  const texture = scene.textures?.get('vaporwave-background')
-                  if (texture && texture.source && texture.source.length > 0) {
-                    const originalWidth = texture.source[0].width
-                    const originalHeight = texture.source[0].height
-                    const scaleX = newWidth / originalWidth
-                    const scaleY = newHeight / originalHeight
-                    const scale = Math.max(scaleX, scaleY)
-                    background.setScale(scale)
-                  }
-                }
-              }
-            }
-          })
-        }, 100)
-      }
-    }
-
-    window.addEventListener('resize', handleResize)
+    // Phaser's RESIZE scale mode will handle resize automatically
+    // No need for manual resize handling
     
-    // Also listen for dev tools open/close which changes viewport
-    window.addEventListener('beforeunload', () => {
-      clearTimeout((window as any)._resizeTimeout)
-    })
-
     return () => {
-      window.removeEventListener('resize', handleResize)
       if (gameRef.current) {
         gameRef.current.destroy(true)
         gameRef.current = null
