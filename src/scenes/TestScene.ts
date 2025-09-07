@@ -388,8 +388,8 @@ export class TestScene extends Phaser.Scene {
     }
 
     try {
-      // Fetch real winners data with reduced limit for faster loading
-      const winnersData = await this.gamblingAPI.getWinnersData(20)
+      // Fetch real winners data - up to 100 entries
+      const winnersData = await this.gamblingAPI.getWinnersData(100)
       
       // Remove loading text
       loadingText.destroy()
@@ -540,10 +540,6 @@ export class TestScene extends Phaser.Scene {
       const address = walletAddr ? 
         `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}` : 'N/A'
       
-      console.log('🎯 Processing winner entry:', {
-        original: winner,
-        processed: { date, amount, txLink, address, txId }
-      })
 
       const rowData = [address, amount, txLink, date]
 

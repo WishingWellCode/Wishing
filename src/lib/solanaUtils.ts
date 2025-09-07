@@ -146,11 +146,11 @@ export class WishGamblingAPI {
     }
   }
 
-  async getWinnersData(limit: number = 20): Promise<any[]> {
+  async getWinnersData(limit: number = 100): Promise<any[]> {
     try {
       // Add timeout to prevent long waits
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 4000) // 4 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
       
       const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true&includeAll=true`, {
         signal: controller.signal,
@@ -167,14 +167,10 @@ export class WishGamblingAPI {
       }
       
       const rawData = await response.json()
-      console.log('🎯 Raw API Response:', {
-        url: `${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true&includeAll=true`,
+      console.log('🎯 Winners API Response:', {
         status: response.status,
-        rawData: rawData,
-        type: typeof rawData,
-        isArray: Array.isArray(rawData),
-        keys: rawData && typeof rawData === 'object' ? Object.keys(rawData) : null,
-        stringified: JSON.stringify(rawData, null, 2)
+        dataKeys: rawData && typeof rawData === 'object' ? Object.keys(rawData) : null,
+        topWinnersCount: rawData?.topWinners?.length || 0
       })
       
       // Handle different response formats
@@ -183,8 +179,6 @@ export class WishGamblingAPI {
         data = rawData
         console.log('✅ Using direct array response')
       } else if (rawData && typeof rawData === 'object') {
-        console.log('🔍 API Response Object Keys:', Object.keys(rawData))
-        console.log('🔍 API Response Object Values:', Object.values(rawData))
         
         // Combine all available arrays, checking all possible properties
         const allArrays: any[] = []
@@ -252,37 +246,14 @@ export class WishGamblingAPI {
         }
       }
       
-      console.log('🎯 Processed Winners Data:', {
-        dataLength: data.length,
-        sampleEntry: data[0] || null,
-        stringifiedData: JSON.stringify(data.slice(0, 3), null, 2)
-      })
-      
-      // Log break-even entries specifically
-      if (Array.isArray(data) && data.length > 0) {
-        const breakEvenEntries = data.filter((entry: any) => 
-          entry.payout !== undefined && entry.payout <= (entry.stake || 1000000000)
-        )
-        console.log('🎯 Break-even entries found:', breakEvenEntries)
-        
-        // Also check for your specific transaction IDs from the logs
-        const yourTransactions = data.filter((entry: any) => {
-          const txIds = ['wbZZWp4JVi6DUgiFY1ZGVGtzN1xKxdyQuNJFQfQWepaVLWv5mewZxkj7SDEAMxobA2ue7RKB1LHpvJoaoMnpzZa',
-                       'qAmBkQnjHoMq1tsecJVKztSENzF3MNwj8jC4hwXeTs2Rzq8PYNP4mmHj19zEB8zaTWQj1fZhHpU3CrWCowQXeqQ',
-                       '4AUYCjFuP6aSgiZFxdaCYocKndmZVWFMSDKxRchnu3V5EBQA6NRCM4TUUJ2Qj7sCdjSzwrH8XDWAADrid5ocM8gc',
-                       '5GAHDcRtuF8UBpVQjzqwydbzJDE4XJUthtMjvkGSvydfU4NidNzbbj9p9sNP4hUtHxLBaQLfDva7SjjQFA9tnvr3']
-          return txIds.some(txId => 
-            entry.burnTx === txId || entry.payoutTx === txId || 
-            entry.txId === txId || entry.transactionId === txId
-          )
-        })
-        console.log('🔍 Your specific transactions found:', yourTransactions)
-      }
+      console.log(`✅ Processed ${data.length} winner entries`)
       
       return data
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.error('Winners fetch timed out after 4 seconds')
+        console.error('Winners fetch timed out after 5 seconds')
+        // Try to return cached data or empty array
+        return []
       } else {
         console.error('Error fetching winners:', error)
       }
