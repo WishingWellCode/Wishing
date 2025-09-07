@@ -59,9 +59,9 @@ export class TestScene extends Phaser.Scene {
       const originalHeight = texture.source[0].height
       
       // Calculate scale to cover entire screen while maintaining aspect ratio
-      // Add extra padding to ensure full coverage even with browser UI changes
-      const scaleX = (this.cameras.main.width * 1.1) / originalWidth
-      const scaleY = (this.cameras.main.height * 1.1) / originalHeight
+      // Small padding to ensure full coverage without excessive zoom
+      const scaleX = (this.cameras.main.width * 1.02) / originalWidth
+      const scaleY = (this.cameras.main.height * 1.02) / originalHeight
       const scale = Math.max(scaleX, scaleY)
       
       background.setScale(scale)
@@ -139,9 +139,9 @@ export class TestScene extends Phaser.Scene {
         const originalWidth = texture.source[0].width
         const originalHeight = texture.source[0].height
         
-        // Ensure full coverage with extra padding
-        const scaleX = (gameSize.width * 1.1) / originalWidth
-        const scaleY = (gameSize.height * 1.1) / originalHeight
+        // Ensure full coverage with minimal padding
+        const scaleX = (gameSize.width * 1.02) / originalWidth
+        const scaleY = (gameSize.height * 1.02) / originalHeight
         const scale = Math.max(scaleX, scaleY)
         
         background.setScale(scale)
@@ -529,9 +529,11 @@ export class TestScene extends Phaser.Scene {
       // Use calculated amount or API amount if provided
       const amount = (winner.amount && winner.amount !== '0') ? winner.amount : calculatedAmount
       
-      // Transaction ID for Solscan link - use burnTx or payoutTx if available
+      // Transaction ID for Solscan link - use tx field from API
       const txId = winner.tx || winner.burnTx || winner.payoutTx || winner.transactionId
-      const txLink = txId ? 'VIEW' : '-'
+      // Only show VIEW link if we have a real transaction ID (not PROCESSING_)
+      const isValidTx = txId && !txId.startsWith('PROCESSING_')
+      const txLink = isValidTx ? 'VIEW' : 'PENDING'
       
       // Winner address formatting
       const walletAddr = winner.winner
@@ -553,20 +555,20 @@ export class TestScene extends Phaser.Scene {
           rowY,
           data,
           {
-            fontSize: colIndex === 2 && txId ? '10px' : '11px',
+            fontSize: colIndex === 2 && isValidTx ? '10px' : '11px',
             fontFamily: colIndex === 0 ? 'monospace' : '"Press Start 2P"',
-            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && txId) ? '#00ffff' : '#ffffff',
+            color: colIndex === 1 ? '#00ff00' : (colIndex === 2 && isValidTx) ? '#00ffff' : (colIndex === 2 ? '#666666' : '#ffffff'),
             align: 'center'
           }
         )
         cellText.setOrigin(0.5)
         cellText.setDepth(2002)
 
-        // Make transaction link clickable
-        if (colIndex === 2 && txId) {
+        // Make transaction link clickable only if valid
+        if (colIndex === 2 && isValidTx) {
           cellText.setInteractive({ useHandCursor: true })
           cellText.on('pointerdown', () => {
-            window.open(`https://solscan.io/tx/${txId}?cluster=mainnet`, '_blank')
+            window.open(`https://solscan.io/tx/${txId}`, '_blank')
           })
           cellText.on('pointerover', () => {
             cellText.setColor('#ffffff')
