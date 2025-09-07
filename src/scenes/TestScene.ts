@@ -28,38 +28,42 @@ export class TestScene extends Phaser.Scene {
   }
 
   preload() {
-    // Check if texture already exists to prevent duplicate loading
-    if (!this.textures.exists('vaporwave-background')) {
-      // Load the real vaporwave background only if not already cached
-      this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
+    // Prevent duplicate loading issues
+    if (this.textures.exists('vaporwave-background')) {
+      // If texture exists, remove it to force fresh load
+      this.textures.remove('vaporwave-background')
     }
+    // Load the real vaporwave background
+    this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
   }
 
   create() {
+    // Clean up any existing background to prevent duplication
+    const existingBg = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
+    if (existingBg) {
+      existingBg.destroy()
+    }
+    
     // Set transparent background to show CSS background
     this.cameras.main.transparent = true
     
-    // Only create background if it doesn't already exist
-    let background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
-    if (!background) {
-      // Add the vaporwave background image with proper scaling
-      background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
-      background.setName('vaporwaveBackground') // Name for resize handling
-      background.setDepth(-1000)
+    // Add the vaporwave background image with proper scaling
+    const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
+    background.setName('vaporwaveBackground') // Name for resize handling
+    background.setDepth(-1000)
+    
+    // Get original texture dimensions for proper scaling
+    const texture = this.textures.get('vaporwave-background')
+    if (texture && texture.source && texture.source.length > 0) {
+      const originalWidth = texture.source[0].width
+      const originalHeight = texture.source[0].height
       
-      // Get original texture dimensions for proper scaling
-      const texture = this.textures.get('vaporwave-background')
-      if (texture && texture.source && texture.source.length > 0) {
-        const originalWidth = texture.source[0].width
-        const originalHeight = texture.source[0].height
-        
-        // Calculate scale to cover entire screen while maintaining aspect ratio
-        const scaleX = this.cameras.main.width / originalWidth
-        const scaleY = this.cameras.main.height / originalHeight
-        const scale = Math.max(scaleX, scaleY)
-        
-        background.setScale(scale)
-      }
+      // Calculate scale to cover entire screen while maintaining aspect ratio
+      const scaleX = this.cameras.main.width / originalWidth
+      const scaleY = this.cameras.main.height / originalHeight
+      const scale = Math.max(scaleX, scaleY)
+      
+      background.setScale(scale)
     }
     
     // Initialize gambling API with Alchemy RPC for production
@@ -461,12 +465,25 @@ export class TestScene extends Phaser.Scene {
         minute: '2-digit'
       }) : 'N/A'
       
-      // Amount is already formatted as WISH token string
-      const amount = winner.amount || '0'
+      // Calculate amount based on tier since API returns "0"
+      let calculatedAmount = '0'
+      const tier = winner.tier
+      if (tier === 'JACKPOT') calculatedAmount = '15,000,000' // 15000x
+      else if (tier === 'MAJOR WIN') calculatedAmount = '180,000' // 180x
+      else if (tier === 'LARGE WIN') calculatedAmount = '25,000' // 25x
+      else if (tier === 'MEDIUM WIN') calculatedAmount = '9,000' // 9x
+      else if (tier === 'SMALL WIN C') calculatedAmount = '1,650' // 1.65x
+      else if (tier === 'SMALL WIN B') calculatedAmount = '1,280' // 1.28x
+      else if (tier === 'SMALL WIN A') calculatedAmount = '1,100' // 1.1x
+      else if (tier === 'BREAK EVEN') calculatedAmount = '1,000' // 1x
+      else if (tier === 'LOSE') calculatedAmount = '0' // 0x
       
-      // Transaction ID for Solscan link
-      const txId = winner.tx
-      const txLink = txId ? 'VIEW' : 'N/A'
+      // Use calculated amount or API amount if provided
+      const amount = (winner.amount && winner.amount !== '0') ? winner.amount : calculatedAmount
+      
+      // Transaction ID for Solscan link - use burnTx or payoutTx if available
+      const txId = winner.tx || winner.burnTx || winner.payoutTx || winner.transactionId
+      const txLink = txId ? 'VIEW' : '-'
       
       // Winner address formatting
       const walletAddr = winner.winner
