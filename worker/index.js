@@ -605,12 +605,15 @@ async function handleFountainResolve(request, env) {
   await env.GAMBLING_SESSIONS.put(`session:${sessionId}`, JSON.stringify(session))
   await env.GAMBLING_SESSIONS.delete(`pending:${session.walletAddress}`)
 
-  // Log the gambling event
+  // Log the gambling event with transaction IDs
   await logGambleEvent(env, {
     walletAddress: session.walletAddress,
     timestamp: Date.now(),
     sessionId,
     amountGambled: 1000,
+    burnTx: txSignature,
+    payoutTx,
+    payout,
     result: {
       ...result,
       amount: payout

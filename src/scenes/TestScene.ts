@@ -388,8 +388,8 @@ export class TestScene extends Phaser.Scene {
     }
 
     try {
-      // Fetch real winners data
-      const winnersData = await this.gamblingAPI.getWinnersData(100)
+      // Fetch real winners data with reduced limit for faster loading
+      const winnersData = await this.gamblingAPI.getWinnersData(20)
       
       // Remove loading text
       loadingText.destroy()
@@ -531,9 +531,9 @@ export class TestScene extends Phaser.Scene {
       
       // Transaction ID for Solscan link - use tx field from API
       const txId = winner.tx || winner.burnTx || winner.payoutTx || winner.transactionId
-      // Only show VIEW link if we have a real transaction ID (not PROCESSING_)
-      const isValidTx = txId && !txId.startsWith('PROCESSING_')
-      const txLink = isValidTx ? 'VIEW' : 'PENDING'
+      // Show VIEW link if we have any transaction ID
+      const isValidTx = txId && txId.length > 20 // Valid Solana tx IDs are ~88 chars
+      const txLink = isValidTx ? 'VIEW' : '-'
       
       // Winner address formatting
       const walletAddr = winner.winner
