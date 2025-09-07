@@ -59,9 +59,9 @@ export class TestScene extends Phaser.Scene {
       const originalHeight = texture.source[0].height
       
       // Calculate scale to cover entire screen while maintaining aspect ratio
-      // Small padding to ensure full coverage without excessive zoom
-      const scaleX = (this.cameras.main.width * 1.02) / originalWidth
-      const scaleY = (this.cameras.main.height * 1.02) / originalHeight
+      // No extra padding to avoid zoom issues
+      const scaleX = this.cameras.main.width / originalWidth
+      const scaleY = this.cameras.main.height / originalHeight
       const scale = Math.max(scaleX, scaleY)
       
       background.setScale(scale)
@@ -139,9 +139,9 @@ export class TestScene extends Phaser.Scene {
         const originalWidth = texture.source[0].width
         const originalHeight = texture.source[0].height
         
-        // Ensure full coverage with minimal padding
-        const scaleX = (gameSize.width * 1.02) / originalWidth
-        const scaleY = (gameSize.height * 1.02) / originalHeight
+        // Ensure full coverage without extra zoom
+        const scaleX = gameSize.width / originalWidth
+        const scaleY = gameSize.height / originalHeight
         const scale = Math.max(scaleX, scaleY)
         
         background.setScale(scale)
@@ -396,6 +396,13 @@ export class TestScene extends Phaser.Scene {
 
       // Filter out losses to check if we have any winners
       const actualWinners = winnersData.filter(w => w.tier !== 'LOSE')
+      
+      console.log('🎯 Winners data check:', {
+        totalData: winnersData.length,
+        actualWinners: actualWinners.length,
+        sampleEntry: winnersData[0],
+        sampleWinner: actualWinners[0]
+      })
 
       if (winnersData.length === 0 || actualWinners.length === 0) {
         const noDataText = this.add.text(
