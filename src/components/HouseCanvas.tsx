@@ -4,13 +4,14 @@ import { HouseScene } from '@/scenes/HouseScene'
 
 interface HouseCanvasProps {
   houseLevel: number
+  portalCoords?: { x: number, y: number }[]
 }
 
 export interface HouseCanvasRef {
   getHouseScene: () => HouseScene | null
 }
 
-const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel }, ref) => {
+const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel, portalCoords }, ref) => {
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -74,6 +75,55 @@ const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel }
       }
     }
   }, [houseLevel])
+  
+  // Set up portal when scene is ready
+  useEffect(() => {
+    if (!portalCoords || portalCoords.length === 0) {
+      console.log('⚠️ No portal coords provided to HouseCanvas')
+      return
+    }
+    
+    const setupPortal = () => {
+      if (!gameRef.current) {
+        console.log('⏳ Game not ready for portal setup')
+        return false
+      }
+      
+      const scene = gameRef.current.scene.getScene('HouseScene') as HouseScene
+      if (!scene) {
+        console.log('⏳ HouseScene not found yet')
+        return false
+      }
+      
+      if (!scene.sceneReady) {
+        console.log('⏳ HouseScene not ready yet')
+        return false
+      }
+      
+      // Set up the portal
+      scene.setExitPortal(portalCoords)
+      console.log('✅ Portal set up successfully in HouseCanvas!')
+      return true
+    }
+    
+    // Try to set up portal with retries
+    let attempts = 0
+    const maxAttempts = 30
+    
+    const trySetup = () => {
+      attempts++
+      const success = setupPortal()
+      
+      if (!success && attempts < maxAttempts) {
+        setTimeout(trySetup, 200)
+      }
+    }
+    
+    // Start trying after a small delay
+    const timer = setTimeout(trySetup, 100)
+    
+    return () => clearTimeout(timer)
+  }, [portalCoords, houseLevel])
 
   return (
     <div 

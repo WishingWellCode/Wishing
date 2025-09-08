@@ -112,62 +112,6 @@ export default function House() {
     }
   }, [router.query.level])
 
-  // Set up exit portal when house level changes
-  useEffect(() => {
-    const setupExitPortal = () => {
-      try {
-        const coords = getExitPortalCoords()
-        
-        // Check if ref exists first
-        if (!houseCanvasRef.current) {
-          console.log('⏳ HouseCanvas ref not ready yet')
-          return false
-        }
-        
-        // Check if getHouseScene method exists
-        if (typeof houseCanvasRef.current.getHouseScene !== 'function') {
-          console.log('⏳ getHouseScene method not available yet')
-          return false
-        }
-        
-        const scene = houseCanvasRef.current.getHouseScene()
-        console.log('🔍 Setting up portal - Scene:', !!scene, 'Coords:', coords.length)
-        
-        if (scene && scene.sceneReady && coords.length > 0) {
-          scene.setExitPortal(coords)
-          console.log('🚪 Exit portal activated for house level', currentHouseLevel, 'with', coords.length, 'coordinates')
-          return true // Success
-        } else {
-          console.log('⏳ Scene not ready yet - Scene:', !!scene, 'Scene ready:', scene?.sceneReady, 'Coords length:', coords.length)
-          return false
-        }
-      } catch (error) {
-        console.error('❌ Error setting up portal:', error)
-        return false
-      }
-    }
-    
-    // Keep trying until successful
-    let attemptCount = 0
-    const maxAttempts = 20
-    
-    const trySetup = () => {
-      attemptCount++
-      console.log(`🔄 Portal setup attempt ${attemptCount}/${maxAttempts}`)
-      
-      const success = setupExitPortal()
-      if (!success && attemptCount < maxAttempts) {
-        // Try again with exponential backoff
-        const delay = Math.min(100 * Math.pow(1.5, attemptCount), 3000)
-        return setTimeout(trySetup, delay)
-      }
-    }
-    
-    // Start trying after initial delay
-    const timer = setTimeout(trySetup, 200)
-    
-    return () => clearTimeout(timer)
-  }, [currentHouseLevel])
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -331,7 +275,11 @@ export default function House() {
 
       <div className="relative w-full h-screen overflow-hidden">
         {/* HouseCanvas for tier background and character movement */}
-        <HouseCanvas ref={houseCanvasRef} houseLevel={currentHouseLevel} />
+        <HouseCanvas 
+          ref={houseCanvasRef} 
+          houseLevel={currentHouseLevel} 
+          portalCoords={EXIT_PORTAL_COORDS}
+        />
         
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-[100]">
