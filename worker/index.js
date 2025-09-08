@@ -579,33 +579,53 @@ async function handleFountainResolve(request, env) {
   // Calculate payout
   const payout = Math.floor(1000 * result.multiplier)
   
-  // Send payout if won (from pool wallet) - WAIT for the transaction
+  // Send payout if won (from pool wallet) - DON'T wait for confirmation
   let payoutTx = null
   if (payout > 0) {
     console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
     
     try {
-      // Send payout and WAIT for the transaction ID
-      payoutTx = await sendPayout(env, session.walletAddress, payout)
-      console.log(`✅ Successfully sent ${payout} $WISH payout with tx: ${payoutTx}`)
+      // Send payout asynchronously to avoid delays
+      const payoutPromise = sendPayoutFast(env, session.walletAddress, payout)
       
-      // Store payout transaction ID in dedicated KV storage
-      if (payoutTx) {
-        const payoutKey = `payout:${session.walletAddress}:${Date.now()}`
-        const payoutData = {
-          txId: payoutTx,
-          sessionId,
-          walletAddress: session.walletAddress,
-          amount: payout,
-          timestamp: Date.now()
-        }
-        await env.GAMBLE_LOGS.put(payoutKey, JSON.stringify(payoutData))
-        console.log(`💾 Stored payout tx ${payoutTx} with key ${payoutKey}`)
+      // Store a temporary transaction ID immediately
+      const tempTxId = 'TEMP_' + crypto.randomUUID()
+      payoutTx = tempTxId
+      
+      // Store temporary entry immediately
+      const payoutKey = `payout:${session.walletAddress}:${Date.now()}`
+      const payoutData = {
+        txId: tempTxId,
+        sessionId,
+        walletAddress: session.walletAddress,
+        amount: payout,
+        timestamp: Date.now(),
+        status: 'pending'
       }
+      await env.GAMBLE_LOGS.put(payoutKey, JSON.stringify(payoutData))
+      
+      // Update with real transaction ID when available (don't wait)
+      payoutPromise.then(async (realTxId) => {
+        console.log(`✅ Payout sent with tx: ${realTxId}`)
+        payoutData.txId = realTxId
+        payoutData.status = 'confirmed'
+        await env.GAMBLE_LOGS.put(payoutKey, JSON.stringify(payoutData))
+        console.log(`💾 Updated payout tx to ${realTxId}`)
+        
+        // Also update the gambling log
+        const gamblingLogKey = `gamble:${session.walletAddress}:${session.timestamp || Date.now()}`
+        const existingLog = await env.GAMBLE_LOGS.get(gamblingLogKey)
+        if (existingLog) {
+          const logData = JSON.parse(existingLog)
+          logData.payoutTx = realTxId
+          await env.GAMBLE_LOGS.put(gamblingLogKey, JSON.stringify(logData))
+        }
+      }).catch(error => {
+        console.error('❌ Payout failed:', error)
+      })
+      
     } catch (error) {
-      console.error('❌ Failed to send payout:', error.message || error)
-      console.error('Full error:', error)
-      // If payout fails, log it but continue (user still burned tokens)
+      console.error('❌ Failed to initiate payout:', error)
       payoutTx = null
     }
   }
@@ -854,7 +874,9 @@ async function getLeaderboard(env) {
               let txId = null
               
               // First check if we have a valid payoutTx in the event
-              if (event.payoutTx && event.payoutTx.length > 20 && !event.payoutTx.startsWith('PROCESSING_')) {
+              if (event.payoutTx && event.payoutTx.length > 20 && 
+                  !event.payoutTx.startsWith('PROCESSING_') && 
+                  !event.payoutTx.startsWith('TEMP_')) {
                 txId = event.payoutTx
                 console.log(`🔗 Using event payout tx: ${txId}`)
               } 
@@ -862,11 +884,11 @@ async function getLeaderboard(env) {
               else {
                 const lookupKey = `${event.walletAddress}:${Math.floor(event.timestamp / 10000)}`
                 const mappedTx = payoutMap.get(lookupKey)
-                if (mappedTx) {
+                if (mappedTx && !mappedTx.startsWith('TEMP_')) {
                   txId = mappedTx
                   console.log(`🔗 Found payout tx in map: ${txId}`)
                 } else {
-                  console.log(`⚠️ No payout tx found for ${event.walletAddress} at ${event.timestamp}`)
+                  console.log(`⚠️ No confirmed payout tx found for ${event.walletAddress} at ${event.timestamp}`)
                 }
               }
               
@@ -1034,6 +1056,78 @@ async function sendPayout(env, recipientWalletAddress, amount) {
 // Async version that doesn't block the main response
 async function sendPayoutAsync(env, recipientWalletAddress, amount) {
   return await sendPayout(env, recipientWalletAddress, amount)
+}
+
+// Fast payout that doesn't wait for confirmation
+async function sendPayoutFast(env, recipientWalletAddress, amount) {
+  console.log(`🚀 Sending fast payout of ${amount} $WISH to ${recipientWalletAddress}`)
+  
+  // Check various possible environment variable names
+  const privateKey = env.POOL_WALLET_PRIVATE_KEY || 
+                     env.POOL_WALLET_PRIVATE || 
+                     env.POOL_PRIVATE_KEY ||
+                     env.PRIVATE_KEY
+  
+  if (!privateKey) {
+    throw new Error('Pool wallet private key not configured')
+  }
+  
+  const connection = new Connection(env.SOLANA_RPC_URL)
+  
+  // Create pool wallet keypair from private key
+  let poolWalletPrivateKey
+  
+  // Handle different private key formats
+  if (privateKey.startsWith('[')) {
+    poolWalletPrivateKey = new Uint8Array(JSON.parse(privateKey))
+  } else {
+    poolWalletPrivateKey = base58ToUint8Array(privateKey)
+  }
+  
+  const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
+  
+  // Get token accounts
+  const tokenMint = new PublicKey(env.WISH_TOKEN_MINT)
+  const recipientPubkey = new PublicKey(recipientWalletAddress)
+  
+  const poolTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    poolWallet.publicKey
+  )
+  
+  const recipientTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    recipientPubkey
+  )
+  
+  // Create transfer instruction
+  const mintInfo = await getMint(connection, tokenMint)
+  const transferAmount = amount * Math.pow(10, mintInfo.decimals)
+  
+  const transferInstruction = createTransferInstruction(
+    poolTokenAccount,
+    recipientTokenAccount,
+    poolWallet.publicKey,
+    transferAmount
+  )
+  
+  // Build and send transaction WITHOUT waiting for confirmation
+  const transaction = new Transaction().add(transferInstruction)
+  const { blockhash } = await connection.getLatestBlockhash()
+  transaction.recentBlockhash = blockhash
+  transaction.feePayer = poolWallet.publicKey
+  
+  // Sign and send
+  transaction.sign(poolWallet)
+  const signature = await connection.sendRawTransaction(transaction.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: 'processed'
+  })
+  
+  console.log(`📤 Transaction sent immediately: ${signature}`)
+  
+  // Don't wait for confirmation - return immediately
+  return signature
 }
 
 // Update gambling log with real transaction ID once payout is sent
