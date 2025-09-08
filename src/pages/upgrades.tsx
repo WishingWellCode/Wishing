@@ -272,36 +272,36 @@ export default function Upgrades() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6">
-              Housing District
-            </h1>
-            <p className="text-lg md:text-xl text-slate-300 font-medium mb-12 max-w-4xl mx-auto leading-relaxed">
-              Upgrade your housing to boost your Wishing Well odds and unlock exclusive benefits!
-            </p>
-            
-            {/* User Stats */}
-            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-6 md:p-8 rounded-2xl max-w-4xl mx-auto shadow-2xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 text-center">
-                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4 rounded-xl border border-green-500/30">
-                  <div className="text-3xl font-bold text-green-400 mb-1">{highestOwnedLevel}</div>
-                  <div className="text-sm font-medium text-slate-300">Current Level</div>
+        <main className="w-full px-6 py-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Header Section */}
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-bold text-white mb-4">
+                Housing District
+              </h1>
+              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Choose your house level to boost your Wishing Well odds. Houses must be purchased in order.
+              </p>
+              
+              {/* User Stats Row */}
+              <div className="flex justify-center gap-8 mb-12">
+                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-400">{highestOwnedLevel}</div>
+                  <div className="text-sm text-gray-300">Current Level</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-4 rounded-xl border border-blue-500/30">
-                  <div className="text-3xl font-bold text-blue-400 mb-1">+{totalBoost}%</div>
-                  <div className="text-sm font-medium text-slate-300">Total Boost</div>
+                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-400">+{totalBoost}%</div>
+                  <div className="text-sm text-gray-300">Total Boost</div>
                 </div>
-                <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-4 rounded-xl border border-yellow-500/30">
-                  <div className="text-3xl font-bold text-yellow-400 mb-1">{userHousing.totalBurned.toLocaleString()}</div>
-                  <div className="text-sm font-medium text-slate-300">Total Burned</div>
+                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-400">{userHousing.totalBurned.toLocaleString()}</div>
+                  <div className="text-sm text-gray-300">Total Burned</div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Housing Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
+            {/* Housing Grid - 2x3 Layout */}
+            <div className="grid grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
             {HOUSE_LEVELS.map((house) => {
               const status = getHouseStatus(house.level)
               const canPurchase = status === 'available'
@@ -311,55 +311,58 @@ export default function Upgrades() {
               return (
                 <div
                   key={house.level}
-                  className={`bg-black/30 backdrop-blur-sm rounded-2xl overflow-hidden border transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                    isOwned ? 'border-green-500/50 shadow-green-500/20' : 
-                    canPurchase ? 'border-purple-500/50 shadow-purple-500/20' : 
-                    'border-gray-500/30 opacity-75'
-                  } shadow-xl`}
+                  className={`bg-white/10 backdrop-blur-sm rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                    isOwned ? 'border-green-500 bg-green-500/5' : 
+                    canPurchase ? 'border-purple-500 bg-purple-500/5' : 
+                    'border-gray-600 opacity-70'
+                  }`}
                 >
-                  {/* House Image */}
-                  <div className="h-48 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative">
-                    <div className={`text-8xl ${isLocked ? 'opacity-30 grayscale' : ''} transition-all duration-300`}>🏠</div>
+                  {/* House Header */}
+                  <div className="p-6 text-center border-b border-white/20">
+                    <div className="text-6xl mb-4">🏠</div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      Level {house.level}
+                    </h3>
+                    <h4 className="text-xl text-purple-300 font-semibold">
+                      {house.name}
+                    </h4>
                     {isOwned && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                      <div className="mt-3 inline-block bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold">
                         ✓ OWNED
                       </div>
                     )}
-                    {isLocked && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                        🔒 LOCKED
+                    {canPurchase && (
+                      <div className="mt-3 inline-block bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold animate-pulse">
+                        ⭐ AVAILABLE
                       </div>
                     )}
-                    {canPurchase && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-pulse">
-                        ⭐ AVAILABLE
+                    {isLocked && (
+                      <div className="mt-3 inline-block bg-gray-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                        🔒 LOCKED
                       </div>
                     )}
                   </div>
                   
-                  {/* House Info */}
-                  <div className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-3">
-                      Level {house.level}: {house.name}
-                    </h3>
-                    <p className="text-sm text-slate-300 mb-4 md:mb-6 leading-relaxed">
+                  {/* House Details */}
+                  <div className="p-6">
+                    <p className="text-gray-300 mb-6 leading-relaxed">
                       {house.description}
                     </p>
                     
-                    {/* Stats */}
-                    <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
-                      <div className="flex justify-between items-center p-2 md:p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                        <span className="text-sm md:text-base font-semibold text-green-400">🚀 Win Boost:</span>
-                        <span className="text-sm md:text-base font-bold text-white">+{house.boostPercent}%</span>
+                    {/* House Stats */}
+                    <div className="space-y-3 mb-6">
+                      <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
+                        <span className="text-green-400 font-semibold">🚀 Win Boost:</span>
+                        <span className="text-white font-bold">+{house.boostPercent}%</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                        <span className="text-sm md:text-base font-semibold text-blue-400">💎 Cost:</span>
-                        <span className="text-sm md:text-base font-bold text-white">{house.cost.toLocaleString()} $WISH</span>
+                      <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
+                        <span className="text-blue-400 font-semibold">💎 Cost:</span>
+                        <span className="text-white font-bold">{house.cost.toLocaleString()} $WISH</span>
                       </div>
                       {house.burnRequirement > 0 && (
-                        <div className="flex justify-between items-center p-2 md:p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                          <span className="text-sm md:text-base font-semibold text-yellow-400">🔥 Requires:</span>
-                          <span className="text-sm md:text-base font-bold text-white">{house.burnRequirement.toLocaleString()} burned</span>
+                        <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
+                          <span className="text-yellow-400 font-semibold">🔥 Requires:</span>
+                          <span className="text-white font-bold">{house.burnRequirement.toLocaleString()} burned</span>
                         </div>
                       )}
                     </div>
@@ -368,7 +371,7 @@ export default function Upgrades() {
                     {isOwned ? (
                       <button 
                         disabled 
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 md:py-4 rounded-xl font-bold opacity-75 cursor-not-allowed shadow-lg text-sm md:text-base"
+                        className="w-full bg-green-500 text-white py-4 rounded-lg font-bold text-lg opacity-75 cursor-not-allowed"
                       >
                         ✅ PURCHASED
                       </button>
@@ -376,11 +379,11 @@ export default function Upgrades() {
                       <button
                         onClick={() => purchaseHouse(house.level)}
                         disabled={purchasing === house.level}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 md:py-4 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-bold text-lg transition-colors disabled:opacity-50"
                       >
                         {purchasing === house.level ? (
                           <div className="flex items-center justify-center gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                             PURCHASING...
                           </div>
                         ) : (
@@ -390,12 +393,12 @@ export default function Upgrades() {
                     ) : (
                       <button 
                         disabled 
-                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 py-3 md:py-4 rounded-xl font-bold cursor-not-allowed shadow-lg text-xs md:text-sm"
+                        className="w-full bg-gray-600 text-gray-400 py-4 rounded-lg font-bold cursor-not-allowed text-sm"
                       >
                         {house.level === 1 ? '❌ REQUIREMENTS NOT MET' : 
                          userHousing.totalBurned < house.burnRequirement ? 
-                         `🔥 NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
-                         '⬆️ BUY PREVIOUS LEVEL FIRST'}
+                         `NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
+                         'BUY PREVIOUS LEVEL FIRST'}
                       </button>
                     )}
                   </div>
@@ -403,28 +406,37 @@ export default function Upgrades() {
               )
             })}
           </div>
-          
-          {/* Info Section */}
-          <div className="mt-12 md:mt-16 text-center">
-            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-6 md:p-12 rounded-2xl md:rounded-3xl shadow-2xl">
-              <h2 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6 md:mb-8">
-                How Housing Works
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 text-left">
-                <div className="bg-green-500/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-green-500/20">
-                  <h3 className="text-lg md:text-2xl font-bold text-green-400 mb-3 md:mb-4 flex items-center gap-2">
+
+            {/* View Current House Button */}
+            {highestOwnedLevel > 0 && (
+              <div className="text-center mb-12">
+                <button
+                  onClick={visitHouse}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  🏠 View My Current House
+                </button>
+              </div>
+            )}
+
+            {/* How It Works */}
+            <div className="bg-black/50 p-8 rounded-xl text-center">
+              <h2 className="text-3xl font-bold text-white mb-6">How Housing Works</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                <div>
+                  <h3 className="text-xl font-bold text-green-400 mb-3 flex items-center gap-2">
                     🚀 Boost System
                   </h3>
-                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
+                  <p className="text-gray-300 leading-relaxed">
                     Each house level provides a win rate boost that stacks with previous levels.
                     The boost percentage is deducted from your loss chance, giving you better odds!
                   </p>
                 </div>
-                <div className="bg-blue-500/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-blue-500/20">
-                  <h3 className="text-lg md:text-2xl font-bold text-blue-400 mb-3 md:mb-4 flex items-center gap-2">
+                <div>
+                  <h3 className="text-xl font-bold text-blue-400 mb-3 flex items-center gap-2">
                     📋 Requirements
                   </h3>
-                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
+                  <p className="text-gray-300 leading-relaxed">
                     Houses must be purchased in order, and higher levels require you to have
                     burned a certain amount of $WISH tokens through gambling to unlock.
                   </p>
