@@ -643,7 +643,7 @@ export default function Upgrades() {
                     <img 
                       src={`/assets/houses/tier${house.level}.png`} 
                       alt={house.name}
-                      className="w-12 h-12 mx-auto object-contain"
+                      style={{ width: '48px', height: '48px', margin: '0 auto', objectFit: 'contain' }}
                     />
                   </div>
                   
