@@ -811,40 +811,38 @@ async function getLeaderboard(env) {
         const logData = await env.GAMBLE_LOGS.get(key.name)
         if (logData) {
           const event = JSON.parse(logData)
-          // Include ALL gambling events (wins, losses, break-even)
+          // Only include WINS (break-even and above, payout >= 1000)
           if (event.walletAddress && event.timestamp) {
             const payout = event.payout || 0
-            const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            // For wins AND break-even, show payout tx (from pool to winner)
-            // For losses only, show burn tx (from winner to burn address)
-            let txId = null
+            // Only show wins (break-even = 1000 and above)
             if (payout >= 1000) {
-              // For wins and break-even, show payout transaction if it's real (not PROCESSING_)
+              // For wins and break-even, show payout transaction from pool wallet
+              let txId = null
               if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
-                txId = event.payoutTx  // Show payout transaction for wins and break-even
+                txId = event.payoutTx  // Show payout transaction for wins
               }
-              // If no valid payout tx, don't show any link
-            } else {
-              // For losses only, show burn transaction
-              if (event.burnTx) {
-                txId = event.burnTx
+              // Fallback: if no payout tx available, use burn tx temporarily
+              else if (event.burnTx && event.burnTx.length > 20) {
+                txId = event.burnTx  // Temporary fallback
               }
+              
+              const result = {
+                winner: event.walletAddress,
+                amount: payout.toString(), // Amount won from pool wallet
+                timestamp: new Date(event.timestamp).toISOString(),
+                tier: event.result?.tier || (payout === 1000 ? 'BREAK EVEN' : 'WIN'),
+                isWin: payout >= 1000
+              }
+              
+              // Always include tx field if we have any valid transaction ID
+              if (txId && txId.length > 20) {
+                result.tx = txId
+              }
+              return result
             }
-            
-            const result = {
-              winner: event.walletAddress,
-              amount: payout.toString(), // Keep as WISH tokens (already in correct units)
-              timestamp: new Date(event.timestamp).toISOString(),
-              tier: event.result?.tier || (payout >= 1000 ? 'break-even' : 'loss'),
-              isWin: payout > 1000  // Only true wins (more than break-even)
-            }
-            
-            // Only include tx field if we have a valid transaction ID
-            if (txId && txId.length > 20) {
-              result.tx = txId
-            }
-            return result
+            // Don't return anything for losses (payout < 1000)
+            return null
           }
         }
       } catch (parseError) {
