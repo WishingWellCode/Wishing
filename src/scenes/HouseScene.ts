@@ -9,6 +9,12 @@ export class HouseScene extends Phaser.Scene {
     coords: [],
     isActive: false
   }
+  private portalWarning: Phaser.GameObjects.Container | null = null
+  private isNearPortal: boolean = false
+  private interactKey!: Phaser.Input.Keyboard.Key
+  private portalGraphics: Phaser.GameObjects.Graphics | null = null
+  private portalGlow: number = 0
+  private confirmationShowing: boolean = false
 
   constructor() {
     super({ key: 'HouseScene' })
@@ -77,6 +83,11 @@ export class HouseScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
+    
+    // Add interact key for portal confirmation
+    if (this.input.keyboard) {
+      this.interactKey = this.input.keyboard.addKey('E')
+    }
   }
 
   handleResize(gameSize: any) {
@@ -129,12 +140,151 @@ export class HouseScene extends Phaser.Scene {
     const playerPos = { x: this.player.x, y: this.player.y }
     const isInsidePortal = this.isPointInPolygon(playerPos, this.exitPortal.coords)
     
-    if (isInsidePortal && !this.exitPortal.isActive) {
-      this.exitPortal.isActive = true
-      console.log('🚪 Entered exit portal - returning to main game')
+    if (isInsidePortal && !this.isNearPortal) {
+      this.isNearPortal = true
+      this.showPortalWarning()
+    } else if (!isInsidePortal && this.isNearPortal) {
+      this.isNearPortal = false
+      this.hidePortalWarning()
+    }
+    
+    // Check for interaction key press when near portal
+    if (this.isNearPortal && this.interactKey && Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+      this.showConfirmationDialog()
+    }
+  }
+  
+  showPortalWarning() {
+    if (this.portalWarning) return
+    
+    // Create warning container
+    this.portalWarning = this.add.container(this.player.x, this.player.y - 60)
+    this.portalWarning.setDepth(1000)
+    
+    // Create background for warning
+    const bg = this.add.rectangle(0, 0, 220, 40, 0x000000, 0.8)
+    bg.setStrokeStyle(2, 0xffff00)
+    
+    // Create warning text
+    const text = this.add.text(0, 0, 'Press E to Exit House', {
+      fontSize: '14px',
+      color: '#ffff00',
+      fontFamily: 'monospace'
+    })
+    text.setOrigin(0.5)
+    
+    this.portalWarning.add([bg, text])
+    
+    // Add floating animation
+    this.tweens.add({
+      targets: this.portalWarning,
+      y: this.player.y - 65,
+      duration: 1000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    })
+  }
+  
+  hidePortalWarning() {
+    if (this.portalWarning) {
+      this.portalWarning.destroy()
+      this.portalWarning = null
+    }
+  }
+  
+  showConfirmationDialog() {
+    if (this.confirmationShowing) return
+    this.confirmationShowing = true
+    
+    // Pause player movement
+    const wasMoving = this.player.active
+    this.player.setActive(false)
+    
+    // Create confirmation dialog
+    const dialogContainer = this.add.container(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY
+    )
+    dialogContainer.setDepth(2000)
+    
+    // Dialog background
+    const dialogBg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.9)
+    dialogBg.setStrokeStyle(3, 0xff0000)
+    
+    // Title
+    const title = this.add.text(0, -60, 'EXIT HOUSE?', {
+      fontSize: '24px',
+      color: '#ff0000',
+      fontFamily: 'monospace',
+      fontStyle: 'bold'
+    })
+    title.setOrigin(0.5)
+    
+    // Message
+    const message = this.add.text(0, -20, 'Are you sure you want to return\nto the main game?', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontFamily: 'monospace',
+      align: 'center'
+    })
+    message.setOrigin(0.5)
+    
+    // Yes button
+    const yesBtn = this.add.rectangle(-80, 40, 120, 40, 0x00ff00, 0.8)
+    yesBtn.setStrokeStyle(2, 0x00ff00)
+    yesBtn.setInteractive({ useHandCursor: true })
+    
+    const yesText = this.add.text(-80, 40, 'YES (Y)', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontFamily: 'monospace'
+    })
+    yesText.setOrigin(0.5)
+    
+    // No button
+    const noBtn = this.add.rectangle(80, 40, 120, 40, 0xff0000, 0.8)
+    noBtn.setStrokeStyle(2, 0xff0000)
+    noBtn.setInteractive({ useHandCursor: true })
+    
+    const noText = this.add.text(80, 40, 'NO (N)', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontFamily: 'monospace'
+    })
+    noText.setOrigin(0.5)
+    
+    dialogContainer.add([dialogBg, title, message, yesBtn, yesText, noBtn, noText])
+    
+    // Handle button clicks
+    yesBtn.on('pointerdown', () => {
+      dialogContainer.destroy()
       this.returnToMainGame()
-    } else if (!isInsidePortal && this.exitPortal.isActive) {
-      this.exitPortal.isActive = false
+    })
+    
+    noBtn.on('pointerdown', () => {
+      dialogContainer.destroy()
+      this.confirmationShowing = false
+      this.player.setActive(true)
+    })
+    
+    // Handle keyboard shortcuts
+    const yKey = this.input.keyboard?.addKey('Y')
+    const nKey = this.input.keyboard?.addKey('N')
+    
+    if (yKey) {
+      yKey.once('down', () => {
+        dialogContainer.destroy()
+        this.returnToMainGame()
+      })
+    }
+    
+    if (nKey) {
+      nKey.once('down', () => {
+        dialogContainer.destroy()
+        this.confirmationShowing = false
+        this.player.setActive(true)
+      })
     }
   }
 
@@ -146,7 +296,7 @@ export class HouseScene extends Phaser.Scene {
   }
 
   update() {
-    if (!this.player) return
+    if (!this.player || this.confirmationShowing) return
     
     // Simple movement system matching TestScene
     const speed = 5
@@ -184,6 +334,11 @@ export class HouseScene extends Phaser.Scene {
     // Check portal proximity
     this.checkPortalProximity()
     
+    // Update portal warning position if active
+    if (this.portalWarning && this.isNearPortal) {
+      this.portalWarning.x = this.player.x
+    }
+    
     // Keep player on screen
     const width = this.cameras.main.width
     const height = this.cameras.main.height
@@ -195,5 +350,38 @@ export class HouseScene extends Phaser.Scene {
   setExitPortal(coords: { x: number, y: number }[]) {
     this.exitPortal.coords = coords
     console.log('🚪 Exit portal set with', coords.length, 'coordinates')
+    
+    // Draw portal area visualization
+    if (this.portalGraphics) {
+      this.portalGraphics.destroy()
+    }
+    
+    if (coords.length > 0) {
+      this.portalGraphics = this.add.graphics()
+      this.portalGraphics.setDepth(0)
+      
+      // Draw subtle portal area
+      this.portalGraphics.lineStyle(2, 0x00ffff, 0.3)
+      this.portalGraphics.fillStyle(0x00ffff, 0.1)
+      
+      this.portalGraphics.beginPath()
+      this.portalGraphics.moveTo(coords[0].x, coords[0].y)
+      for (let i = 1; i < coords.length; i++) {
+        this.portalGraphics.lineTo(coords[i].x, coords[i].y)
+      }
+      this.portalGraphics.closePath()
+      this.portalGraphics.fillPath()
+      this.portalGraphics.strokePath()
+      
+      // Add pulsing effect
+      this.tweens.add({
+        targets: this.portalGraphics,
+        alpha: 0.3,
+        duration: 1500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      })
+    }
   }
 }
