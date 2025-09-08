@@ -112,14 +112,17 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
   if (!isActive) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] pointer-events-none">
-      {/* Debug Overlay - transparent and pointer-events only where needed */}
+    <>
+      {/* Debug Overlay - COMPLETELY TRANSPARENT, NO BACKGROUND */}
       <div 
         ref={containerRef}
-        className="absolute inset-0 cursor-crosshair pointer-events-auto"
+        className="fixed inset-0 z-[9998] cursor-crosshair"
         onClick={handleClick}
         onContextMenu={handleRightClick}
-        style={{ background: 'transparent' }}
+        style={{ 
+          background: 'transparent',
+          pointerEvents: 'auto'
+        }}
       >
         {/* Render points */}
         {points.map((point, index) => (
@@ -203,8 +206,8 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         ))}
       </div>
 
-      {/* Control Panel - smaller and with pointer events */}
-      <div className="absolute top-4 left-4 bg-black/90 p-3 rounded-lg border-2 border-red-500 text-white font-pixel text-xs max-w-xs pointer-events-auto">
+      {/* Control Panel - FIXED position, not absolute */}
+      <div className="fixed top-20 left-4 bg-black/90 p-3 rounded-lg border-2 border-red-500 text-white font-pixel text-xs max-w-xs z-[9999]" style={{ pointerEvents: 'auto' }}>
         <h3 className="text-sm text-red-400 mb-2">Portal Debugger</h3>
         
         <div className="space-y-1 mb-3 text-xs">
@@ -291,11 +294,11 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         )}
       </div>
 
-      {/* Minimized Instructions - just show key info */}
-      <div className="absolute bottom-4 right-4 bg-black/80 p-2 rounded-lg border border-gray-600 text-white font-pixel text-xs max-w-xs pointer-events-auto">
+      {/* Minimized Instructions - FIXED position */}
+      <div className="fixed bottom-4 right-4 bg-black/80 p-2 rounded-lg border border-gray-600 text-white font-pixel text-xs max-w-xs z-[9999]" style={{ pointerEvents: 'auto' }}>
         <p className="text-yellow-400">L-Click: Add point | R-Click: Clear</p>
         <p className="text-gray-300">Console logs coordinates</p>
       </div>
-    </div>
+    </>
   )
 }
