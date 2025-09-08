@@ -1269,9 +1269,11 @@ async function handleGetHousingData(walletAddress, env) {
       }
     }
     
-    // Always calculate fresh total burned from gambling sessions
-    const totalBurned = await calculateTotalBurned(walletAddress, env)
-    housingData.totalBurned = totalBurned
+    // Get total burned from user stats (faster than calculating from logs)
+    const userKey = `user:${walletAddress}`
+    const userStatsStr = await env.USER_STATS.get(userKey)
+    const userStats = userStatsStr ? JSON.parse(userStatsStr) : { totalGambled: 0 }
+    housingData.totalBurned = userStats.totalGambled || 0
     
     console.log('🏠 Retrieved housing data:', housingData)
     
@@ -1327,8 +1329,11 @@ async function handleHousePurchase(request, env) {
       housingData = JSON.parse(housingDataStr)
     }
     
-    // Always calculate fresh total burned from gambling sessions
-    housingData.totalBurned = await calculateTotalBurned(walletAddress, env)
+    // Get total burned from user stats (faster than calculating from logs)  
+    const userKey = `user:${walletAddress}`
+    const userStatsStr = await env.USER_STATS.get(userKey)
+    const userStats = userStatsStr ? JSON.parse(userStatsStr) : { totalGambled: 0 }
+    housingData.totalBurned = userStats.totalGambled || 0
     
     // Validate purchase
     const house = HOUSE_LEVELS[level - 1]
@@ -1422,10 +1427,7 @@ async function handleGetUserStats(walletAddress, env) {
   console.log('📊 Fetching user stats for:', walletAddress)
   
   try {
-    // Calculate total burned from gambling sessions
-    const totalBurned = await calculateTotalBurned(walletAddress, env)
-    
-    // Get additional user stats if they exist
+    // Get user stats first (faster than calculating from logs)
     const userKey = `user:${walletAddress}`
     const userStatsStr = await env.USER_STATS.get(userKey)
     
@@ -1439,6 +1441,9 @@ async function handleGetUserStats(walletAddress, env) {
     if (userStatsStr) {
       userStats = JSON.parse(userStatsStr)
     }
+    
+    // totalBurned equals totalGambled since each gambling session burns tokens
+    const totalBurned = userStats.totalGambled || 0
     
     const response = {
       walletAddress,

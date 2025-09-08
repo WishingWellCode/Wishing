@@ -3,6 +3,9 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
+
+const HouseCanvas = dynamic(() => import('@/components/HouseCanvas'), { ssr: false })
 
 interface HouseLevel {
   level: number
@@ -106,8 +109,7 @@ export default function House() {
     
     try {
       setLoading(true)
-      // TODO: Implement API call to fetch user housing data
-      const response = await fetch(`/api/housing/${publicKey.toString()}`)
+      const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}`)
       if (response.ok) {
         const data = await response.json()
         setOwnedLevels(data.ownedLevels || [])
@@ -269,16 +271,12 @@ export default function House() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div style={{
-        backgroundImage: 'url(/assets/backgrounds/house-interior.jpg), url(/assets/backgrounds/Realbackground.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        minHeight: '100vh',
-        backgroundColor: '#1a0b2e' // Fallback color
-      }}>
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* HouseCanvas for tier background and character movement */}
+        <HouseCanvas houseLevel={currentHouseLevel} />
+        
         {/* Header */}
-        <div className="flex justify-between items-center p-6 bg-black/60">
+        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-10">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.push('/')}
@@ -299,112 +297,84 @@ export default function House() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="container mx-auto px-6 py-8">
-          {/* House Display */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-black/80 rounded-lg overflow-hidden border-2 border-purple-500">
-              {/* House Image/Display */}
-              <div className="h-96 bg-gradient-to-b from-purple-900/50 to-black/50 flex items-center justify-center relative">
-                <div className="text-center">
-                  <div className="text-8xl mb-4">🏠</div>
-                  <h1 className="text-4xl font-pixel text-purple-400 mb-2">
-                    {currentHouse.name}
-                  </h1>
-                  <div className="text-lg font-pixel text-green-400">
-                    Level {currentHouse.level} • +{currentHouse.boostPercent}% Win Boost
-                  </div>
-                </div>
-                
-                {/* Level Selector */}
-                {ownedLevels.length > 1 && (
-                  <div className="absolute top-4 right-4">
-                    <select
-                      value={currentHouseLevel}
-                      onChange={(e) => {
-                        const newLevel = Number(e.target.value)
-                        setCurrentHouseLevel(newLevel)
-                        router.push(`/house?level=${newLevel}`, undefined, { shallow: true })
-                      }}
-                      className="bg-black/80 text-white font-pixel p-2 rounded border border-purple-500"
-                    >
-                      {ownedLevels.sort((a, b) => b - a).map(level => (
-                        <option key={level} value={level}>
-                          Level {level}: {HOUSE_LEVELS[level - 1].name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-              
-              {/* House Interior Description */}
-              <div className="p-8">
-                <h2 className="text-2xl font-pixel text-purple-400 mb-4">Your Home Interior</h2>
-                <p className="text-white font-pixel text-sm leading-relaxed mb-6">
-                  {currentHouse.interiorDescription}
-                </p>
-                
-                {/* House Stats */}
-                <div className="bg-purple-900/30 p-6 rounded-lg">
-                  <h3 className="text-xl font-pixel text-purple-400 mb-4">House Benefits</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div className="bg-black/50 p-4 rounded">
-                      <div className="text-2xl font-pixel text-green-400 mb-2">+{currentHouse.boostPercent}%</div>
-                      <div className="text-sm font-pixel text-white">Win Rate Boost</div>
-                    </div>
-                    <div className="bg-black/50 p-4 rounded">
-                      <div className="text-2xl font-pixel text-blue-400 mb-2">{currentHouse.cost.toLocaleString()}</div>
-                      <div className="text-sm font-pixel text-white">$WISH Invested</div>
-                    </div>
-                    <div className="bg-black/50 p-4 rounded">
-                      <div className="text-2xl font-pixel text-purple-400 mb-2">Level {currentHouse.level}</div>
-                      <div className="text-sm font-pixel text-white">House Level</div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="mt-8 text-center space-y-4">
-                  <div className="space-x-4">
-                    <button
-                      onClick={() => router.push('/')}
-                      className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded font-pixel"
-                    >
-                      Return to Game
-                    </button>
-                    <button
-                      onClick={() => router.push('/upgrades')}
-                      className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded font-pixel"
-                    >
-                      Upgrade House
-                    </button>
-                  </div>
-                  
-                  <p className="text-gray-400 font-pixel text-xs">
-                    More interactive features coming soon! For now, enjoy your +{currentHouse.boostPercent}% win boost when gambling.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Additional Info */}
-            <div className="mt-8 bg-black/80 p-6 rounded-lg border border-gray-600">
-              <h3 className="text-xl font-pixel text-purple-400 mb-4">About Your Housing Benefits</h3>
-              <p className="text-white font-pixel text-sm leading-relaxed mb-4">
-                Your house provides a permanent boost to your gambling odds at the Wishing Well. 
-                The {currentHouse.boostPercent}% boost from your {currentHouse.name} is applied automatically 
-                to every gambling session.
-              </p>
-              
-              {ownedLevels.length > 1 && (
-                <p className="text-green-400 font-pixel text-sm">
-                  You own {ownedLevels.length} house{ownedLevels.length > 1 ? 's' : ''}! 
-                  Total boost from all houses: +{ownedLevels.reduce((sum, level) => sum + HOUSE_LEVELS[level - 1].boostPercent, 0)}%
-                </p>
-              )}
+        {/* Game Controls Instruction */}
+        <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
+          <p>WASD/Arrow Keys - Move around your house</p>
+          <p>You are in your {currentHouse.name}</p>
+        </div>
+        
+        {/* Level Selector and House Info */}
+        <div className="absolute top-20 right-4 bg-black/80 p-4 rounded-lg border-2 border-purple-500 z-10">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-pixel text-purple-400 mb-1">
+              {currentHouse.name}
+            </h1>
+            <div className="text-sm font-pixel text-green-400">
+              Level {currentHouse.level} • +{currentHouse.boostPercent}% Win Boost
             </div>
           </div>
+          
+          {/* Level Selector */}
+          {ownedLevels.length > 1 && (
+            <div className="mb-4">
+              <select
+                value={currentHouseLevel}
+                onChange={(e) => {
+                  const newLevel = Number(e.target.value)
+                  setCurrentHouseLevel(newLevel)
+                  router.push(`/house?level=${newLevel}`, undefined, { shallow: true })
+                }}
+                className="w-full bg-black/80 text-white font-pixel p-2 rounded border border-purple-500 text-xs"
+              >
+                {ownedLevels.sort((a, b) => b - a).map(level => (
+                  <option key={level} value={level}>
+                    Level {level}: {HOUSE_LEVELS[level - 1].name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          {/* Action Buttons */}
+          <div className="space-y-2">
+            <button
+              onClick={() => router.push('/')}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded font-pixel text-xs"
+            >
+              Return to Game
+            </button>
+            <button
+              onClick={() => router.push('/upgrades')}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded font-pixel text-xs"
+            >
+              Upgrade House
+            </button>
+          </div>
+        </div>
+        
+        {/* House Info Panel (Bottom Right) */}
+        <div className="absolute bottom-4 right-4 bg-black/80 p-4 rounded-lg border border-gray-600 z-10 max-w-sm">
+          <h3 className="text-lg font-pixel text-purple-400 mb-2">House Benefits</h3>
+          <div className="text-white font-pixel text-xs leading-relaxed mb-3">
+            {currentHouse.interiorDescription}
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="bg-black/50 p-2 rounded">
+              <div className="text-lg font-pixel text-green-400 mb-1">+{currentHouse.boostPercent}%</div>
+              <div className="text-xs font-pixel text-white">Win Boost</div>
+            </div>
+            <div className="bg-black/50 p-2 rounded">
+              <div className="text-lg font-pixel text-blue-400 mb-1">{currentHouse.cost.toLocaleString()}</div>
+              <div className="text-xs font-pixel text-white">$WISH Cost</div>
+            </div>
+          </div>
+          
+          {ownedLevels.length > 1 && (
+            <p className="text-green-400 font-pixel text-xs mt-3">
+              Total boost: +{ownedLevels.reduce((sum, level) => sum + HOUSE_LEVELS[level - 1].boostPercent, 0)}%
+            </p>
+          )}
         </div>
       </div>
     </>
