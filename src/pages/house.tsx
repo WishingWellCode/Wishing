@@ -106,6 +106,37 @@ export default function House() {
   const [ownedLevels, setOwnedLevels] = useState<number[]>([])
   const [debugMode, setDebugMode] = useState(false)
   const houseCanvasRef = useRef<HouseCanvasRef>(null)
+  
+  // ALWAYS RENDER DEBUG BUTTON - No matter what state
+  const DebugButton = () => (
+    <>
+      <button
+        onClick={() => setDebugMode(!debugMode)}
+        className={`fixed top-4 right-4 z-[99999] px-8 py-4 rounded-lg font-pixel text-xl font-bold border-4 transition-all ${
+          debugMode 
+            ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
+            : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
+        }`}
+        style={{ 
+          fontSize: '20px',
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 99999
+        }}
+      >
+        {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
+      </button>
+      
+      {/* Portal Debugger */}
+      {debugMode && (
+        <PortalDebugger 
+          isActive={debugMode} 
+          onClose={() => setDebugMode(false)} 
+        />
+      )}
+    </>
+  )
 
   useEffect(() => {
     // Get house level from URL params or default to highest owned
@@ -154,17 +185,44 @@ export default function House() {
 
   if (loading) {
     return (
-      <div style={{ 
-        background: 'url(/assets/backgrounds/Realbackground.jpg)', 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div className="text-white text-2xl font-pixel">Loading your house...</div>
-      </div>
+      <>
+        <Head>
+          <title>Loading House - $WISH Wishing Well</title>
+        </Head>
+        <div style={{ 
+          background: 'url(/assets/backgrounds/Realbackground.jpg)', 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center', 
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative'
+        }}>
+          {/* DEBUG BUTTON ALWAYS VISIBLE - Even during loading */}
+          <button
+            onClick={() => setDebugMode(!debugMode)}
+            className={`absolute top-6 right-6 z-[9999] px-6 py-3 rounded font-pixel text-lg font-bold border-4 transition-all ${
+              debugMode 
+                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
+                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
+            }`}
+            style={{ fontSize: '16px' }}
+          >
+            {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
+          </button>
+          
+          {/* Portal Debugger */}
+          {debugMode && (
+            <PortalDebugger 
+              isActive={debugMode} 
+              onClose={() => setDebugMode(false)} 
+            />
+          )}
+          
+          <div className="text-white text-2xl font-pixel">Loading your house...</div>
+        </div>
+      </>
     )
   }
 
@@ -183,8 +241,30 @@ export default function House() {
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          position: 'relative'
         }}>
+          {/* DEBUG BUTTON ALWAYS VISIBLE - Even when not connected */}
+          <button
+            onClick={() => setDebugMode(!debugMode)}
+            className={`absolute top-6 right-6 z-[9999] px-6 py-3 rounded font-pixel text-lg font-bold border-4 transition-all ${
+              debugMode 
+                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
+                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
+            }`}
+            style={{ fontSize: '16px' }}
+          >
+            {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
+          </button>
+          
+          {/* Portal Debugger */}
+          {debugMode && (
+            <PortalDebugger 
+              isActive={debugMode} 
+              onClose={() => setDebugMode(false)} 
+            />
+          )}
+          
           <div className="text-center bg-black/80 p-8 rounded-lg">
             <h1 className="text-4xl font-pixel text-purple-400 mb-4">Your House</h1>
             <p className="text-white mb-6 font-pixel">Connect your wallet to visit your house</p>
@@ -290,17 +370,12 @@ export default function House() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* ALWAYS RENDER DEBUG BUTTON FIRST */}
+      <DebugButton />
+
       <div className="relative w-full h-screen overflow-hidden">
         {/* HouseCanvas for tier background and character movement */}
         <HouseCanvas ref={houseCanvasRef} houseLevel={currentHouseLevel} />
-        
-        {/* Portal Debugger */}
-        {debugMode && (
-          <PortalDebugger 
-            isActive={debugMode} 
-            onClose={() => setDebugMode(false)} 
-          />
-        )}
         
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-[100]">
@@ -320,17 +395,6 @@ export default function House() {
           </div>
           
           <div className="flex items-center gap-4">
-            {/* DEBUG BUTTON - MOVED TO TOP RIGHT */}
-            <button
-              onClick={() => setDebugMode(!debugMode)}
-              className={`px-4 py-2 rounded font-pixel text-sm font-bold border-2 transition-all ${
-                debugMode 
-                  ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-lg shadow-red-500/50' 
-                  : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-lg shadow-orange-500/50 animate-pulse'
-              }`}
-            >
-              {debugMode ? '❌ Close Debug' : '🔧 Debug Portal'}
-            </button>
             <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
           </div>
         </div>
