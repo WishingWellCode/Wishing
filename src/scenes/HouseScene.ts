@@ -328,41 +328,59 @@ export class HouseScene extends Phaser.Scene {
     }
   }
 
-  update() {
-    if (!this.player || this.confirmationShowing) return
+  update(time: number, delta: number) {
+    if (!this.player) return
+    // Allow movement even when dialog is showing
     
-    // Simple movement system matching TestScene
-    const speed = 5
+    // Smooth movement system with delta time normalization
+    // Base speed at 60fps, normalized for any refresh rate
+    const baseSpeed = 390 // pixels per second (6.5 * 60)
+    const speed = (baseSpeed * delta) / 1000 // Convert to pixels per frame
+    
+    let deltaX = 0
+    let deltaY = 0
     
     // Arrow keys
     if (this.cursors) {
       if (this.cursors.left.isDown) {
-        this.player.x -= speed
+        deltaX -= speed
       } else if (this.cursors.right.isDown) {
-        this.player.x += speed
+        deltaX += speed
       }
       
       if (this.cursors.up.isDown) {
-        this.player.y -= speed
+        deltaY -= speed
       } else if (this.cursors.down.isDown) {
-        this.player.y += speed
+        deltaY += speed
       }
     }
     
     // WASD keys
     if (this.wasd) {
       if (this.wasd.A.isDown) {
-        this.player.x -= speed
+        deltaX -= speed
       } else if (this.wasd.D.isDown) {
-        this.player.x += speed
+        deltaX += speed
       }
       
       if (this.wasd.W.isDown) {
-        this.player.y -= speed
+        deltaY -= speed
       } else if (this.wasd.S.isDown) {
-        this.player.y += speed
+        deltaY += speed
       }
     }
+    
+    // Apply diagonal movement normalization
+    if (deltaX !== 0 && deltaY !== 0) {
+      // Normalize diagonal movement to maintain consistent speed
+      const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      deltaX = (deltaX / length) * speed
+      deltaY = (deltaY / length) * speed
+    }
+    
+    // Apply movement
+    this.player.x += deltaX
+    this.player.y += deltaY
     
     // Check portal proximity
     this.checkPortalProximity()
@@ -389,60 +407,7 @@ export class HouseScene extends Phaser.Scene {
       this.portalGraphics.destroy()
     }
     
-    if (coords.length > 0) {
-      this.portalGraphics = this.add.graphics()
-      this.portalGraphics.setDepth(10) // Higher depth so it's visible
-      
-      // Draw highly visible portal area
-      this.portalGraphics.lineStyle(5, 0x00ffff, 1.0)
-      this.portalGraphics.fillStyle(0x00ffff, 0.3)
-      
-      this.portalGraphics.beginPath()
-      this.portalGraphics.moveTo(coords[0].x, coords[0].y)
-      for (let i = 1; i < coords.length; i++) {
-        this.portalGraphics.lineTo(coords[i].x, coords[i].y)
-      }
-      this.portalGraphics.closePath()
-      this.portalGraphics.fillPath()
-      this.portalGraphics.strokePath()
-      
-      // Add bright pulsing effect
-      this.tweens.add({
-        targets: this.portalGraphics,
-        alpha: 0.8,
-        duration: 800,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      })
-      
-      // Add portal text label
-      const portalText = this.add.text(
-        coords[0].x + 50,
-        coords[0].y - 30,
-        'EXIT PORTAL\nMove here to exit',
-        {
-          fontSize: '16px',
-          color: '#00ffff',
-          fontFamily: 'monospace',
-          backgroundColor: '#000000',
-          padding: { x: 10, y: 5 },
-          align: 'center'
-        }
-      )
-      portalText.setDepth(11)
-      
-      // Add text pulsing
-      this.tweens.add({
-        targets: portalText,
-        alpha: 0.7,
-        duration: 1200,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      })
-      
-      console.log('✅ Portal visualization created with coordinates:', coords)
-    }
+    // Portal area is now invisible - no visual indicators
+    console.log('✅ Portal area configured (invisible) with coordinates:', coords)
   }
 }

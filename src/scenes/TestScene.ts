@@ -1120,7 +1120,7 @@ export class TestScene extends Phaser.Scene {
     })
   }
 
-  update() {
+  update(time: number, delta: number) {
     // Check if player exists before updating
     if (!this.testPlayer) {
       // Check if wallet is now connected and create player
@@ -1131,38 +1131,55 @@ export class TestScene extends Phaser.Scene {
       return
     }
     
-    // Simple movement for the test rectangle
-    const speed = 5
+    // Smooth movement system with delta time normalization
+    // Base speed at 60fps, normalized for any refresh rate
+    const baseSpeed = 390 // pixels per second (6.5 * 60)
+    const speed = (baseSpeed * delta) / 1000 // Convert to pixels per frame
+    
+    let deltaX = 0
+    let deltaY = 0
     
     // Arrow keys
     if (this.cursors) {
       if (this.cursors.left.isDown) {
-        this.testPlayer.x -= speed
+        deltaX -= speed
       } else if (this.cursors.right.isDown) {
-        this.testPlayer.x += speed
+        deltaX += speed
       }
       
       if (this.cursors.up.isDown) {
-        this.testPlayer.y -= speed
+        deltaY -= speed
       } else if (this.cursors.down.isDown) {
-        this.testPlayer.y += speed
+        deltaY += speed
       }
     }
     
     // WASD keys
     if (this.wasd) {
       if (this.wasd.A.isDown) {
-        this.testPlayer.x -= speed
+        deltaX -= speed
       } else if (this.wasd.D.isDown) {
-        this.testPlayer.x += speed
+        deltaX += speed
       }
       
       if (this.wasd.W.isDown) {
-        this.testPlayer.y -= speed
+        deltaY -= speed
       } else if (this.wasd.S.isDown) {
-        this.testPlayer.y += speed
+        deltaY += speed
       }
     }
+    
+    // Apply diagonal movement normalization
+    if (deltaX !== 0 && deltaY !== 0) {
+      // Normalize diagonal movement to maintain consistent speed
+      const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      deltaX = (deltaX / length) * speed
+      deltaY = (deltaY / length) * speed
+    }
+    
+    // Apply movement
+    this.testPlayer.x += deltaX
+    this.testPlayer.y += deltaY
     
     // Check fountain proximity using polygon detection
     const wasNearFountain = this.isNearFountain

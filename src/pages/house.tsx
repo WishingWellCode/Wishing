@@ -309,10 +309,9 @@ export default function House() {
         {/* Game Controls Instruction */}
         <div className="absolute bottom-4 left-4 bg-black/80 p-4 rounded-lg border-2 border-purple-400 text-white font-pixel text-xs z-50">
           <p>WASD/Arrow Keys - Move around your house</p>
-          <p>P - Debug: Show player position in console</p>
           <p>ESC - Close dialog | ENTER - Confirm exit</p>
           <p>You are in your {currentHouse.name}</p>
-          <p className="text-cyan-400 mt-2">Move to the cyan portal area to exit</p>
+          <p className="text-yellow-400 mt-2">Move to the door area to exit</p>
         </div>
         
         {/* Level Selector and House Info */}
