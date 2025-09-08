@@ -816,17 +816,17 @@ async function getLeaderboard(env) {
             const payout = event.payout || 0
             const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            // For wins, prioritize showing payout tx (from pool to winner)
-            // For losses/break-even, show burn tx (from winner to burn address)
+            // For wins AND break-even, show payout tx (from pool to winner)
+            // For losses only, show burn tx (from winner to burn address)
             let txId = null
-            if (payout > 0) {
-              // For wins, only show payout transaction if it's real (not PROCESSING_)
+            if (payout >= 1000) {
+              // For wins and break-even, show payout transaction if it's real (not PROCESSING_)
               if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
-                txId = event.payoutTx  // Show payout transaction for wins
+                txId = event.payoutTx  // Show payout transaction for wins and break-even
               }
-              // If no valid payout tx, don't show any link for wins
+              // If no valid payout tx, don't show any link
             } else {
-              // For losses and break-even, show burn transaction
+              // For losses only, show burn transaction
               if (event.burnTx) {
                 txId = event.burnTx
               }
