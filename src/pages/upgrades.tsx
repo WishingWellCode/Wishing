@@ -186,12 +186,20 @@ export default function Upgrades() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #581c87, #0f172a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '64px', width: '64px', border: '4px solid #8b5cf6', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>Loading Housing District...</div>
+      <>
+        <style jsx global>{`
+          body {
+            overflow: auto !important;
+            overflow-x: hidden !important;
+          }
+        `}</style>
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #581c87, #0f172a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '64px', width: '64px', border: '4px solid #8b5cf6', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>Loading Housing District...</div>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -202,6 +210,13 @@ export default function Upgrades() {
           <title>Housing Upgrades - $WISH Wishing Well</title>
           <meta name="description" content="Upgrade your housing to boost your gambling odds!" />
         </Head>
+        
+        <style jsx global>{`
+          body {
+            overflow: auto !important;
+            overflow-x: hidden !important;
+          }
+        `}</style>
         
         <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #581c87, #0f172a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '48px', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxWidth: '400px' }}>
@@ -230,6 +245,13 @@ export default function Upgrades() {
       </Head>
 
       {/* Fallback CSS - Ensures page always renders correctly even if Tailwind fails */}
+      <style jsx global>{`
+        /* Override global body overflow hidden for upgrades page */
+        body {
+          overflow: auto !important;
+          overflow-x: hidden !important;
+        }
+      `}</style>
       <style jsx>{`
         .fallback-container {
           min-height: 100vh;
