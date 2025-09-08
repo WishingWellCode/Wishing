@@ -24,6 +24,7 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
   }, [isActive])
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
     if (!containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
@@ -35,6 +36,11 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
     setNextId(prev => prev + 1)
 
     console.log(`📍 Point ${nextId}: {x: ${x}, y: ${y}}`)
+  }
+
+  const handleRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    clearPoints()
   }
 
   const clearPoints = () => {
@@ -112,22 +118,39 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         ref={containerRef}
         className="absolute inset-0 cursor-crosshair"
         onClick={handleClick}
+        onContextMenu={handleRightClick}
         style={{ background: 'transparent' }}
       >
         {/* Render points */}
         {points.map((point, index) => (
           <div key={point.id}>
-            {/* Point marker */}
+            {/* Point marker - made much more visual */}
             <div
-              className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-white text-xs font-bold pointer-events-none"
+              className="absolute bg-red-500 border-4 border-white rounded-full flex items-center justify-center text-white font-bold pointer-events-none shadow-lg"
               style={{
-                left: point.x - 8,
-                top: point.y - 8,
-                fontSize: '10px'
+                width: '24px',
+                height: '24px',
+                left: point.x - 12,
+                top: point.y - 12,
+                fontSize: '12px',
+                boxShadow: '0 0 10px rgba(255,0,0,0.8), 0 0 20px rgba(255,0,0,0.4)',
+                zIndex: 10000
               }}
             >
               {point.id}
             </div>
+            
+            {/* Pulsing ring animation */}
+            <div
+              className="absolute border-2 border-red-400 rounded-full pointer-events-none animate-ping"
+              style={{
+                width: '32px',
+                height: '32px',
+                left: point.x - 16,
+                top: point.y - 16,
+                zIndex: 9999
+              }}
+            />
             
             {/* Line to next point */}
             {index < points.length - 1 && (
@@ -146,8 +169,9 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
                   x2={points[index + 1].x}
                   y2={points[index + 1].y}
                   stroke="red"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
+                  strokeWidth="4"
+                  strokeDasharray="8,4"
+                  style={{ filter: 'drop-shadow(0px 0px 4px rgba(255,0,0,0.6))' }}
                 />
               </svg>
             )}
@@ -169,8 +193,9 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
                   x2={points[0].x}
                   y2={points[0].y}
                   stroke="red"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
+                  strokeWidth="4"
+                  strokeDasharray="8,4"
+                  style={{ filter: 'drop-shadow(0px 0px 4px rgba(255,0,0,0.6))' }}
                 />
               </svg>
             )}
@@ -183,7 +208,8 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         <h3 className="text-lg text-red-400 mb-3">Portal Area Debugger</h3>
         
         <div className="space-y-2 mb-4">
-          <p>Click to add points ({points.length} points)</p>
+          <p>LEFT CLICK: Add point ({points.length} points)</p>
+          <p>RIGHT CLICK: Clear all points</p>
           <p className="text-yellow-400">
             {points.length === 0 && "Start clicking to map the portal area"}
             {points.length === 1 && "Need at least 2 more points"}
@@ -269,9 +295,10 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
       <div className="absolute top-4 right-4 bg-black/90 p-4 rounded-lg border border-gray-600 text-white font-pixel text-xs max-w-xs">
         <h4 className="text-yellow-400 mb-2">Instructions:</h4>
         <ul className="space-y-1 text-xs">
-          <li>• Click around the portal area perimeter</li>
-          <li>• Points will be connected in order</li>
-          <li>• Minimum 3 points needed</li>
+          <li>• LEFT CLICK: Add points around portal area</li>
+          <li>• RIGHT CLICK: Clear all points</li>
+          <li>• Points connect in order with glowing lines</li>
+          <li>• Minimum 3 points needed for polygon</li>
           <li>• Check console for coordinates</li>
           <li>• Export when done mapping</li>
         </ul>

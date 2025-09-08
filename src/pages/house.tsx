@@ -325,14 +325,18 @@ export default function House() {
         </div>
 
         {/* Game Controls Instruction */}
-        <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
+        <div className="absolute bottom-4 left-4 bg-black/80 p-4 rounded-lg border-2 border-purple-400 text-white font-pixel text-xs z-50">
           <p>WASD/Arrow Keys - Move around your house</p>
           <p>You are in your {currentHouse.name}</p>
           <button
             onClick={() => setDebugMode(!debugMode)}
-            className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs"
+            className={`mt-3 px-4 py-2 rounded font-pixel text-sm font-bold border-2 transition-all ${
+              debugMode 
+                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-lg shadow-red-500/50' 
+                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-lg shadow-orange-500/50 animate-pulse'
+            }`}
           >
-            {debugMode ? 'Close Debug' : 'Debug Portal'}
+            {debugMode ? '❌ Close Debug' : '🔧 Debug Portal'}
           </button>
         </div>
         
