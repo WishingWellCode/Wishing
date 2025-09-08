@@ -135,33 +135,28 @@ export class HouseScene extends Phaser.Scene {
   }
 
   checkPortalProximity() {
-    if (this.exitPortal.coords.length === 0) {
-      console.log('No portal coords set')
-      return
-    }
+    if (this.exitPortal.coords.length === 0) return
     
     const playerPos = { x: this.player.x, y: this.player.y }
     const isInsidePortal = this.isPointInPolygon(playerPos, this.exitPortal.coords)
     
     // Debug logging
     if (Math.floor(this.game.loop.frame) % 60 === 0) { // Log every second
-      console.log('Player pos:', playerPos, 'Inside portal:', isInsidePortal, 'Portal coords:', this.exitPortal.coords.length)
+      console.log('Player pos:', playerPos, 'Inside portal:', isInsidePortal)
     }
     
-    if (isInsidePortal && !this.isNearPortal) {
+    if (isInsidePortal && !this.exitPortal.isActive) {
+      // Entering portal - immediate trigger like TestScene
+      this.exitPortal.isActive = true
       this.isNearPortal = true
-      console.log('🚪 Player entered portal area')
-      this.showPortalWarning()
-    } else if (!isInsidePortal && this.isNearPortal) {
-      this.isNearPortal = false
-      console.log('🚪 Player left portal area')
-      this.hidePortalWarning()
-    }
-    
-    // Check for interaction key press when near portal
-    if (this.isNearPortal && this.interactKey && Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-      console.log('🚪 E key pressed near portal')
+      console.log('🚪 Entered exit portal - showing confirmation')
       this.showConfirmationDialog()
+    } else if (!isInsidePortal && this.exitPortal.isActive) {
+      // Leaving portal
+      this.exitPortal.isActive = false
+      this.isNearPortal = false
+      console.log('🚪 Left exit portal')
+      this.hidePortalWarning()
     }
   }
   
@@ -207,20 +202,17 @@ export class HouseScene extends Phaser.Scene {
   showConfirmationDialog() {
     if (this.confirmationShowing) return
     this.confirmationShowing = true
+    console.log('🚪 Showing exit confirmation dialog')
     
-    // Pause player movement
-    const wasMoving = this.player.active
-    this.player.setActive(false)
-    
-    // Create confirmation dialog
+    // Create confirmation dialog container
     const dialogContainer = this.add.container(
       this.cameras.main.centerX,
       this.cameras.main.centerY
     )
     dialogContainer.setDepth(2000)
     
-    // Dialog background
-    const dialogBg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.9)
+    // Dialog background  
+    const dialogBg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.95)
     dialogBg.setStrokeStyle(3, 0xff0000)
     
     // Title
@@ -233,7 +225,7 @@ export class HouseScene extends Phaser.Scene {
     title.setOrigin(0.5)
     
     // Message
-    const message = this.add.text(0, -20, 'Are you sure you want to return\nto the main game?', {
+    const message = this.add.text(0, -20, 'Return to the main game?', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -246,7 +238,7 @@ export class HouseScene extends Phaser.Scene {
     yesBtn.setStrokeStyle(2, 0x00ff00)
     yesBtn.setInteractive({ useHandCursor: true })
     
-    const yesText = this.add.text(-80, 40, 'YES (Y)', {
+    const yesText = this.add.text(-80, 40, 'YES', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace'
@@ -255,10 +247,10 @@ export class HouseScene extends Phaser.Scene {
     
     // No button
     const noBtn = this.add.rectangle(80, 40, 120, 40, 0xff0000, 0.8)
-    noBtn.setStrokeStyle(2, 0xff0000)
+    noBtn.setStrokeStyle(2, 0xff0000) 
     noBtn.setInteractive({ useHandCursor: true })
     
-    const noText = this.add.text(80, 40, 'NO (N)', {
+    const noText = this.add.text(80, 40, 'NO', {
       fontSize: '16px',
       color: '#ffffff',
       fontFamily: 'monospace'
@@ -268,35 +260,25 @@ export class HouseScene extends Phaser.Scene {
     dialogContainer.add([dialogBg, title, message, yesBtn, yesText, noBtn, noText])
     
     // Handle button clicks
-    yesBtn.on('pointerdown', () => {
+    const handleYes = () => {
+      console.log('✅ User confirmed exit')
       dialogContainer.destroy()
       this.returnToMainGame()
-    })
+    }
     
-    noBtn.on('pointerdown', () => {
+    const handleNo = () => {
+      console.log('❌ User cancelled exit')
       dialogContainer.destroy()
       this.confirmationShowing = false
-      this.player.setActive(true)
-    })
-    
-    // Handle keyboard shortcuts
-    const yKey = this.input.keyboard?.addKey('Y')
-    const nKey = this.input.keyboard?.addKey('N')
-    
-    if (yKey) {
-      yKey.once('down', () => {
-        dialogContainer.destroy()
-        this.returnToMainGame()
-      })
+      // Reset portal state so it can trigger again
+      this.exitPortal.isActive = false
+      this.isNearPortal = false
     }
     
-    if (nKey) {
-      nKey.once('down', () => {
-        dialogContainer.destroy()
-        this.confirmationShowing = false
-        this.player.setActive(true)
-      })
-    }
+    yesBtn.on('pointerdown', handleYes)
+    yesText.on('pointerdown', handleYes)
+    noBtn.on('pointerdown', handleNo)
+    noText.on('pointerdown', handleNo)
   }
 
   returnToMainGame() {
@@ -369,11 +351,11 @@ export class HouseScene extends Phaser.Scene {
     
     if (coords.length > 0) {
       this.portalGraphics = this.add.graphics()
-      this.portalGraphics.setDepth(0)
+      this.portalGraphics.setDepth(10) // Higher depth so it's visible
       
-      // Draw more visible portal area
-      this.portalGraphics.lineStyle(3, 0x00ffff, 0.8)
-      this.portalGraphics.fillStyle(0x00ffff, 0.2)
+      // Draw highly visible portal area
+      this.portalGraphics.lineStyle(5, 0x00ffff, 1.0)
+      this.portalGraphics.fillStyle(0x00ffff, 0.3)
       
       this.portalGraphics.beginPath()
       this.portalGraphics.moveTo(coords[0].x, coords[0].y)
@@ -384,11 +366,37 @@ export class HouseScene extends Phaser.Scene {
       this.portalGraphics.fillPath()
       this.portalGraphics.strokePath()
       
-      // Add pulsing effect
+      // Add bright pulsing effect
       this.tweens.add({
         targets: this.portalGraphics,
-        alpha: 0.6,
-        duration: 1000,
+        alpha: 0.8,
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      })
+      
+      // Add portal text label
+      const portalText = this.add.text(
+        coords[0].x + 50,
+        coords[0].y - 30,
+        'EXIT PORTAL\nMove here to exit',
+        {
+          fontSize: '16px',
+          color: '#00ffff',
+          fontFamily: 'monospace',
+          backgroundColor: '#000000',
+          padding: { x: 10, y: 5 },
+          align: 'center'
+        }
+      )
+      portalText.setDepth(11)
+      
+      // Add text pulsing
+      this.tweens.add({
+        targets: portalText,
+        alpha: 0.7,
+        duration: 1200,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut'
