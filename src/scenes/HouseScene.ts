@@ -15,6 +15,7 @@ export class HouseScene extends Phaser.Scene {
   private portalGraphics: Phaser.GameObjects.Graphics | null = null
   private portalGlow: number = 0
   private confirmationShowing: boolean = false
+  public sceneReady: boolean = false
 
   constructor() {
     super({ key: 'HouseScene' })
@@ -36,6 +37,8 @@ export class HouseScene extends Phaser.Scene {
   }
 
   create() {
+    console.log('🎬 HouseScene create() started for level', this.houseLevel)
+    
     // Clean up any existing background
     const existingBg = this.children.getByName('houseBackground') as Phaser.GameObjects.Image
     if (existingBg) {
@@ -107,6 +110,10 @@ export class HouseScene extends Phaser.Scene {
         })
       })
     }
+    
+    // Mark scene as ready
+    this.sceneReady = true
+    console.log('✅ HouseScene is ready!')
   }
 
   handleResize(gameSize: any) {

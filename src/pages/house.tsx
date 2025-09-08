@@ -115,25 +115,58 @@ export default function House() {
   // Set up exit portal when house level changes
   useEffect(() => {
     const setupExitPortal = () => {
-      const coords = getExitPortalCoords()
-      const scene = houseCanvasRef.current?.getHouseScene()
-      console.log('🔍 Setting up portal - Scene:', !!scene, 'Coords:', coords.length)
-      if (scene && coords.length > 0) {
-        scene.setExitPortal(coords)
-        console.log('🚪 Exit portal activated for house level', currentHouseLevel, 'with', coords.length, 'coordinates')
-      } else {
-        console.log('❌ Failed to set portal - Scene:', !!scene, 'Coords length:', coords.length)
+      try {
+        const coords = getExitPortalCoords()
+        
+        // Check if ref exists first
+        if (!houseCanvasRef.current) {
+          console.log('⏳ HouseCanvas ref not ready yet')
+          return false
+        }
+        
+        // Check if getHouseScene method exists
+        if (typeof houseCanvasRef.current.getHouseScene !== 'function') {
+          console.log('⏳ getHouseScene method not available yet')
+          return false
+        }
+        
+        const scene = houseCanvasRef.current.getHouseScene()
+        console.log('🔍 Setting up portal - Scene:', !!scene, 'Coords:', coords.length)
+        
+        if (scene && scene.sceneReady && coords.length > 0) {
+          scene.setExitPortal(coords)
+          console.log('🚪 Exit portal activated for house level', currentHouseLevel, 'with', coords.length, 'coordinates')
+          return true // Success
+        } else {
+          console.log('⏳ Scene not ready yet - Scene:', !!scene, 'Scene ready:', scene?.sceneReady, 'Coords length:', coords.length)
+          return false
+        }
+      } catch (error) {
+        console.error('❌ Error setting up portal:', error)
+        return false
       }
     }
     
-    // Multiple attempts with increasing delays to ensure scene is ready
-    const timers = [
-      setTimeout(setupExitPortal, 100),
-      setTimeout(setupExitPortal, 500),
-      setTimeout(setupExitPortal, 1000)
-    ]
+    // Keep trying until successful
+    let attemptCount = 0
+    const maxAttempts = 20
     
-    return () => timers.forEach(timer => clearTimeout(timer))
+    const trySetup = () => {
+      attemptCount++
+      console.log(`🔄 Portal setup attempt ${attemptCount}/${maxAttempts}`)
+      
+      const success = setupExitPortal()
+      if (!success && attemptCount < maxAttempts) {
+        // Try again with exponential backoff
+        const delay = Math.min(100 * Math.pow(1.5, attemptCount), 3000)
+        return setTimeout(trySetup, delay)
+      }
+    }
+    
+    // Start trying after initial delay
+    const timer = setTimeout(trySetup, 200)
+    
+    return () => clearTimeout(timer)
   }, [currentHouseLevel])
 
   useEffect(() => {
