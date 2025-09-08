@@ -588,8 +588,23 @@ async function handleFountainResolve(request, env) {
       // Send payout and WAIT for the transaction ID
       payoutTx = await sendPayout(env, session.walletAddress, payout)
       console.log(`✅ Successfully sent ${payout} $WISH payout with tx: ${payoutTx}`)
+      
+      // Store payout transaction ID in dedicated KV storage
+      if (payoutTx) {
+        const payoutKey = `payout:${session.walletAddress}:${Date.now()}`
+        const payoutData = {
+          txId: payoutTx,
+          sessionId,
+          walletAddress: session.walletAddress,
+          amount: payout,
+          timestamp: Date.now()
+        }
+        await env.GAMBLE_LOGS.put(payoutKey, JSON.stringify(payoutData))
+        console.log(`💾 Stored payout tx ${payoutTx} with key ${payoutKey}`)
+      }
     } catch (error) {
       console.error('❌ Failed to send payout:', error.message || error)
+      console.error('Full error:', error)
       // If payout fails, log it but continue (user still burned tokens)
       payoutTx = null
     }
@@ -790,6 +805,29 @@ async function getLeaderboard(env) {
       limit: 1000  // Get more entries to ensure we have recent ones
     })
     
+    // Also get payout transactions
+    const payoutList = await env.GAMBLE_LOGS.list({
+      prefix: 'payout:',
+      limit: 1000
+    })
+    
+    // Create a map of wallet+timestamp to payout txId for quick lookup
+    const payoutMap = new Map()
+    for (const key of payoutList.keys) {
+      try {
+        const payoutData = await env.GAMBLE_LOGS.get(key.name)
+        if (payoutData) {
+          const payout = JSON.parse(payoutData)
+          // Create a lookup key based on wallet and approximate timestamp
+          const lookupKey = `${payout.walletAddress}:${Math.floor(payout.timestamp / 10000)}`
+          payoutMap.set(lookupKey, payout.txId)
+          console.log(`📝 Found payout tx: ${payout.txId} for ${payout.walletAddress}`)
+        }
+      } catch (e) {
+        console.warn(`Failed to parse payout: ${key.name}`)
+      }
+    }
+    
     // Sort keys by timestamp (most recent first) and take top 100
     const sortedKeys = list.keys.sort((a, b) => {
       // Extract timestamp from key format: gamble:wallet:timestamp
@@ -814,11 +852,22 @@ async function getLeaderboard(env) {
             if (payout >= 1000) {
               // For wins and break-even, show payout transaction from pool wallet
               let txId = null
+              
+              // First check if we have a valid payoutTx in the event
               if (event.payoutTx && event.payoutTx.length > 20 && !event.payoutTx.startsWith('PROCESSING_')) {
-                txId = event.payoutTx  // Show payout transaction for wins
-                console.log(`🔗 Using payout tx for display: ${txId}`)
-              } else {
-                console.log(`⚠️ No valid payout tx for ${event.walletAddress}, payoutTx: ${event.payoutTx}`)
+                txId = event.payoutTx
+                console.log(`🔗 Using event payout tx: ${txId}`)
+              } 
+              // Otherwise check the payout map
+              else {
+                const lookupKey = `${event.walletAddress}:${Math.floor(event.timestamp / 10000)}`
+                const mappedTx = payoutMap.get(lookupKey)
+                if (mappedTx) {
+                  txId = mappedTx
+                  console.log(`🔗 Found payout tx in map: ${txId}`)
+                } else {
+                  console.log(`⚠️ No payout tx found for ${event.walletAddress} at ${event.timestamp}`)
+                }
               }
               
               const result = {
@@ -978,6 +1027,7 @@ async function sendPayout(env, recipientWalletAddress, amount) {
     // Don't throw - transaction was likely successful even if confirmation timed out
   }
   
+  console.log(`🔄 Returning payout transaction signature: ${signature}`)
   return signature
 }
 
