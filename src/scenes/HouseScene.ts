@@ -68,12 +68,20 @@ export class HouseScene extends Phaser.Scene {
     this.scale.on('resize', this.handleResize, this)
     
     // Create player character - green rectangle like in TestScene
-    this.player = this.add.rectangle(
-      this.cameras.main.centerX, 
-      this.cameras.main.centerY + 100,
-      32, 32, 0x00ff00
-    )
+    const spawnX = this.cameras.main.centerX
+    const spawnY = this.cameras.main.centerY + 100
+    
+    this.player = this.add.rectangle(spawnX, spawnY, 32, 32, 0x00ff00)
     this.player.setDepth(1)
+    
+    // Debug logging for spawn position and screen size
+    console.log('🎮 Player spawned at:', { x: spawnX, y: spawnY })
+    console.log('📐 Camera dimensions:', { 
+      width: this.cameras.main.width, 
+      height: this.cameras.main.height,
+      centerX: this.cameras.main.centerX,
+      centerY: this.cameras.main.centerY
+    })
     
     // Setup controls
     if (this.input.keyboard) {
@@ -87,6 +95,17 @@ export class HouseScene extends Phaser.Scene {
     // Add interact key for portal confirmation
     if (this.input.keyboard) {
       this.interactKey = this.input.keyboard.addKey('E')
+      
+      // Add debug key to show player position
+      const debugKey = this.input.keyboard.addKey('P')
+      debugKey.on('down', () => {
+        console.log('🎮 DEBUG - Player position:', { x: this.player.x, y: this.player.y })
+        console.log('🚪 DEBUG - Portal coords:', this.exitPortal.coords)
+        console.log('📐 DEBUG - Screen size:', { 
+          width: this.cameras.main.width, 
+          height: this.cameras.main.height 
+        })
+      })
     }
   }
 
@@ -140,16 +159,16 @@ export class HouseScene extends Phaser.Scene {
     const playerPos = { x: this.player.x, y: this.player.y }
     const isInsidePortal = this.isPointInPolygon(playerPos, this.exitPortal.coords)
     
-    // Debug logging
-    if (Math.floor(this.game.loop.frame) % 60 === 0) { // Log every second
-      console.log('Player pos:', playerPos, 'Inside portal:', isInsidePortal)
+    // Debug logging every 3 seconds
+    if (Math.floor(this.game.loop.frame) % 180 === 0) { 
+      console.log('🔍 Portal check - Player:', playerPos, 'Inside portal:', isInsidePortal, 'Portal active:', this.exitPortal.isActive)
     }
     
     if (isInsidePortal && !this.exitPortal.isActive) {
       // Entering portal - immediate trigger like TestScene
       this.exitPortal.isActive = true
       this.isNearPortal = true
-      console.log('🚪 Entered exit portal - showing confirmation')
+      console.log('🚪 PORTAL TRIGGERED - Player entered portal area!')
       this.showConfirmationDialog()
     } else if (!isInsidePortal && this.exitPortal.isActive) {
       // Leaving portal
@@ -342,7 +361,7 @@ export class HouseScene extends Phaser.Scene {
   // Method to set exit portal coordinates (called from React component)
   setExitPortal(coords: { x: number, y: number }[]) {
     this.exitPortal.coords = coords
-    console.log('🚪 Exit portal set with', coords.length, 'coordinates')
+    console.log('🚪 Exit portal set with', coords.length, 'coordinates:', coords)
     
     // Draw portal area visualization
     if (this.portalGraphics) {

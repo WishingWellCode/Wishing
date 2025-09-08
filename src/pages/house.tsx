@@ -10,12 +10,12 @@ const HouseCanvas = dynamic(() => import('@/components/HouseCanvas'), { ssr: fal
 import type { HouseCanvasRef } from '@/components/HouseCanvas'
 
 // Exit portal coordinates - same for all house levels
-// Positioned in the center-bottom area where the player typically starts
+// TEMPORARY: Very large portal area for debugging
 const EXIT_PORTAL_COORDS: { x: number, y: number }[] = [
-  {x: 400, y: 600},
-  {x: 800, y: 600},
-  {x: 800, y: 700},
-  {x: 400, y: 700}
+  {x: 200, y: 400},
+  {x: 1200, y: 400},
+  {x: 1200, y: 800},
+  {x: 200, y: 800}
 ]
 
 function getExitPortalCoords(): { x: number, y: number }[] {
@@ -325,8 +325,10 @@ export default function House() {
         {/* Game Controls Instruction */}
         <div className="absolute bottom-4 left-4 bg-black/80 p-4 rounded-lg border-2 border-purple-400 text-white font-pixel text-xs z-50">
           <p>WASD/Arrow Keys - Move around your house</p>
+          <p>P - Debug: Show player position in console</p>
           <p>You are in your {currentHouse.name}</p>
           <p className="text-cyan-400 mt-2">Move to the cyan portal area to exit</p>
+          <p className="text-red-400 mt-1">Large debug portal active</p>
         </div>
         
         {/* Level Selector and House Info */}
