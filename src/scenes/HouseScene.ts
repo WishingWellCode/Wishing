@@ -15,6 +15,7 @@ export class HouseScene extends Phaser.Scene {
   private portalGraphics: Phaser.GameObjects.Graphics | null = null
   private portalGlow: number = 0
   private confirmationShowing: boolean = false
+  private confirmationDialog: Phaser.GameObjects.Container | null = null
   public sceneReady: boolean = false
 
   constructor() {
@@ -168,21 +169,19 @@ export class HouseScene extends Phaser.Scene {
     
     // Debug logging every 3 seconds
     if (Math.floor(this.game.loop.frame) % 180 === 0) { 
-      console.log('🔍 Portal check - Player:', playerPos, 'Inside portal:', isInsidePortal, 'Portal active:', this.exitPortal.isActive)
+      console.log('🔍 Portal check - Player:', playerPos, 'Inside portal:', isInsidePortal, 'Dialog showing:', this.confirmationShowing)
     }
     
-    if (isInsidePortal && !this.exitPortal.isActive) {
-      // Entering portal - immediate trigger like TestScene
+    if (isInsidePortal && !this.confirmationShowing) {
+      // Entering portal - show dialog
       this.exitPortal.isActive = true
       this.isNearPortal = true
       console.log('🚪 PORTAL TRIGGERED - Player entered portal area!')
       this.showConfirmationDialog()
-    } else if (!isInsidePortal && this.exitPortal.isActive) {
-      // Leaving portal
-      this.exitPortal.isActive = false
-      this.isNearPortal = false
-      console.log('🚪 Left exit portal')
-      this.hidePortalWarning()
+    } else if (!isInsidePortal && this.confirmationShowing) {
+      // Left portal while dialog is showing - close dialog
+      console.log('🚪 Left portal area - closing dialog')
+      this.closeConfirmationDialog()
     }
   }
   
@@ -231,11 +230,11 @@ export class HouseScene extends Phaser.Scene {
     console.log('🚪 Showing exit confirmation dialog')
     
     // Create confirmation dialog container
-    const dialogContainer = this.add.container(
+    this.confirmationDialog = this.add.container(
       this.cameras.main.centerX,
       this.cameras.main.centerY
     )
-    dialogContainer.setDepth(2000)
+    this.confirmationDialog.setDepth(2000)
     
     // Dialog background - make it interactive to block clicks behind
     const dialogBg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.95)
@@ -286,23 +285,18 @@ export class HouseScene extends Phaser.Scene {
     noText.setOrigin(0.5)
     noText.setInteractive({ useHandCursor: true })
     
-    dialogContainer.add([dialogBg, title, message, yesBtn, yesText, noBtn, noText])
+    this.confirmationDialog.add([dialogBg, title, message, yesBtn, yesText, noBtn, noText])
     
     // Handle button clicks
     const handleYes = () => {
       console.log('✅ User confirmed exit')
-      dialogContainer.destroy()
-      this.confirmationShowing = false
+      this.closeConfirmationDialog()
       this.returnToMainGame()
     }
     
     const handleNo = () => {
       console.log('❌ User cancelled exit')
-      dialogContainer.destroy()
-      this.confirmationShowing = false
-      // Reset portal state so it can trigger again
-      this.exitPortal.isActive = false
-      this.isNearPortal = false
+      this.closeConfirmationDialog()
     }
     
     // Add event handlers
@@ -319,6 +313,17 @@ export class HouseScene extends Phaser.Scene {
       const enterKey = this.input.keyboard.addKey('ENTER')
       enterKey.once('down', handleYes)
     }
+  }
+  
+  closeConfirmationDialog() {
+    if (this.confirmationDialog) {
+      this.confirmationDialog.destroy()
+      this.confirmationDialog = null
+    }
+    this.confirmationShowing = false
+    // Reset portal state so it can trigger again
+    this.exitPortal.isActive = false
+    this.isNearPortal = false
   }
 
   returnToMainGame() {
