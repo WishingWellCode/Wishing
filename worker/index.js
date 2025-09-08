@@ -340,6 +340,15 @@ export default {
       return handleGetHousingData(walletAddress, env)
     }
     
+    // User stats API route
+    if (url.pathname.startsWith('/api/user/') && url.pathname.endsWith('/stats')) {
+      const pathParts = url.pathname.split('/')
+      if (pathParts.length === 5) {
+        const walletAddress = pathParts[3]
+        return handleGetUserStats(walletAddress, env)
+      }
+    }
+    
     return new Response('Not Found', { 
       status: 404,
       headers: { 'Access-Control-Allow-Origin': '*' }
@@ -1419,26 +1428,84 @@ async function handleHousePurchase(request, env) {
   }
 }
 
+async function handleGetUserStats(walletAddress, env) {
+  console.log('📊 Fetching user stats for:', walletAddress)
+  
+  try {
+    // Calculate total burned from gambling sessions
+    const totalBurned = await calculateTotalBurned(walletAddress, env)
+    
+    // Get additional user stats if they exist
+    const userKey = `user:${walletAddress}`
+    const userStatsStr = await env.USER_STATS.get(userKey)
+    
+    let userStats = {
+      totalGambled: 0,
+      totalWon: 0,
+      gamesPlayed: 0,
+      biggestWin: 0
+    }
+    
+    if (userStatsStr) {
+      userStats = JSON.parse(userStatsStr)
+    }
+    
+    const response = {
+      walletAddress,
+      totalBurned,
+      ...userStats,
+      timestamp: Date.now()
+    }
+    
+    console.log('📊 User stats response:', response)
+    
+    return new Response(JSON.stringify(response), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ Error fetching user stats:', error)
+    return new Response(JSON.stringify({ 
+      error: 'Failed to fetch user stats',
+      walletAddress,
+      totalBurned: 0,
+      timestamp: Date.now()
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+}
+
 async function calculateTotalBurned(walletAddress, env) {
   console.log('🔥 Calculating total burned for:', walletAddress)
   
   try {
     // Get all gambling logs for this wallet
-    const listResult = await env.GAMBLE_LOGS.list({ prefix: `session:${walletAddress}:` })
+    const listResult = await env.GAMBLE_LOGS.list({ prefix: `gamble:${walletAddress}:` })
     
     let totalBurned = 0
     
     for (const key of listResult.keys) {
       try {
-        const sessionData = await env.GAMBLE_LOGS.get(key.name)
-        if (sessionData) {
-          const session = JSON.parse(sessionData)
-          if (session.exactStake && session.status === 'resolved') {
-            totalBurned += session.exactStake
+        const gambleData = await env.GAMBLE_LOGS.get(key.name)
+        if (gambleData) {
+          const gamble = JSON.parse(gambleData)
+          // Each gambling session burns exactly 1000 tokens
+          if (gamble.amountGambled) {
+            totalBurned += gamble.amountGambled
           }
         }
       } catch (e) {
-        console.warn('Error processing session:', key.name, e)
+        console.warn('Error processing gamble log:', key.name, e)
       }
     }
     
