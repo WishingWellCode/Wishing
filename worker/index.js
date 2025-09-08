@@ -787,8 +787,11 @@ async function getLeaderboard(env) {
     const logs = []
     const list = await env.GAMBLE_LOGS.list()
     
-    // Fetch up to 100 most recent gambling events
-    for (const key of list.keys.slice(0, 100)) {
+    // Fetch up to 50 most recent gambling events for faster response
+    const keysToProcess = list.keys.slice(0, 50)
+    
+    // Process entries in parallel for better performance
+    const promises = keysToProcess.map(async (key) => {
       try {
         const logData = await env.GAMBLE_LOGS.get(key.name)
         if (logData) {
@@ -798,20 +801,26 @@ async function getLeaderboard(env) {
             const payout = event.payout || 0
             const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            logs.push({
+            return {
               winner: event.walletAddress,
               amount: Math.round(payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
               tx: event.payoutTx || event.burnTx, // Use payout tx if available, fallback to burn tx
               timestamp: new Date(event.timestamp).toISOString(),
               tier: event.result?.tier || (payout >= gambledAmount ? 'break-even' : 'loss'),
               isWin: payout > 0
-            })
+            }
           }
         }
       } catch (parseError) {
         console.warn('Failed to parse log entry:', key.name, parseError)
       }
-    }
+      return null
+    })
+    
+    const results = await Promise.all(promises)
+    results.forEach(result => {
+      if (result) logs.push(result)
+    })
     
     // Sort by timestamp (most recent first)
     logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))

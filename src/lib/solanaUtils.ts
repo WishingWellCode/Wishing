@@ -150,7 +150,7 @@ export class WishGamblingAPI {
     try {
       // Add timeout to prevent long waits
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
       
       const response = await fetch(`${this.workerUrl}/api/leaderboard?limit=${limit}&includeBreakEven=true&includeAll=true`, {
         signal: controller.signal,
@@ -251,7 +251,7 @@ export class WishGamblingAPI {
       return data
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.error('Winners fetch timed out after 5 seconds')
+        console.error('Winners fetch timed out after 10 seconds')
         // Try to return cached data or empty array
         return []
       } else {
