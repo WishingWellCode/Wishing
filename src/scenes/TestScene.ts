@@ -670,7 +670,7 @@ export class TestScene extends Phaser.Scene {
       'Portal 1: Housing District',
       {
         fontSize: '24px',
-        fill: '#8b5cf6',
+        color: '#8b5cf6',
         fontFamily: '"Press Start 2P"',
         align: 'center'
       }
@@ -685,7 +685,7 @@ export class TestScene extends Phaser.Scene {
       'Welcome to the Housing District!\n\nTo access this portal, you need to visit\nthe Upgrades page first to purchase\nyour housing upgrades.\n\nWould you like to go there now?',
       {
         fontSize: '16px',
-        fill: '#ffffff',
+        color: '#ffffff',
         fontFamily: '"Press Start 2P"',
         align: 'center',
         lineSpacing: 8
@@ -711,7 +711,7 @@ export class TestScene extends Phaser.Scene {
       'CONTINUE',
       {
         fontSize: '14px',
-        fill: '#ffffff',
+        color: '#ffffff',
         fontFamily: '"Press Start 2P"'
       }
     )
@@ -735,7 +735,7 @@ export class TestScene extends Phaser.Scene {
       'CANCEL',
       {
         fontSize: '14px',
-        fill: '#ffffff',
+        color: '#ffffff',
         fontFamily: '"Press Start 2P"'
       }
     )
