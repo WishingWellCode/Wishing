@@ -1238,12 +1238,12 @@ function getResultMessage(tier) {
 
 // Housing system constants and functions
 const HOUSE_LEVELS = [
-  { level: 1, name: "Starter Shack", cost: 1000, boostPercent: 0.5, burnRequirement: 0 },
-  { level: 2, name: "Cozy Cottage", cost: 5000, boostPercent: 1.5, burnRequirement: 10000 },
-  { level: 3, name: "Suburban Home", cost: 15000, boostPercent: 4.0, burnRequirement: 25000 },
-  { level: 4, name: "Luxury Villa", cost: 50000, boostPercent: 8.0, burnRequirement: 75000 },
-  { level: 5, name: "Grand Mansion", cost: 150000, boostPercent: 15.0, burnRequirement: 150000 },
-  { level: 6, name: "Royal Palace", cost: 500000, boostPercent: 25.0, burnRequirement: 250000 }
+  { level: 1, name: "Starter Shack", cost: 0, boostPercent: 0.5, burnRequirement: 1000 },
+  { level: 2, name: "Cozy Cottage", cost: 0, boostPercent: 1.5, burnRequirement: 30000 },
+  { level: 3, name: "Suburban Home", cost: 0, boostPercent: 4.0, burnRequirement: 75000 },
+  { level: 4, name: "Luxury Villa", cost: 0, boostPercent: 8.0, burnRequirement: 225000 },
+  { level: 5, name: "Grand Mansion", cost: 0, boostPercent: 15.0, burnRequirement: 450000 },
+  { level: 6, name: "Royal Palace", cost: 0, boostPercent: 25.0, burnRequirement: 750000 }
 ]
 
 async function handleGetHousingData(walletAddress, env) {
@@ -1269,13 +1269,9 @@ async function handleGetHousingData(walletAddress, env) {
       }
     }
     
-    // Calculate total burned from gambling sessions if not stored
-    if (housingData.totalBurned === 0) {
-      const totalBurned = await calculateTotalBurned(walletAddress, env)
-      housingData.totalBurned = totalBurned
-      // Update storage with calculated value
-      await env.GAMBLE_LOGS.put(housingKey, JSON.stringify(housingData))
-    }
+    // Always calculate fresh total burned from gambling sessions
+    const totalBurned = await calculateTotalBurned(walletAddress, env)
+    housingData.totalBurned = totalBurned
     
     console.log('🏠 Retrieved housing data:', housingData)
     
@@ -1331,10 +1327,8 @@ async function handleHousePurchase(request, env) {
       housingData = JSON.parse(housingDataStr)
     }
     
-    // Calculate total burned if not available
-    if (housingData.totalBurned === 0) {
-      housingData.totalBurned = await calculateTotalBurned(walletAddress, env)
-    }
+    // Always calculate fresh total burned from gambling sessions
+    housingData.totalBurned = await calculateTotalBurned(walletAddress, env)
     
     // Validate purchase
     const house = HOUSE_LEVELS[level - 1]
