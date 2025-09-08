@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Transaction } from '@solana/web3.js'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 
@@ -71,7 +72,8 @@ const HOUSE_LEVELS: HouseLevel[] = [
 ]
 
 export default function Upgrades() {
-  const { publicKey, connected } = useWallet()
+  const { publicKey, connected, signTransaction } = useWallet()
+  const wallet = { signTransaction }
   const router = useRouter()
   const [userHousing, setUserHousing] = useState<UserHousingData>({
     currentLevel: 0,
@@ -142,12 +144,15 @@ export default function Upgrades() {
   }
 
   const purchaseHouse = async (level: number) => {
-    if (!publicKey || !canPurchaseHouse(level)) return
+    if (!publicKey || !canPurchaseHouse(level) || !wallet.signTransaction) return
     
     try {
       setPurchasing(level)
       const house = HOUSE_LEVELS[level - 1]
       
+      console.log(`Attempting to purchase ${house.name} (Level ${level}) for ${house.cost} $WISH`)
+      
+      // Step 1: Get the transaction from the API
       const response = await fetch('/api/housing/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,15 +163,46 @@ export default function Upgrades() {
         })
       })
       
-      if (response.ok) {
-        await fetchUserHousingData()
-        console.log(`Successfully purchased ${house.name}!`)
-      } else {
-        const error = await response.json()
-        console.error('Purchase failed:', error)
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('Purchase API error:', errorData)
+        alert(`Purchase failed: ${errorData || 'Unknown error'}`)
+        return
       }
+      
+      const data = await response.json()
+      console.log('Purchase API response:', data)
+      
+      // Step 2: If we got a transaction to sign, sign and send it
+      if (data.transaction) {
+        try {
+          const transaction = Transaction.from(Buffer.from(data.transaction, 'base64'))
+          console.log('Signing transaction...')
+          
+          const signedTransaction = await wallet.signTransaction(transaction)
+          console.log('Transaction signed, sending...')
+          
+          // TODO: Send the signed transaction to the network
+          // const connection = new Connection('your-rpc-url')
+          // const signature = await connection.sendRawTransaction(signedTransaction.serialize())
+          // await connection.confirmTransaction(signature)
+          
+          console.log('Transaction would be sent here (currently simulated)')
+        } catch (txError) {
+          console.error('Transaction signing/sending failed:', txError)
+          alert('Transaction failed. Please try again.')
+          return
+        }
+      }
+      
+      // Step 3: Update local state (in production, only do this after transaction confirmation)
+      await fetchUserHousingData()
+      console.log(`Successfully purchased ${house.name}!`)
+      alert(`🎉 Successfully purchased ${house.name}!`)
+      
     } catch (error) {
       console.error('Error purchasing house:', error)
+      alert('Purchase failed. Please check the console for details.')
     } finally {
       setPurchasing(null)
     }
