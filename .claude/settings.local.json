@@ -26,7 +26,11 @@
       "Bash(npm update:*)",
       "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=20&includeBreakEven=true&includeAll=true\")",
       "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=5&includeBreakEven=true&includeAll=true\")",
-      "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=10&includeBreakEven=true&includeAll=true\")"
+      "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=10&includeBreakEven=true&includeAll=true\")",
+      "Bash(time curl:*)",
+      "Bash(timeout 10 wrangler tail)",
+      "Bash(timeout 30 git push)",
+      "WebFetch(domain:localhost)"
     ],
     "deny": [],
     "ask": []
