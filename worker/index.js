@@ -788,12 +788,22 @@ async function getGlobalStats(env) {
 
 async function getLeaderboard(env) {
   try {
-    // Get all gamble logs from KV storage
+    // Get all gamble logs from KV storage with proper prefix
     const logs = []
-    const list = await env.GAMBLE_LOGS.list()
+    const list = await env.GAMBLE_LOGS.list({
+      prefix: 'gamble:',
+      limit: 1000  // Get more entries to ensure we have recent ones
+    })
     
-    // Fetch up to 50 most recent gambling events for faster response
-    const keysToProcess = list.keys.slice(0, 50)
+    // Sort keys by timestamp (most recent first) and take top 100
+    const sortedKeys = list.keys.sort((a, b) => {
+      // Extract timestamp from key format: gamble:wallet:timestamp
+      const timestampA = parseInt(a.name.split(':')[2] || '0')
+      const timestampB = parseInt(b.name.split(':')[2] || '0')
+      return timestampB - timestampA  // Descending order (newest first)
+    }).slice(0, 100)
+    
+    const keysToProcess = sortedKeys
     
     // Process entries in parallel for better performance
     const promises = keysToProcess.map(async (key) => {
@@ -806,7 +816,14 @@ async function getLeaderboard(env) {
             const payout = event.payout || 0
             const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            const txId = event.payoutTx || event.burnTx || null
+            // For wins, show payout tx; for losses/break-even, show burn tx
+            let txId = null
+            if (payout > 0 && event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
+              txId = event.payoutTx  // Show payout transaction for wins
+            } else if (event.burnTx) {
+              txId = event.burnTx    // Show burn transaction for losses/break-even
+            }
+            
             const result = {
               winner: event.walletAddress,
               amount: Math.round(payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
@@ -814,8 +831,9 @@ async function getLeaderboard(env) {
               tier: event.result?.tier || (payout >= gambledAmount ? 'break-even' : 'loss'),
               isWin: payout > 0
             }
+            
             // Only include tx field if we have a valid transaction ID
-            if (txId) {
+            if (txId && txId.length > 20) {
               result.tx = txId
             }
             return result
