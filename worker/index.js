@@ -584,20 +584,28 @@ async function handleFountainResolve(request, env) {
   if (payout > 0) {
     console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
     
-    // Send payout asynchronously - don't block the response
-    sendPayoutAsync(env, session.walletAddress, payout).then(txId => {
-      console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
-      
-      // Update the gambling log with the real transaction ID
-      updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).catch(error => {
-        console.error('❌ Failed to update gambling log with real tx:', error)
+    // Check if pool wallet private key is configured
+    if (!env.POOL_WALLET_PRIVATE_KEY) {
+      console.error('❌ POOL_WALLET_PRIVATE_KEY not configured - cannot send real payouts')
+      console.log('⚠️ Using simulated payout for testing - no real transaction will be sent')
+      // For testing: use burn tx as a placeholder to show links work
+      payoutTx = txSignature // Use burn tx temporarily for testing
+    } else {
+      // Send payout asynchronously - don't block the response
+      sendPayoutAsync(env, session.walletAddress, payout).then(txId => {
+        console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
+        
+        // Update the gambling log with the real transaction ID
+        updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).catch(error => {
+          console.error('❌ Failed to update gambling log with real tx:', error)
+        })
+      }).catch(error => {
+        console.error('❌ Failed to send payout:', error.message || error)
       })
-    }).catch(error => {
-      console.error('❌ Failed to send payout:', error.message || error)
-    })
-    
-    // Return immediately with a placeholder transaction ID
-    payoutTx = 'PROCESSING_' + crypto.randomUUID()
+      
+      // Return immediately with a placeholder transaction ID
+      payoutTx = 'PROCESSING_' + crypto.randomUUID()
+    }
   }
 
   // Update session
@@ -817,12 +825,15 @@ async function getLeaderboard(env) {
             
             // Only show wins (break-even = 1000 and above)
             if (payout >= 1000) {
-              // For wins and break-even, ONLY show payout transaction from pool wallet
+              // For wins and break-even, show payout transaction from pool wallet
               let txId = null
               if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
                 txId = event.payoutTx  // Show payout transaction for wins
               }
-              // DO NOT use burn tx as fallback - only show if we have real payout tx
+              // If payoutTx equals burnTx (temporary testing mode), show it
+              else if (event.payoutTx && event.burnTx && event.payoutTx === event.burnTx) {
+                txId = event.burnTx  // Temporary: show burn tx when pool wallet not configured
+              }
               
               const result = {
                 winner: event.walletAddress,
