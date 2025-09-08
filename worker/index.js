@@ -817,15 +817,12 @@ async function getLeaderboard(env) {
             
             // Only show wins (break-even = 1000 and above)
             if (payout >= 1000) {
-              // For wins and break-even, show payout transaction from pool wallet
+              // For wins and break-even, ONLY show payout transaction from pool wallet
               let txId = null
               if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
                 txId = event.payoutTx  // Show payout transaction for wins
               }
-              // Fallback: if no payout tx available, use burn tx temporarily
-              else if (event.burnTx && event.burnTx.length > 20) {
-                txId = event.burnTx  // Temporary fallback
-              }
+              // DO NOT use burn tx as fallback - only show if we have real payout tx
               
               const result = {
                 winner: event.walletAddress,
@@ -862,9 +859,9 @@ async function getLeaderboard(env) {
     console.log(`📊 Leaderboard: Found ${logs.length} winning transactions`)
     
     return {
-      topWinners: logs.slice(0, 20), // Top 20 winners
-      mostActive: logs.slice(0, 20), // Same data for now
-      luckiest: logs.filter(log => log.tier === 'jackpot' || log.tier === 'major').slice(0, 10)
+      topWinners: logs.slice(0, 50), // Recent winners only
+      mostActive: [], // Empty to avoid duplicates
+      luckiest: [] // Empty to avoid duplicates
     }
   } catch (error) {
     console.error('Error fetching leaderboard:', error)
@@ -983,35 +980,42 @@ async function sendPayoutAsync(env, recipientWalletAddress, amount) {
 // Update gambling log with real transaction ID once payout is sent
 async function updateGamblingLogWithTx(env, sessionId, walletAddress, realTxId) {
   try {
-    // Find and update the gambling log entry
-    const logKey = `gamble:${walletAddress}:${Date.now()}`
+    console.log(`🔄 Updating gambling log for session ${sessionId} with real tx: ${realTxId}`)
     
-    // Since we don't have the exact key, we need to scan recent entries
+    // Get recent entries for this wallet (sorted by timestamp)
     const listResult = await env.GAMBLE_LOGS.list({
       prefix: `gamble:${walletAddress}:`,
-      limit: 100
+      limit: 50
     })
     
-    // Find the most recent entry that matches this session
-    for (const key of listResult.keys) {
+    // Sort keys by timestamp (newest first) and search
+    const sortedKeys = listResult.keys.sort((a, b) => {
+      const timestampA = parseInt(a.name.split(':')[2] || '0')
+      const timestampB = parseInt(b.name.split(':')[2] || '0')
+      return timestampB - timestampA
+    })
+    
+    // Find the entry that matches this session
+    for (const key of sortedKeys) {
       try {
         const logData = await env.GAMBLE_LOGS.get(key.name)
         if (logData) {
           const entry = JSON.parse(logData)
-          if (entry.sessionId === sessionId) {
+          if (entry.sessionId === sessionId && entry.payoutTx && entry.payoutTx.startsWith('PROCESSING_')) {
             // Update with real transaction ID
             entry.payoutTx = realTxId
             await env.GAMBLE_LOGS.put(key.name, JSON.stringify(entry))
-            console.log(`✅ Updated gambling log ${key.name} with real tx: ${realTxId}`)
+            console.log(`✅ Updated gambling log ${key.name} with real tx: ${realTxId.substring(0, 20)}...`)
             return
           }
         }
       } catch (parseError) {
+        console.warn(`⚠️ Failed to parse log entry: ${key.name}`)
         continue
       }
     }
     
-    console.log(`⚠️ Could not find gambling log entry for session ${sessionId}`)
+    console.log(`❌ Could not find gambling log entry for session ${sessionId} with PROCESSING_ tx`)
   } catch (error) {
     console.error('❌ Error updating gambling log with real tx:', error)
   }
