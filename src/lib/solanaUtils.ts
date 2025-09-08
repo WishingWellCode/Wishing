@@ -65,6 +65,63 @@ export class WishGamblingAPI {
     return await response.json()
   }
 
+  async createTransferTransaction(
+    userWallet: PublicKey,
+    recipientWallet: PublicKey,
+    tokenMint: PublicKey,
+    amount: number
+  ): Promise<Transaction> {
+    const userTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      userWallet
+    )
+
+    const recipientTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      recipientWallet
+    )
+
+    const transaction = new Transaction()
+
+    // Get the actual decimals for this token
+    const mintInfo = await getMint(this.connection, tokenMint)
+    const actualDecimals = mintInfo.decimals
+    
+    // Create transfer instruction to pool wallet (NOT burn)
+    const transferInstruction = createTransferInstruction(
+      userTokenAccount,
+      recipientTokenAccount,
+      userWallet,
+      amount * Math.pow(10, actualDecimals), // Use actual token decimals
+      [],
+      TOKEN_PROGRAM_ID
+    )
+
+    transaction.add(transferInstruction)
+
+    // Set recent blockhash and fee payer with retry logic
+    let retries = 3
+    let lastError = null
+    
+    while (retries > 0) {
+      try {
+        const { blockhash } = await this.connection.getLatestBlockhash('finalized')
+        transaction.recentBlockhash = blockhash
+        transaction.feePayer = userWallet
+        return transaction
+      } catch (error) {
+        console.warn(`RPC error (${retries} retries left):`, error)
+        lastError = error
+        retries--
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+      }
+    }
+    
+    throw lastError || new Error('Failed to get blockhash after retries')
+  }
+
   async createBurnTransaction(
     userWallet: PublicKey,
     tokenMint: PublicKey,

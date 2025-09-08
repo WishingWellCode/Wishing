@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { WishGamblingAPI } from '@/lib/solanaUtils'
 
 interface HouseLevel {
   level: number
@@ -72,8 +73,7 @@ const HOUSE_LEVELS: HouseLevel[] = [
 ]
 
 export default function Upgrades() {
-  const { publicKey, connected, signTransaction } = useWallet()
-  const wallet = { signTransaction }
+  const { publicKey, connected, signTransaction, sendTransaction } = useWallet()
   const router = useRouter()
   const [userHousing, setUserHousing] = useState<UserHousingData>({
     currentLevel: 0,
@@ -82,6 +82,12 @@ export default function Upgrades() {
   })
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState<number | null>(null)
+
+  // Initialize Solana API
+  const gamblingAPI = new WishGamblingAPI(
+    'https://wish-well-worker.stealthbundlebot.workers.dev',
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+  )
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -97,43 +103,44 @@ export default function Upgrades() {
     try {
       setLoading(true)
       
-      // Try to fetch from Cloudflare Worker first, fallback to local storage for demo
-      let userData
-      try {
-        const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}`)
-        if (response.ok) {
-          userData = await response.json()
-        } else {
-          throw new Error('Worker API not available')
-        }
-      } catch (workerError) {
-        console.log('Using local storage for housing data (worker not available)')
-        
-        // Get from localStorage for demo purposes
-        const localData = localStorage.getItem(`housing_${publicKey.toString()}`)
-        if (localData) {
-          userData = JSON.parse(localData)
-        } else {
-          // Default data that allows Level 1 purchase
-          userData = {
-            currentLevel: 0,
-            totalBurned: 1000000, // High enough to allow all purchases for testing
-            ownedLevels: []
-          }
-          localStorage.setItem(`housing_${publicKey.toString()}`, JSON.stringify(userData))
-        }
+      // Fetch housing data and gambling stats separately
+      const [housingData, gamblingStats] = await Promise.all([
+        // Get housing data (owned levels)
+        fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}`).then(r => r.ok ? r.json() : null),
+        // Get gambling stats for totalBurned
+        fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/user/${publicKey.toString()}/stats`).then(r => r.ok ? r.json() : null)
+      ])
+      
+      const userData = {
+        currentLevel: 0,
+        totalBurned: gamblingStats?.totalBurned || 0, // Get real burned amount from gambling
+        ownedLevels: housingData?.ownedLevels || []
+      }
+      
+      if (userData.ownedLevels.length > 0) {
+        userData.currentLevel = Math.max(...userData.ownedLevels)
       }
       
       setUserHousing(userData)
     } catch (error) {
       console.error('Error fetching housing data:', error)
-      // Fallback default data
-      const defaultData = {
-        currentLevel: 0,
-        totalBurned: 1000000,
-        ownedLevels: []
+      // Fallback - still fetch real gambling stats for totalBurned
+      try {
+        const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/user/${publicKey.toString()}/stats`)
+        const stats = await response.json()
+        setUserHousing({
+          currentLevel: 0,
+          totalBurned: stats?.totalBurned || 0, // Use real gambling burned amount
+          ownedLevels: []
+        })
+      } catch {
+        // Complete fallback
+        setUserHousing({
+          currentLevel: 0,
+          totalBurned: 0,
+          ownedLevels: []
+        })
       }
-      setUserHousing(defaultData)
     } finally {
       setLoading(false)
     }
@@ -164,68 +171,72 @@ export default function Upgrades() {
   }
 
   const purchaseHouse = async (level: number) => {
-    if (!publicKey || !canPurchaseHouse(level)) return
+    if (!publicKey || !canPurchaseHouse(level) || !signTransaction || !sendTransaction) return
     
     try {
       setPurchasing(level)
       const house = HOUSE_LEVELS[level - 1]
       
-      console.log(`Attempting to purchase ${house.name} (Level ${level}) for ${house.cost} $WISH`)
+      console.log(`Purchasing ${house.name} (Level ${level}) for ${house.cost} $WISH`)
       
-      // For now, simulate the purchase process
-      // TODO: Implement actual Solana transaction to send tokens to pool wallet
+      // Create real Solana transaction to transfer tokens to pool wallet
+      const WISH_TOKEN_MINT = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjidkWBQv')
+      const POOL_WALLET = new PublicKey(process.env.NEXT_PUBLIC_POOL_WALLET_PUBLIC || '8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTBcXWnCv')
       
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('Creating transfer transaction...')
+      const transaction = await gamblingAPI.createTransferTransaction(
+        publicKey,
+        POOL_WALLET,
+        WISH_TOKEN_MINT,
+        house.cost
+      )
       
-      // Update local storage (until Cloudflare Worker integration is ready)
-      const currentData = localStorage.getItem(`housing_${publicKey.toString()}`)
-      let userData = currentData ? JSON.parse(currentData) : {
-        currentLevel: 0,
-        totalBurned: 1000000,
-        ownedLevels: []
-      }
+      console.log('Signing transaction...')
+      const signedTransaction = await signTransaction(transaction)
       
-      // Add the purchased house level
-      if (!userData.ownedLevels.includes(level)) {
-        userData.ownedLevels.push(level)
-        userData.ownedLevels.sort((a, b) => a - b)
-        userData.currentLevel = Math.max(...userData.ownedLevels)
-      }
+      console.log('Sending transaction to network...')
+      const signature = await sendTransaction(signedTransaction, gamblingAPI.connection)
       
-      // Save updated data
-      localStorage.setItem(`housing_${publicKey.toString()}`, JSON.stringify(userData))
+      console.log('Confirming transaction...')
+      await gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
       
-      // Try to update Cloudflare Worker as well
-      try {
-        const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/purchase', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            walletAddress: publicKey.toString(),
-            level: level,
-            cost: house.cost,
-            ownedLevels: userData.ownedLevels
-          })
+      console.log(`Transaction confirmed: ${signature}`)
+      
+      // Update Cloudflare Worker with purchase
+      const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          walletAddress: publicKey.toString(),
+          level: level,
+          cost: house.cost,
+          txSignature: signature
         })
-        
-        if (response.ok) {
-          console.log('Successfully updated Cloudflare Worker')
-        } else {
-          console.log('Cloudflare Worker update failed, using local storage only')
-        }
-      } catch (workerError) {
-        console.log('Cloudflare Worker not available, using local storage only')
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update housing data on server')
       }
       
-      // Refresh the UI
+      // Refresh the UI with latest data
       await fetchUserHousingData()
-      console.log(`Successfully purchased ${house.name}!`)
-      alert(`🎉 Successfully purchased ${house.name}!\\n\\nNote: This is a demo purchase using local storage.\\nReal Solana transactions will be implemented next.`)
       
-    } catch (error) {
+      console.log(`Successfully purchased ${house.name}!`)
+      alert(`🎉 Successfully purchased ${house.name}!\\n\\nTransaction: ${signature}`)
+      
+    } catch (error: any) {
       console.error('Error purchasing house:', error)
-      alert('Purchase failed. Please check the console for details.')
+      
+      let errorMessage = 'Purchase failed. '
+      if (error.message.includes('insufficient funds')) {
+        errorMessage += 'Insufficient $WISH tokens in your wallet.'
+      } else if (error.message.includes('User rejected')) {
+        errorMessage += 'Transaction was cancelled.'
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.'
+      }
+      
+      alert(errorMessage)
     } finally {
       setPurchasing(null)
     }
