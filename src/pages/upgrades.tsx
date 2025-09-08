@@ -103,44 +103,68 @@ export default function Upgrades() {
     try {
       setLoading(true)
       
+      // Clear any old localStorage data from testing
+      const localStorageKey = `housing_${publicKey.toString()}`
+      if (localStorage.getItem(localStorageKey)) {
+        console.log('Clearing old localStorage data from testing')
+        localStorage.removeItem(localStorageKey)
+      }
+      
       // Fetch housing data and gambling stats separately
-      const [housingData, gamblingStats] = await Promise.all([
-        // Get housing data (owned levels)
-        fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}`).then(r => r.ok ? r.json() : null),
+      let housingData = null
+      let gamblingStats = null
+      
+      try {
+        // Get housing data (owned levels) - only if API endpoint exists
+        const housingResponse = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}`)
+        if (housingResponse.ok) {
+          housingData = await housingResponse.json()
+          console.log('Housing data from API:', housingData)
+        } else if (housingResponse.status === 404) {
+          console.log('No housing data found for user (expected for new users)')
+          housingData = { ownedLevels: [] }
+        }
+      } catch (e) {
+        console.log('Housing API not available yet')
+        housingData = { ownedLevels: [] }
+      }
+      
+      try {
         // Get gambling stats for totalBurned
-        fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/user/${publicKey.toString()}/stats`).then(r => r.ok ? r.json() : null)
-      ])
+        const statsResponse = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/user/${publicKey.toString()}/stats`)
+        if (statsResponse.ok) {
+          gamblingStats = await statsResponse.json()
+          console.log('Gambling stats from API:', gamblingStats)
+        }
+      } catch (e) {
+        console.log('Stats API not available')
+      }
       
       const userData = {
         currentLevel: 0,
-        totalBurned: gamblingStats?.totalBurned || 0, // Get real burned amount from gambling
-        ownedLevels: housingData?.ownedLevels || []
+        totalBurned: gamblingStats?.totalBurned || 0, // Only from gambling, not purchases
+        ownedLevels: Array.isArray(housingData?.ownedLevels) ? housingData.ownedLevels : []
       }
+      
+      // Validate ownedLevels - must be an array of numbers between 1-6
+      userData.ownedLevels = userData.ownedLevels.filter(level => 
+        typeof level === 'number' && level >= 1 && level <= 6
+      )
       
       if (userData.ownedLevels.length > 0) {
         userData.currentLevel = Math.max(...userData.ownedLevels)
       }
       
+      console.log('Final user housing data:', userData)
       setUserHousing(userData)
     } catch (error) {
       console.error('Error fetching housing data:', error)
-      // Fallback - still fetch real gambling stats for totalBurned
-      try {
-        const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/user/${publicKey.toString()}/stats`)
-        const stats = await response.json()
-        setUserHousing({
-          currentLevel: 0,
-          totalBurned: stats?.totalBurned || 0, // Use real gambling burned amount
-          ownedLevels: []
-        })
-      } catch {
-        // Complete fallback
-        setUserHousing({
-          currentLevel: 0,
-          totalBurned: 0,
-          ownedLevels: []
-        })
-      }
+      // Clean fallback - no owned houses by default
+      setUserHousing({
+        currentLevel: 0,
+        totalBurned: 0,
+        ownedLevels: []
+      })
     } finally {
       setLoading(false)
     }
