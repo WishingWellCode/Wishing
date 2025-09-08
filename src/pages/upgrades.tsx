@@ -272,36 +272,34 @@ export default function Upgrades() {
         </header>
 
         {/* Main Content */}
-        <main className="w-full px-6 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold text-white mb-4">
-                Housing District
-              </h1>
-              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-                Choose your house level to boost your Wishing Well odds. Houses must be purchased in order.
-              </p>
-              
-              {/* User Stats Row */}
-              <div className="flex justify-center gap-8 mb-12">
-                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
-                  <div className="text-2xl font-bold text-green-400">{highestOwnedLevel}</div>
-                  <div className="text-sm text-gray-300">Current Level</div>
-                </div>
-                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-400">+{totalBoost}%</div>
-                  <div className="text-sm text-gray-300">Total Boost</div>
-                </div>
-                <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">{userHousing.totalBurned.toLocaleString()}</div>
-                  <div className="text-sm text-gray-300">Total Burned</div>
-                </div>
+        <main className="container mx-auto px-4 py-12">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-white mb-4">
+              Housing District
+            </h1>
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Choose your house level to boost your Wishing Well odds. Houses must be purchased in order.
+            </p>
+            
+            {/* User Stats Row */}
+            <div className="flex justify-center gap-8 mb-16">
+              <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                <div className="text-2xl font-bold text-green-400">{highestOwnedLevel}</div>
+                <div className="text-sm text-gray-300">Current Level</div>
+              </div>
+              <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                <div className="text-2xl font-bold text-blue-400">+{totalBoost}%</div>
+                <div className="text-sm text-gray-300">Total Boost</div>
+              </div>
+              <div className="text-center bg-black/50 px-6 py-4 rounded-lg">
+                <div className="text-2xl font-bold text-yellow-400">{userHousing.totalBurned.toLocaleString()}</div>
+                <div className="text-sm text-gray-300">Total Burned</div>
               </div>
             </div>
+          </div>
 
-            {/* Housing Grid - 2x3 Layout */}
-            <div className="grid grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+          {/* 2x3 Grid of Houses */}
+          <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
             {HOUSE_LEVELS.map((house) => {
               const status = getHouseStatus(house.level)
               const canPurchase = status === 'available'
@@ -309,138 +307,109 @@ export default function Upgrades() {
               const isLocked = status === 'locked'
               
               return (
-                <div
-                  key={house.level}
-                  className={`bg-white/10 backdrop-blur-sm rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                    isOwned ? 'border-green-500 bg-green-500/5' : 
-                    canPurchase ? 'border-purple-500 bg-purple-500/5' : 
-                    'border-gray-600 opacity-70'
-                  }`}
-                >
-                  {/* House Header */}
-                  <div className="p-6 text-center border-b border-white/20">
-                    <div className="text-6xl mb-4">🏠</div>
-                    <h3 className="text-2xl font-bold text-white mb-2">
-                      Level {house.level}
-                    </h3>
-                    <h4 className="text-xl text-purple-300 font-semibold">
-                      {house.name}
-                    </h4>
-                    {isOwned && (
-                      <div className="mt-3 inline-block bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                        ✓ OWNED
-                      </div>
-                    )}
-                    {canPurchase && (
-                      <div className="mt-3 inline-block bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold animate-pulse">
-                        ⭐ AVAILABLE
-                      </div>
-                    )}
-                    {isLocked && (
-                      <div className="mt-3 inline-block bg-gray-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-                        🔒 LOCKED
+                <div key={house.level} className={`bg-white/10 backdrop-blur-sm rounded-2xl border-2 p-8 text-center transition-all duration-300 hover:scale-105 ${
+                  isOwned ? 'border-green-500 bg-green-500/5' : 
+                  canPurchase ? 'border-purple-500 bg-purple-500/5' : 
+                  'border-gray-600 opacity-70'
+                }`}>
+                  <div className="text-8xl mb-6">🏠</div>
+                  
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    Level {house.level}
+                  </h2>
+                  
+                  <h3 className="text-2xl text-purple-300 font-semibold mb-4">
+                    {house.name}
+                  </h3>
+                  
+                  <p className="text-gray-300 mb-8 leading-relaxed">
+                    {house.description}
+                  </p>
+                  
+                  <div className="space-y-4 mb-8">
+                    <div className="bg-black/30 p-4 rounded-lg flex justify-between items-center">
+                      <span className="text-green-400 font-semibold">🚀 Win Boost:</span>
+                      <span className="text-white font-bold text-xl">+{house.boostPercent}%</span>
+                    </div>
+                    
+                    <div className="bg-black/30 p-4 rounded-lg flex justify-between items-center">
+                      <span className="text-blue-400 font-semibold">💎 Cost:</span>
+                      <span className="text-white font-bold text-xl">{house.cost.toLocaleString()} $WISH</span>
+                    </div>
+                    
+                    {house.burnRequirement > 0 && (
+                      <div className="bg-black/30 p-4 rounded-lg flex justify-between items-center">
+                        <span className="text-yellow-400 font-semibold">🔥 Requires:</span>
+                        <span className="text-white font-bold">{house.burnRequirement.toLocaleString()} burned</span>
                       </div>
                     )}
                   </div>
                   
-                  {/* House Details */}
-                  <div className="p-6">
-                    <p className="text-gray-300 mb-6 leading-relaxed">
-                      {house.description}
-                    </p>
-                    
-                    {/* House Stats */}
-                    <div className="space-y-3 mb-6">
-                      <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
-                        <span className="text-green-400 font-semibold">🚀 Win Boost:</span>
-                        <span className="text-white font-bold">+{house.boostPercent}%</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
-                        <span className="text-blue-400 font-semibold">💎 Cost:</span>
-                        <span className="text-white font-bold">{house.cost.toLocaleString()} $WISH</span>
-                      </div>
-                      {house.burnRequirement > 0 && (
-                        <div className="flex justify-between items-center bg-black/30 p-3 rounded-lg">
-                          <span className="text-yellow-400 font-semibold">🔥 Requires:</span>
-                          <span className="text-white font-bold">{house.burnRequirement.toLocaleString()} burned</span>
+                  {isOwned ? (
+                    <button disabled className="w-full bg-green-500 text-white py-4 px-6 rounded-xl font-bold text-lg opacity-75 cursor-not-allowed">
+                      ✅ PURCHASED
+                    </button>
+                  ) : canPurchase ? (
+                    <button
+                      onClick={() => purchaseHouse(house.level)}
+                      disabled={purchasing === house.level}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-colors disabled:opacity-50"
+                    >
+                      {purchasing === house.level ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                          PURCHASING...
                         </div>
+                      ) : (
+                        '🏠 PURCHASE NOW'
                       )}
-                    </div>
-                    
-                    {/* Purchase Button */}
-                    {isOwned ? (
-                      <button 
-                        disabled 
-                        className="w-full bg-green-500 text-white py-4 rounded-lg font-bold text-lg opacity-75 cursor-not-allowed"
-                      >
-                        ✅ PURCHASED
-                      </button>
-                    ) : canPurchase ? (
-                      <button
-                        onClick={() => purchaseHouse(house.level)}
-                        disabled={purchasing === house.level}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-bold text-lg transition-colors disabled:opacity-50"
-                      >
-                        {purchasing === house.level ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                            PURCHASING...
-                          </div>
-                        ) : (
-                          '🏠 PURCHASE NOW'
-                        )}
-                      </button>
-                    ) : (
-                      <button 
-                        disabled 
-                        className="w-full bg-gray-600 text-gray-400 py-4 rounded-lg font-bold cursor-not-allowed text-sm"
-                      >
-                        {house.level === 1 ? '❌ REQUIREMENTS NOT MET' : 
-                         userHousing.totalBurned < house.burnRequirement ? 
-                         `NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
-                         'BUY PREVIOUS LEVEL FIRST'}
-                      </button>
-                    )}
-                  </div>
+                    </button>
+                  ) : (
+                    <button disabled className="w-full bg-gray-600 text-gray-400 py-4 px-6 rounded-xl font-bold cursor-not-allowed text-sm">
+                      {house.level === 1 ? '❌ REQUIREMENTS NOT MET' : 
+                       userHousing.totalBurned < house.burnRequirement ? 
+                       `NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
+                       'BUY PREVIOUS LEVEL FIRST'}
+                    </button>
+                  )}
                 </div>
               )
             })}
           </div>
 
-            {/* View Current House Button */}
-            {highestOwnedLevel > 0 && (
-              <div className="text-center mb-12">
-                <button
-                  onClick={visitHouse}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-12 py-4 rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  🏠 View My Current House
-                </button>
-              </div>
-            )}
+          {/* View My Current House Button - At Bottom as Requested */}
+          {highestOwnedLevel > 0 && (
+            <div className="text-center mb-16">
+              <button
+                onClick={visitHouse}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-16 py-6 rounded-2xl font-bold text-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                🏠 View My Current House
+              </button>
+            </div>
+          )}
 
-            {/* How It Works */}
-            <div className="bg-black/50 p-8 rounded-xl text-center">
-              <h2 className="text-3xl font-bold text-white mb-6">How Housing Works</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                <div>
-                  <h3 className="text-xl font-bold text-green-400 mb-3 flex items-center gap-2">
-                    🚀 Boost System
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Each house level provides a win rate boost that stacks with previous levels.
-                    The boost percentage is deducted from your loss chance, giving you better odds!
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-blue-400 mb-3 flex items-center gap-2">
-                    📋 Requirements
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Houses must be purchased in order, and higher levels require you to have
-                    burned a certain amount of $WISH tokens through gambling to unlock.
-                  </p>
-                </div>
+          {/* How It Works */}
+          <div className="bg-black/50 p-8 rounded-xl text-center max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-6">How Housing Works</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+              <div>
+                <h3 className="text-xl font-bold text-green-400 mb-3 flex items-center gap-2">
+                  🚀 Boost System
+                </h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Each house level provides a win rate boost that stacks with previous levels.
+                  The boost percentage is deducted from your loss chance, giving you better odds!
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-blue-400 mb-3 flex items-center gap-2">
+                  📋 Requirements
+                </h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Houses must be purchased in order, and higher levels require you to have
+                  burned a certain amount of $WISH tokens through gambling to unlock.
+                </p>
               </div>
             </div>
           </div>
