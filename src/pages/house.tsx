@@ -119,15 +119,23 @@ export default function House() {
     const setupExitPortal = () => {
       const coords = getExitPortalCoords()
       const scene = houseCanvasRef.current?.getHouseScene()
+      console.log('🔍 Setting up portal - Scene:', !!scene, 'Coords:', coords.length)
       if (scene && coords.length > 0) {
         scene.setExitPortal(coords)
-        console.log('🚪 Exit portal activated for house level', currentHouseLevel)
+        console.log('🚪 Exit portal activated for house level', currentHouseLevel, 'with', coords.length, 'coordinates')
+      } else {
+        console.log('❌ Failed to set portal - Scene:', !!scene, 'Coords length:', coords.length)
       }
     }
     
-    // Small delay to ensure scene is ready
-    const timer = setTimeout(setupExitPortal, 500)
-    return () => clearTimeout(timer)
+    // Multiple attempts with increasing delays to ensure scene is ready
+    const timers = [
+      setTimeout(setupExitPortal, 100),
+      setTimeout(setupExitPortal, 500),
+      setTimeout(setupExitPortal, 1000)
+    ]
+    
+    return () => timers.forEach(timer => clearTimeout(timer))
   }, [currentHouseLevel])
 
   useEffect(() => {
@@ -164,29 +172,9 @@ export default function House() {
     }
   }
 
-  const currentHouse = HOUSE_LEVELS[currentHouseLevel - 1]
-  const isOwned = ownedLevels.includes(currentHouseLevel)
+  const currentHouse = HOUSE_LEVELS[currentHouseLevel - 1] || HOUSE_LEVELS[0]
+  const isOwned = loading ? true : ownedLevels.includes(currentHouseLevel)
 
-  if (loading) {
-    return (
-      <>
-        <Head>
-          <title>Loading House - $WISH Wishing Well</title>
-        </Head>
-        <div style={{ 
-          background: 'url(/assets/backgrounds/Realbackground.jpg)', 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center', 
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div className="text-white text-2xl font-pixel">Loading your house...</div>
-        </div>
-      </>
-    )
-  }
 
   if (!connected) {
     return (

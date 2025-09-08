@@ -135,21 +135,32 @@ export class HouseScene extends Phaser.Scene {
   }
 
   checkPortalProximity() {
-    if (this.exitPortal.coords.length === 0) return
+    if (this.exitPortal.coords.length === 0) {
+      console.log('No portal coords set')
+      return
+    }
     
     const playerPos = { x: this.player.x, y: this.player.y }
     const isInsidePortal = this.isPointInPolygon(playerPos, this.exitPortal.coords)
     
+    // Debug logging
+    if (Math.floor(this.game.loop.frame) % 60 === 0) { // Log every second
+      console.log('Player pos:', playerPos, 'Inside portal:', isInsidePortal, 'Portal coords:', this.exitPortal.coords.length)
+    }
+    
     if (isInsidePortal && !this.isNearPortal) {
       this.isNearPortal = true
+      console.log('🚪 Player entered portal area')
       this.showPortalWarning()
     } else if (!isInsidePortal && this.isNearPortal) {
       this.isNearPortal = false
+      console.log('🚪 Player left portal area')
       this.hidePortalWarning()
     }
     
     // Check for interaction key press when near portal
     if (this.isNearPortal && this.interactKey && Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+      console.log('🚪 E key pressed near portal')
       this.showConfirmationDialog()
     }
   }
@@ -360,9 +371,9 @@ export class HouseScene extends Phaser.Scene {
       this.portalGraphics = this.add.graphics()
       this.portalGraphics.setDepth(0)
       
-      // Draw subtle portal area
-      this.portalGraphics.lineStyle(2, 0x00ffff, 0.3)
-      this.portalGraphics.fillStyle(0x00ffff, 0.1)
+      // Draw more visible portal area
+      this.portalGraphics.lineStyle(3, 0x00ffff, 0.8)
+      this.portalGraphics.fillStyle(0x00ffff, 0.2)
       
       this.portalGraphics.beginPath()
       this.portalGraphics.moveTo(coords[0].x, coords[0].y)
@@ -376,12 +387,14 @@ export class HouseScene extends Phaser.Scene {
       // Add pulsing effect
       this.tweens.add({
         targets: this.portalGraphics,
-        alpha: 0.3,
-        duration: 1500,
+        alpha: 0.6,
+        duration: 1000,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut'
       })
+      
+      console.log('✅ Portal visualization created with coordinates:', coords)
     }
   }
 }
