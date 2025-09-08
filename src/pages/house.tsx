@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 
 const HouseCanvas = dynamic(() => import('@/components/HouseCanvas'), { ssr: false })
-const PortalDebugger = dynamic(() => import('@/components/PortalDebugger'), { ssr: false })
+const DebugPortal = dynamic(() => import('@/components/DebugPortal'), { ssr: false })
 
 import type { HouseCanvasRef } from '@/components/HouseCanvas'
 
@@ -106,37 +106,6 @@ export default function House() {
   const [ownedLevels, setOwnedLevels] = useState<number[]>([])
   const [debugMode, setDebugMode] = useState(false)
   const houseCanvasRef = useRef<HouseCanvasRef>(null)
-  
-  // ALWAYS RENDER DEBUG BUTTON - No matter what state
-  const DebugButton = () => (
-    <>
-      <button
-        onClick={() => setDebugMode(!debugMode)}
-        className={`fixed top-4 right-4 z-[99999] px-8 py-4 rounded-lg font-pixel text-xl font-bold border-4 transition-all ${
-          debugMode 
-            ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
-            : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
-        }`}
-        style={{ 
-          fontSize: '20px',
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          zIndex: 99999
-        }}
-      >
-        {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
-      </button>
-      
-      {/* Portal Debugger */}
-      {debugMode && (
-        <PortalDebugger 
-          isActive={debugMode} 
-          onClose={() => setDebugMode(false)} 
-        />
-      )}
-    </>
-  )
 
   useEffect(() => {
     // Get house level from URL params or default to highest owned
@@ -197,29 +166,7 @@ export default function House() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          position: 'relative'
         }}>
-          {/* DEBUG BUTTON ALWAYS VISIBLE - Even during loading */}
-          <button
-            onClick={() => setDebugMode(!debugMode)}
-            className={`absolute top-6 right-6 z-[9999] px-6 py-3 rounded font-pixel text-lg font-bold border-4 transition-all ${
-              debugMode 
-                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
-                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
-            }`}
-            style={{ fontSize: '16px' }}
-          >
-            {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
-          </button>
-          
-          {/* Portal Debugger */}
-          {debugMode && (
-            <PortalDebugger 
-              isActive={debugMode} 
-              onClose={() => setDebugMode(false)} 
-            />
-          )}
-          
           <div className="text-white text-2xl font-pixel">Loading your house...</div>
         </div>
       </>
@@ -242,29 +189,7 @@ export default function House() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          position: 'relative'
         }}>
-          {/* DEBUG BUTTON ALWAYS VISIBLE - Even when not connected */}
-          <button
-            onClick={() => setDebugMode(!debugMode)}
-            className={`absolute top-6 right-6 z-[9999] px-6 py-3 rounded font-pixel text-lg font-bold border-4 transition-all ${
-              debugMode 
-                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-2xl shadow-red-500/50' 
-                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-2xl shadow-orange-500/50 animate-pulse'
-            }`}
-            style={{ fontSize: '16px' }}
-          >
-            {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
-          </button>
-          
-          {/* Portal Debugger */}
-          {debugMode && (
-            <PortalDebugger 
-              isActive={debugMode} 
-              onClose={() => setDebugMode(false)} 
-            />
-          )}
-          
           <div className="text-center bg-black/80 p-8 rounded-lg">
             <h1 className="text-4xl font-pixel text-purple-400 mb-4">Your House</h1>
             <p className="text-white mb-6 font-pixel">Connect your wallet to visit your house</p>
@@ -370,8 +295,31 @@ export default function House() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      {/* ALWAYS RENDER DEBUG BUTTON FIRST */}
-      <DebugButton />
+      {/* Debug Portal - renders outside React tree */}
+      <DebugPortal isActive={debugMode} onClose={() => setDebugMode(false)} />
+
+      {/* Debug Button - always visible */}
+      <button
+        onClick={() => setDebugMode(!debugMode)}
+        style={{ 
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 99999,
+          padding: '12px 24px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          border: '3px solid',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          backgroundColor: debugMode ? '#dc2626' : '#ea580c',
+          borderColor: debugMode ? '#991b1b' : '#c2410c',
+          color: 'white',
+          fontFamily: 'monospace'
+        }}
+      >
+        {debugMode ? '❌ CLOSE DEBUG' : '🔧 DEBUG PORTAL'}
+      </button>
 
       <div className="relative w-full h-screen overflow-hidden">
         {/* HouseCanvas for tier background and character movement */}
