@@ -587,6 +587,11 @@ async function handleFountainResolve(request, env) {
     // Send payout asynchronously - don't block the response
     sendPayoutAsync(env, session.walletAddress, payout).then(txId => {
       console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
+      
+      // Update the gambling log with the real transaction ID
+      updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).catch(error => {
+        console.error('❌ Failed to update gambling log with real tx:', error)
+      })
     }).catch(error => {
       console.error('❌ Failed to send payout:', error.message || error)
     })
@@ -801,14 +806,19 @@ async function getLeaderboard(env) {
             const payout = event.payout || 0
             const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            return {
+            const txId = event.payoutTx || event.burnTx || null
+            const result = {
               winner: event.walletAddress,
               amount: Math.round(payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
-              tx: event.payoutTx || event.burnTx, // Use payout tx if available, fallback to burn tx
               timestamp: new Date(event.timestamp).toISOString(),
               tier: event.result?.tier || (payout >= gambledAmount ? 'break-even' : 'loss'),
               isWin: payout > 0
             }
+            // Only include tx field if we have a valid transaction ID
+            if (txId) {
+              result.tx = txId
+            }
+            return result
           }
         }
       } catch (parseError) {
@@ -944,6 +954,43 @@ async function sendPayout(env, recipientWalletAddress, amount) {
 // Async version that doesn't block the main response
 async function sendPayoutAsync(env, recipientWalletAddress, amount) {
   return await sendPayout(env, recipientWalletAddress, amount)
+}
+
+// Update gambling log with real transaction ID once payout is sent
+async function updateGamblingLogWithTx(env, sessionId, walletAddress, realTxId) {
+  try {
+    // Find and update the gambling log entry
+    const logKey = `gamble:${walletAddress}:${Date.now()}`
+    
+    // Since we don't have the exact key, we need to scan recent entries
+    const listResult = await env.GAMBLE_LOGS.list({
+      prefix: `gamble:${walletAddress}:`,
+      limit: 100
+    })
+    
+    // Find the most recent entry that matches this session
+    for (const key of listResult.keys) {
+      try {
+        const logData = await env.GAMBLE_LOGS.get(key.name)
+        if (logData) {
+          const entry = JSON.parse(logData)
+          if (entry.sessionId === sessionId) {
+            // Update with real transaction ID
+            entry.payoutTx = realTxId
+            await env.GAMBLE_LOGS.put(key.name, JSON.stringify(entry))
+            console.log(`✅ Updated gambling log ${key.name} with real tx: ${realTxId}`)
+            return
+          }
+        }
+      } catch (parseError) {
+        continue
+      }
+    }
+    
+    console.log(`⚠️ Could not find gambling log entry for session ${sessionId}`)
+  } catch (error) {
+    console.error('❌ Error updating gambling log with real tx:', error)
+  }
 }
 
 function getResultMessage(tier) {

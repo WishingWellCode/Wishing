@@ -538,9 +538,9 @@ export class TestScene extends Phaser.Scene {
       
       // Transaction ID for Solscan link - use tx field from API
       const txId = winner.tx || winner.burnTx || winner.payoutTx || winner.transactionId
-      // Show VIEW link if we have any transaction ID
-      const isValidTx = txId && txId.length > 20 // Valid Solana tx IDs are ~88 chars
-      const txLink = isValidTx ? 'VIEW' : '-'
+      // Show VIEW link if we have any transaction ID (not PROCESSING_)
+      const isValidTx = txId && txId.length > 20 && !txId.startsWith('PROCESSING_')
+      const txLink = isValidTx ? 'VIEW TX' : '-'
       
       // Winner address formatting
       const walletAddr = winner.winner

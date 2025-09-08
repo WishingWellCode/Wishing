@@ -24,7 +24,8 @@
       "Bash(wrangler r2 object list:*)",
       "Bash(wrangler r2 object get:*)",
       "Bash(npm update:*)",
-      "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=20&includeBreakEven=true&includeAll=true\")"
+      "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=20&includeBreakEven=true&includeAll=true\")",
+      "Bash(time curl -s \"https://wish-well-worker.stealthbundlebot.workers.dev/api/leaderboard?limit=5&includeBreakEven=true&includeAll=true\")"
     ],
     "deny": [],
     "ask": []
