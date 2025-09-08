@@ -193,16 +193,11 @@ export default function Upgrades() {
 
   if (loading) {
     return (
-      <div style={{ 
-        background: 'url(/assets/backgrounds/Realbackground.jpg)', 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div className="text-white text-2xl font-pixel">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <div className="text-2xl font-bold text-white">Loading Housing District...</div>
+        </div>
       </div>
     )
   }
@@ -215,19 +210,16 @@ export default function Upgrades() {
           <meta name="description" content="Upgrade your housing to boost your gambling odds!" />
         </Head>
         
-        <div style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div className="text-center bg-black/80 p-8 rounded-lg">
-            <h1 className="text-4xl font-pixel text-purple-400 mb-4">Housing Upgrades</h1>
-            <p className="text-white mb-6 font-pixel">Connect your wallet to view housing upgrades</p>
-            <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          <div className="text-center bg-black/40 backdrop-blur-sm border border-purple-500/30 p-12 rounded-3xl shadow-2xl max-w-md">
+            <div className="text-6xl mb-6">🏠</div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
+              Housing Upgrades
+            </h1>
+            <p className="text-slate-300 mb-8 text-lg leading-relaxed">
+              Connect your wallet to view and purchase housing upgrades
+            </p>
+            <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-pink-600 hover:!from-purple-700 hover:!to-pink-700 !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-200 !px-8 !py-3 !font-bold" />
           </div>
         </div>
       </>
@@ -249,57 +241,56 @@ export default function Upgrades() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div style={{
-        backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        minHeight: '100vh'
-      }}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         {/* Header */}
-        <div className="flex justify-between items-center p-6">
+        <div className="flex justify-between items-center p-6 bg-black/20 backdrop-blur-sm border-b border-purple-500/20">
           <button 
             onClick={() => router.push('/')}
-            className="text-purple-400 hover:text-purple-300 font-pixel text-lg"
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            ← Back to Game
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Game
           </button>
           
           <div className="flex items-center gap-4">
             {highestOwnedLevel > 0 && (
               <button
                 onClick={visitHouse}
-                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white font-pixel"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Visit House
+                🏠 Visit House
               </button>
             )}
-            <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+            <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-pink-600 hover:!from-purple-700 hover:!to-pink-700 !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-200" />
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-6 py-8">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-pixel text-purple-400 mb-4">Housing District</h1>
-            <p className="text-xl text-white font-pixel mb-6">
-              Upgrade your housing to boost your Wishing Well odds!
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center mb-16">
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6">
+              Housing District
+            </h1>
+            <p className="text-2xl text-slate-300 font-medium mb-8 max-w-3xl mx-auto leading-relaxed">
+              Upgrade your housing to boost your Wishing Well odds and unlock exclusive benefits!
             </p>
             
             {/* User Stats */}
-            <div className="bg-black/80 p-6 rounded-lg inline-block">
+            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-8 rounded-2xl inline-block shadow-2xl">
               <div className="grid grid-cols-3 gap-8 text-center">
-                <div>
-                  <div className="text-2xl font-pixel text-green-400">{highestOwnedLevel}</div>
-                  <div className="text-sm font-pixel text-white">Current Level</div>
+                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4 rounded-xl border border-green-500/30">
+                  <div className="text-3xl font-bold text-green-400 mb-1">{highestOwnedLevel}</div>
+                  <div className="text-sm font-medium text-slate-300">Current Level</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-pixel text-blue-400">+{totalBoost}%</div>
-                  <div className="text-sm font-pixel text-white">Total Boost</div>
+                <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-4 rounded-xl border border-blue-500/30">
+                  <div className="text-3xl font-bold text-blue-400 mb-1">+{totalBoost}%</div>
+                  <div className="text-sm font-medium text-slate-300">Total Boost</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-pixel text-yellow-400">{userHousing.totalBurned.toLocaleString()}</div>
-                  <div className="text-sm font-pixel text-white">Total Burned</div>
+                <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-4 rounded-xl border border-yellow-500/30">
+                  <div className="text-3xl font-bold text-yellow-400 mb-1">{userHousing.totalBurned.toLocaleString()}</div>
+                  <div className="text-sm font-medium text-slate-300">Total Burned</div>
                 </div>
               </div>
             </div>
@@ -316,50 +307,55 @@ export default function Upgrades() {
               return (
                 <div
                   key={house.level}
-                  className={`bg-black/80 rounded-lg overflow-hidden border-2 ${
-                    isOwned ? 'border-green-500' : 
-                    canPurchase ? 'border-purple-500' : 
-                    'border-gray-500'
-                  }`}
+                  className={`bg-black/30 backdrop-blur-sm rounded-2xl overflow-hidden border transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    isOwned ? 'border-green-500/50 shadow-green-500/20' : 
+                    canPurchase ? 'border-purple-500/50 shadow-purple-500/20' : 
+                    'border-gray-500/30 opacity-75'
+                  } shadow-xl`}
                 >
                   {/* House Image */}
-                  <div className="h-48 bg-gray-700 flex items-center justify-center relative">
-                    <div className={`text-6xl ${isLocked ? 'opacity-30' : ''}`}>🏠</div>
+                  <div className="h-48 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative">
+                    <div className={`text-8xl ${isLocked ? 'opacity-30 grayscale' : ''} transition-all duration-300`}>🏠</div>
                     {isOwned && (
-                      <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-sm font-pixel">
-                        OWNED
+                      <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                        ✓ OWNED
                       </div>
                     )}
                     {isLocked && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-pixel">
-                        LOCKED
+                      <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                        🔒 LOCKED
+                      </div>
+                    )}
+                    {canPurchase && (
+                      <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-pulse">
+                        ⭐ AVAILABLE
                       </div>
                     )}
                   </div>
                   
                   {/* House Info */}
                   <div className="p-6">
-                    <h3 className="text-xl font-pixel text-purple-400 mb-2">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-3">
                       Level {house.level}: {house.name}
                     </h3>
-                    <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                    <p className="text-sm text-slate-300 mb-6 leading-relaxed">
                       {house.description}
                     </p>
                     
                     {/* Stats */}
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between">
-                        <span className="font-pixel text-green-400">Win Boost:</span>
-                        <span className="font-pixel text-white">+{house.boostPercent}%</span>
+                    <div className="space-y-3 mb-6">
+                      <div className="flex justify-between items-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <span className="font-semibold text-green-400">🚀 Win Boost:</span>
+                        <span className="font-bold text-white">+{house.boostPercent}%</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="font-pixel text-blue-400">Cost:</span>
-                        <span className="font-pixel text-white">{house.cost.toLocaleString()} $WISH</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <span className="font-semibold text-blue-400">💎 Cost:</span>
+                        <span className="font-bold text-white">{house.cost.toLocaleString()} $WISH</span>
                       </div>
                       {house.burnRequirement > 0 && (
-                        <div className="flex justify-between">
-                          <span className="font-pixel text-yellow-400">Requires:</span>
-                          <span className="font-pixel text-white">{house.burnRequirement.toLocaleString()} burned</span>
+                        <div className="flex justify-between items-center p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                          <span className="font-semibold text-yellow-400">🔥 Requires:</span>
+                          <span className="font-bold text-white">{house.burnRequirement.toLocaleString()} burned</span>
                         </div>
                       )}
                     </div>
@@ -368,27 +364,34 @@ export default function Upgrades() {
                     {isOwned ? (
                       <button 
                         disabled 
-                        className="w-full bg-green-600 text-white py-3 rounded font-pixel opacity-75 cursor-not-allowed"
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-xl font-bold opacity-75 cursor-not-allowed shadow-lg"
                       >
-                        PURCHASED
+                        ✅ PURCHASED
                       </button>
                     ) : canPurchase ? (
                       <button
                         onClick={() => purchaseHouse(house.level)}
                         disabled={purchasing === house.level}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded font-pixel disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-4 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {purchasing === house.level ? 'PURCHASING...' : 'PURCHASE'}
+                        {purchasing === house.level ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            PURCHASING...
+                          </div>
+                        ) : (
+                          '🏠 PURCHASE NOW'
+                        )}
                       </button>
                     ) : (
                       <button 
                         disabled 
-                        className="w-full bg-gray-600 text-gray-400 py-3 rounded font-pixel cursor-not-allowed"
+                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 py-4 rounded-xl font-bold cursor-not-allowed shadow-lg text-xs"
                       >
-                        {house.level === 1 ? 'REQUIREMENTS NOT MET' : 
+                        {house.level === 1 ? '❌ REQUIREMENTS NOT MET' : 
                          userHousing.totalBurned < house.burnRequirement ? 
-                         `NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
-                         'BUY PREVIOUS LEVEL FIRST'}
+                         `🔥 NEED ${(house.burnRequirement - userHousing.totalBurned).toLocaleString()} MORE BURNED` :
+                         '⬆️ BUY PREVIOUS LEVEL FIRST'}
                       </button>
                     )}
                   </div>
@@ -398,22 +401,28 @@ export default function Upgrades() {
           </div>
           
           {/* Info Section */}
-          <div className="mt-12 text-center">
-            <div className="bg-black/80 p-8 rounded-lg max-w-4xl mx-auto">
-              <h2 className="text-3xl font-pixel text-purple-400 mb-6">How Housing Works</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                <div>
-                  <h3 className="text-xl font-pixel text-green-400 mb-3">Boost System</h3>
-                  <p className="text-white font-pixel text-sm leading-relaxed">
+          <div className="mt-16 text-center">
+            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-12 rounded-3xl max-w-5xl mx-auto shadow-2xl">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-8">
+                How Housing Works
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
+                <div className="bg-green-500/10 p-6 rounded-2xl border border-green-500/20">
+                  <h3 className="text-2xl font-bold text-green-400 mb-4 flex items-center gap-2">
+                    🚀 Boost System
+                  </h3>
+                  <p className="text-slate-300 text-lg leading-relaxed">
                     Each house level provides a win rate boost that stacks with previous levels.
-                    The boost percentage is deducted from your loss chance!
+                    The boost percentage is deducted from your loss chance, giving you better odds!
                   </p>
                 </div>
-                <div>
-                  <h3 className="text-xl font-pixel text-blue-400 mb-3">Requirements</h3>
-                  <p className="text-white font-pixel text-sm leading-relaxed">
+                <div className="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20">
+                  <h3 className="text-2xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                    📋 Requirements
+                  </h3>
+                  <p className="text-slate-300 text-lg leading-relaxed">
                     Houses must be purchased in order, and higher levels require you to have
-                    burned a certain amount of $WISH tokens through gambling.
+                    burned a certain amount of $WISH tokens through gambling to unlock.
                   </p>
                 </div>
               </div>
