@@ -120,6 +120,16 @@ export default function Upgrades() {
         if (housingResponse.ok) {
           housingData = await housingResponse.json()
           console.log('Housing data from API:', housingData)
+          console.log('Owned levels from API:', housingData?.ownedLevels)
+          
+          // TEMPORARY: Clear test data if it includes Level 1 without a real purchase
+          // Remove this after testing is complete
+          if (housingData?.ownedLevels?.includes(1) && !housingData?.purchaseTransactions?.['1']) {
+            console.log('Clearing test data - Level 1 was marked as owned without real purchase')
+            // Call reset API to clear server-side data
+            await resetHousingData()
+            housingData.ownedLevels = []
+          }
         } else if (housingResponse.status === 404) {
           console.log('No housing data found for user (expected for new users)')
           housingData = { ownedLevels: [] }
@@ -167,6 +177,28 @@ export default function Upgrades() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const resetHousingData = async () => {
+    if (!publicKey) return
+    
+    try {
+      console.log('Attempting to reset housing data for wallet:', publicKey.toString())
+      const response = await fetch(`https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/${publicKey.toString()}/reset`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      if (response.ok) {
+        console.log('Successfully reset housing data on server')
+      } else {
+        console.log('Reset API endpoint not available yet, clearing only client-side')
+      }
+    } catch (error) {
+      console.log('Reset API not available yet:', error)
     }
   }
 
