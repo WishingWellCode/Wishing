@@ -584,27 +584,33 @@ async function handleFountainResolve(request, env) {
   if (payout > 0) {
     console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
     
-    // Check if pool wallet private key is configured
-    if (!env.POOL_WALLET_PRIVATE_KEY) {
-      console.error('❌ POOL_WALLET_PRIVATE_KEY not configured - cannot send real payouts')
-      console.log('⚠️ Using simulated payout for testing - no real transaction will be sent')
-      // For testing: use burn tx as a placeholder to show links work
-      payoutTx = txSignature // Use burn tx temporarily for testing
-    } else {
+    // Try to send real payout
+    try {
       // Send payout asynchronously - don't block the response
-      sendPayoutAsync(env, session.walletAddress, payout).then(txId => {
+      const payoutPromise = sendPayoutAsync(env, session.walletAddress, payout)
+      
+      // Store a placeholder immediately
+      payoutTx = 'PROCESSING_' + crypto.randomUUID()
+      
+      // Handle the payout result asynchronously
+      payoutPromise.then(txId => {
         console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
         
         // Update the gambling log with the real transaction ID
-        updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).catch(error => {
+        updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).then(() => {
+          console.log(`✅ Updated gambling log for session ${sessionId} with tx: ${txId}`)
+        }).catch(error => {
           console.error('❌ Failed to update gambling log with real tx:', error)
         })
       }).catch(error => {
         console.error('❌ Failed to send payout:', error.message || error)
+        // If payout fails, at least store the burn tx so we have something
+        payoutTx = txSignature
       })
-      
-      // Return immediately with a placeholder transaction ID
-      payoutTx = 'PROCESSING_' + crypto.randomUUID()
+    } catch (error) {
+      console.error('❌ Exception in payout handling:', error)
+      // Fallback to burn tx if something goes wrong
+      payoutTx = txSignature
     }
   }
 
@@ -993,13 +999,15 @@ async function updateGamblingLogWithTx(env, sessionId, walletAddress, realTxId) 
   try {
     console.log(`🔄 Updating gambling log for session ${sessionId} with real tx: ${realTxId}`)
     
-    // Get recent entries for this wallet (sorted by timestamp)
+    // Get recent entries for this wallet
     const listResult = await env.GAMBLE_LOGS.list({
       prefix: `gamble:${walletAddress}:`,
-      limit: 50
+      limit: 100
     })
     
-    // Sort keys by timestamp (newest first) and search
+    console.log(`📋 Found ${listResult.keys.length} gambling logs for wallet ${walletAddress}`)
+    
+    // Sort keys by timestamp (newest first)
     const sortedKeys = listResult.keys.sort((a, b) => {
       const timestampA = parseInt(a.name.split(':')[2] || '0')
       const timestampB = parseInt(b.name.split(':')[2] || '0')
@@ -1007,28 +1015,42 @@ async function updateGamblingLogWithTx(env, sessionId, walletAddress, realTxId) 
     })
     
     // Find the entry that matches this session
+    let updated = false
     for (const key of sortedKeys) {
       try {
         const logData = await env.GAMBLE_LOGS.get(key.name)
         if (logData) {
           const entry = JSON.parse(logData)
-          if (entry.sessionId === sessionId && entry.payoutTx && entry.payoutTx.startsWith('PROCESSING_')) {
+          // Match by sessionId OR by PROCESSING_ placeholder
+          if (entry.sessionId === sessionId || 
+              (entry.payoutTx && entry.payoutTx.startsWith('PROCESSING_'))) {
+            
+            console.log(`📝 Found matching entry: ${key.name}, current payoutTx: ${entry.payoutTx}`)
+            
             // Update with real transaction ID
             entry.payoutTx = realTxId
             await env.GAMBLE_LOGS.put(key.name, JSON.stringify(entry))
-            console.log(`✅ Updated gambling log ${key.name} with real tx: ${realTxId.substring(0, 20)}...`)
-            return
+            console.log(`✅ Updated gambling log ${key.name} with real tx: ${realTxId}`)
+            updated = true
+            break
           }
         }
       } catch (parseError) {
-        console.warn(`⚠️ Failed to parse log entry: ${key.name}`)
+        console.warn(`⚠️ Failed to parse log entry: ${key.name}`, parseError)
         continue
       }
     }
     
-    console.log(`❌ Could not find gambling log entry for session ${sessionId} with PROCESSING_ tx`)
+    if (!updated) {
+      console.error(`❌ Could not find gambling log entry for session ${sessionId}`)
+      // Log all entries for debugging
+      console.log('📊 All entries checked:', sortedKeys.map(k => k.name).join(', '))
+    }
+    
+    return updated
   } catch (error) {
     console.error('❌ Error updating gambling log with real tx:', error)
+    return false
   }
 }
 
