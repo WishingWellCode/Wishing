@@ -579,38 +579,19 @@ async function handleFountainResolve(request, env) {
   // Calculate payout
   const payout = Math.floor(1000 * result.multiplier)
   
-  // Send payout if won (from pool wallet) - but don't wait for confirmation
+  // Send payout if won (from pool wallet) - WAIT for the transaction
   let payoutTx = null
   if (payout > 0) {
     console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
     
-    // Try to send real payout
     try {
-      // Send payout asynchronously - don't block the response
-      const payoutPromise = sendPayoutAsync(env, session.walletAddress, payout)
-      
-      // Store a placeholder immediately
-      payoutTx = 'PROCESSING_' + crypto.randomUUID()
-      
-      // Handle the payout result asynchronously
-      payoutPromise.then(txId => {
-        console.log(`✅ Successfully sent ${payout} $WISH payout: ${txId}`)
-        
-        // Update the gambling log with the real transaction ID
-        updateGamblingLogWithTx(env, sessionId, session.walletAddress, txId).then(() => {
-          console.log(`✅ Updated gambling log for session ${sessionId} with tx: ${txId}`)
-        }).catch(error => {
-          console.error('❌ Failed to update gambling log with real tx:', error)
-        })
-      }).catch(error => {
-        console.error('❌ Failed to send payout:', error.message || error)
-        // If payout fails, at least store the burn tx so we have something
-        payoutTx = txSignature
-      })
+      // Send payout and WAIT for the transaction ID
+      payoutTx = await sendPayout(env, session.walletAddress, payout)
+      console.log(`✅ Successfully sent ${payout} $WISH payout with tx: ${payoutTx}`)
     } catch (error) {
-      console.error('❌ Exception in payout handling:', error)
-      // Fallback to burn tx if something goes wrong
-      payoutTx = txSignature
+      console.error('❌ Failed to send payout:', error.message || error)
+      // If payout fails, log it but continue (user still burned tokens)
+      payoutTx = null
     }
   }
 
@@ -833,12 +814,11 @@ async function getLeaderboard(env) {
             if (payout >= 1000) {
               // For wins and break-even, show payout transaction from pool wallet
               let txId = null
-              if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
+              if (event.payoutTx && event.payoutTx.length > 20 && !event.payoutTx.startsWith('PROCESSING_')) {
                 txId = event.payoutTx  // Show payout transaction for wins
-              }
-              // If payoutTx equals burnTx (temporary testing mode), show it
-              else if (event.payoutTx && event.burnTx && event.payoutTx === event.burnTx) {
-                txId = event.burnTx  // Temporary: show burn tx when pool wallet not configured
+                console.log(`🔗 Using payout tx for display: ${txId}`)
+              } else {
+                console.log(`⚠️ No valid payout tx for ${event.walletAddress}, payoutTx: ${event.payoutTx}`)
               }
               
               const result = {
