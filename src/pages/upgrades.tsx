@@ -122,12 +122,7 @@ export default function Upgrades() {
           console.log('Housing data from API:', housingData)
           console.log('Owned levels from API:', housingData?.ownedLevels)
           
-          // TEMPORARY: Clear test data if it includes Level 1 without a real purchase
-          // Remove this after testing is complete
-          if (housingData?.ownedLevels?.includes(1) && !housingData?.purchaseTransactions?.['1']) {
-            console.log('Clearing test data - Level 1 was marked as owned without real purchase')
-            housingData.ownedLevels = []
-          }
+          // Housing data is now properly managed by the server
         } else if (housingResponse.status === 404) {
           console.log('No housing data found for user (expected for new users)')
           housingData = { ownedLevels: [] }
