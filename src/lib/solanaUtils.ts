@@ -2,7 +2,9 @@ import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } f
 import { 
   createBurnInstruction,
   createTransferInstruction, 
+  createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
+  getAccount,
   getMint,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID
@@ -82,6 +84,38 @@ export class WishGamblingAPI {
     )
 
     const transaction = new Transaction()
+
+    // Check if user token account exists, create if not
+    try {
+      await getAccount(this.connection, userTokenAccount)
+    } catch (error) {
+      console.log('User token account does not exist, creating...')
+      const createUserTokenAccountIx = createAssociatedTokenAccountInstruction(
+        userWallet,
+        userTokenAccount,
+        userWallet,
+        tokenMint,
+        TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      )
+      transaction.add(createUserTokenAccountIx)
+    }
+    
+    // Check if recipient token account exists, create if not
+    try {
+      await getAccount(this.connection, recipientTokenAccount)
+    } catch (error) {
+      console.log('Recipient token account does not exist, creating...')
+      const createRecipientTokenAccountIx = createAssociatedTokenAccountInstruction(
+        userWallet, // User pays for creation
+        recipientTokenAccount,
+        recipientWallet,
+        tokenMint,
+        TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      )
+      transaction.add(createRecipientTokenAccountIx)
+    }
 
     // Get the actual decimals for this token
     const mintInfo = await getMint(this.connection, tokenMint)
