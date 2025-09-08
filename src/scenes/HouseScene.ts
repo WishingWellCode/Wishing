@@ -5,6 +5,10 @@ export class HouseScene extends Phaser.Scene {
   private wasd!: any
   private player!: Phaser.GameObjects.Rectangle
   private houseLevel: number = 1
+  private exitPortal: { coords: { x: number, y: number }[], isActive: boolean } = {
+    coords: [],
+    isActive: false
+  }
 
   constructor() {
     super({ key: 'HouseScene' })
@@ -99,6 +103,48 @@ export class HouseScene extends Phaser.Scene {
     this.cameras.main.setSize(gameSize.width, gameSize.height)
   }
 
+  // Point-in-polygon detection (same as TestScene)
+  isPointInPolygon(point: { x: number, y: number }, polygon: { x: number, y: number }[]): boolean {
+    let isInside = false
+    const x = point.x
+    const y = point.y
+    
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x
+      const yi = polygon[i].y
+      const xj = polygon[j].x
+      const yj = polygon[j].y
+      
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+        isInside = !isInside
+      }
+    }
+    
+    return isInside
+  }
+
+  checkPortalProximity() {
+    if (this.exitPortal.coords.length === 0) return
+    
+    const playerPos = { x: this.player.x, y: this.player.y }
+    const isInsidePortal = this.isPointInPolygon(playerPos, this.exitPortal.coords)
+    
+    if (isInsidePortal && !this.exitPortal.isActive) {
+      this.exitPortal.isActive = true
+      console.log('🚪 Entered exit portal - returning to main game')
+      this.returnToMainGame()
+    } else if (!isInsidePortal && this.exitPortal.isActive) {
+      this.exitPortal.isActive = false
+    }
+  }
+
+  returnToMainGame() {
+    console.log('🏠 Leaving house, returning to main game...')
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
+  }
+
   update() {
     if (!this.player) return
     
@@ -135,10 +181,19 @@ export class HouseScene extends Phaser.Scene {
       }
     }
     
+    // Check portal proximity
+    this.checkPortalProximity()
+    
     // Keep player on screen
     const width = this.cameras.main.width
     const height = this.cameras.main.height
     this.player.x = Phaser.Math.Clamp(this.player.x, 16, width - 16)
     this.player.y = Phaser.Math.Clamp(this.player.y, 16, height - 16)
+  }
+
+  // Method to set exit portal coordinates (called from React component)
+  setExitPortal(coords: { x: number, y: number }[]) {
+    this.exitPortal.coords = coords
+    console.log('🚪 Exit portal set with', coords.length, 'coordinates')
   }
 }

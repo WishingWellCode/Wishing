@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
@@ -6,6 +6,23 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 
 const HouseCanvas = dynamic(() => import('@/components/HouseCanvas'), { ssr: false })
+const PortalDebugger = dynamic(() => import('@/components/PortalDebugger'), { ssr: false })
+
+import type { HouseCanvasRef } from '@/components/HouseCanvas'
+
+// Exit portal coordinates for each house level (to be populated with debug tool)
+const EXIT_PORTAL_COORDS: { [level: number]: { x: number, y: number }[] } = {
+  1: [], // Tier 1 - to be mapped with debug tool
+  2: [], // Tier 2 - to be mapped with debug tool
+  3: [], // Tier 3 - to be mapped with debug tool
+  4: [], // Tier 4 - to be mapped with debug tool
+  5: [], // Tier 5 - to be mapped with debug tool
+  6: [], // Tier 6 - to be mapped with debug tool
+}
+
+function getExitPortalCoords(level: number): { x: number, y: number }[] {
+  return EXIT_PORTAL_COORDS[level] || []
+}
 
 interface HouseLevel {
   level: number
@@ -87,6 +104,8 @@ export default function House() {
   const [currentHouseLevel, setCurrentHouseLevel] = useState<number>(1)
   const [loading, setLoading] = useState(true)
   const [ownedLevels, setOwnedLevels] = useState<number[]>([])
+  const [debugMode, setDebugMode] = useState(false)
+  const houseCanvasRef = useRef<HouseCanvasRef>(null)
 
   useEffect(() => {
     // Get house level from URL params or default to highest owned
@@ -273,7 +292,15 @@ export default function House() {
 
       <div className="relative w-full h-screen overflow-hidden">
         {/* HouseCanvas for tier background and character movement */}
-        <HouseCanvas houseLevel={currentHouseLevel} />
+        <HouseCanvas ref={houseCanvasRef} houseLevel={currentHouseLevel} />
+        
+        {/* Portal Debugger */}
+        {debugMode && (
+          <PortalDebugger 
+            isActive={debugMode} 
+            onClose={() => setDebugMode(false)} 
+          />
+        )}
         
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-10">
@@ -301,6 +328,12 @@ export default function House() {
         <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
           <p>WASD/Arrow Keys - Move around your house</p>
           <p>You are in your {currentHouse.name}</p>
+          <button
+            onClick={() => setDebugMode(!debugMode)}
+            className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs"
+          >
+            {debugMode ? 'Close Debug' : 'Debug Portal'}
+          </button>
         </div>
         
         {/* Level Selector and House Info */}
@@ -348,6 +381,21 @@ export default function House() {
               className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded font-pixel text-xs"
             >
               Upgrade House
+            </button>
+            <button
+              onClick={() => {
+                const coords = getExitPortalCoords(currentHouseLevel)
+                const scene = houseCanvasRef.current?.getHouseScene()
+                if (scene && coords.length > 0) {
+                  scene.setExitPortal(coords)
+                  console.log('🚪 Set exit portal for house level', currentHouseLevel)
+                } else {
+                  console.log('❌ No exit portal defined for level', currentHouseLevel)
+                }
+              }}
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded font-pixel text-xs"
+            >
+              Test Exit Portal
             </button>
           </div>
         </div>

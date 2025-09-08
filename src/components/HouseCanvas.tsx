@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import Phaser from 'phaser'
 import { HouseScene } from '@/scenes/HouseScene'
 
@@ -6,9 +6,22 @@ interface HouseCanvasProps {
   houseLevel: number
 }
 
-export default function HouseCanvas({ houseLevel }: HouseCanvasProps) {
+export interface HouseCanvasRef {
+  getHouseScene: () => HouseScene | null
+}
+
+const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel }, ref) => {
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    getHouseScene: () => {
+      if (gameRef.current) {
+        return gameRef.current.scene.getScene('HouseScene') as HouseScene
+      }
+      return null
+    }
+  }))
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return
@@ -73,4 +86,8 @@ export default function HouseCanvas({ houseLevel }: HouseCanvasProps) {
       }}
     />
   )
-}
+})
+
+HouseCanvas.displayName = 'HouseCanvas'
+
+export default HouseCanvas
