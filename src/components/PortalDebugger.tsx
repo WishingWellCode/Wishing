@@ -112,11 +112,11 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
   if (!isActive) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/50">
-      {/* Debug Overlay */}
+    <div className="fixed inset-0 z-[9999] pointer-events-none">
+      {/* Debug Overlay - transparent and pointer-events only where needed */}
       <div 
         ref={containerRef}
-        className="absolute inset-0 cursor-crosshair"
+        className="absolute inset-0 cursor-crosshair pointer-events-auto"
         onClick={handleClick}
         onContextMenu={handleRightClick}
         style={{ background: 'transparent' }}
@@ -203,51 +203,51 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         ))}
       </div>
 
-      {/* Control Panel */}
-      <div className="absolute top-4 left-4 bg-black/90 p-4 rounded-lg border-2 border-red-500 text-white font-pixel text-xs max-w-sm">
-        <h3 className="text-lg text-red-400 mb-3">Portal Area Debugger</h3>
+      {/* Control Panel - smaller and with pointer events */}
+      <div className="absolute top-4 left-4 bg-black/90 p-3 rounded-lg border-2 border-red-500 text-white font-pixel text-xs max-w-xs pointer-events-auto">
+        <h3 className="text-sm text-red-400 mb-2">Portal Debugger</h3>
         
-        <div className="space-y-2 mb-4">
-          <p>LEFT CLICK: Add point ({points.length} points)</p>
-          <p>RIGHT CLICK: Clear all points</p>
-          <p className="text-yellow-400">
-            {points.length === 0 && "Start clicking to map the portal area"}
-            {points.length === 1 && "Need at least 2 more points"}
-            {points.length === 2 && "Need at least 1 more point"}
-            {points.length >= 3 && "Polygon complete! Keep adding or export"}
+        <div className="space-y-1 mb-3 text-xs">
+          <p>L-Click: Add ({points.length})</p>
+          <p>R-Click: Clear all</p>
+          <p className="text-yellow-400 text-xs">
+            {points.length === 0 && "Click to map portal"}
+            {points.length === 1 && "Need 2+ points"}
+            {points.length === 2 && "Need 1+ point"}
+            {points.length >= 3 && "Ready to export!"}
           </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <button
             onClick={exportCoordinates}
             disabled={points.length === 0}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-2 px-3 rounded"
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white py-1 px-2 rounded text-xs"
           >
-            Export Coordinates
+            Export
           </button>
           
           <button
             onClick={removeLastPoint}
             disabled={points.length === 0}
-            className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 text-white py-2 px-3 rounded"
+            className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 text-white py-1 px-2 rounded text-xs"
           >
-            Remove Last Point
+            Undo Last
           </button>
           
           <button
             onClick={clearPoints}
             disabled={points.length === 0}
-            className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white py-2 px-3 rounded"
+            className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white py-1 px-2 rounded text-xs"
           >
-            Clear All Points
+            Clear All
           </button>
           
           <button
             onClick={onClose}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded text-xs"
           >
-            Close Debugger
+            Close
           </button>
         </div>
 
@@ -291,17 +291,10 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         )}
       </div>
 
-      {/* Instructions */}
-      <div className="absolute top-4 right-4 bg-black/90 p-4 rounded-lg border border-gray-600 text-white font-pixel text-xs max-w-xs">
-        <h4 className="text-yellow-400 mb-2">Instructions:</h4>
-        <ul className="space-y-1 text-xs">
-          <li>• LEFT CLICK: Add points around portal area</li>
-          <li>• RIGHT CLICK: Clear all points</li>
-          <li>• Points connect in order with glowing lines</li>
-          <li>• Minimum 3 points needed for polygon</li>
-          <li>• Check console for coordinates</li>
-          <li>• Export when done mapping</li>
-        </ul>
+      {/* Minimized Instructions - just show key info */}
+      <div className="absolute bottom-4 right-4 bg-black/80 p-2 rounded-lg border border-gray-600 text-white font-pixel text-xs max-w-xs pointer-events-auto">
+        <p className="text-yellow-400">L-Click: Add point | R-Click: Clear</p>
+        <p className="text-gray-300">Console logs coordinates</p>
       </div>
     </div>
   )
