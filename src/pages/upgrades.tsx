@@ -86,7 +86,7 @@ export default function Upgrades() {
   // Initialize Solana API
   const gamblingAPI = new WishGamblingAPI(
     'https://wish-well-worker.stealthbundlebot.workers.dev',
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki'
   )
 
   useEffect(() => {
@@ -126,8 +126,6 @@ export default function Upgrades() {
           // Remove this after testing is complete
           if (housingData?.ownedLevels?.includes(1) && !housingData?.purchaseTransactions?.['1']) {
             console.log('Clearing test data - Level 1 was marked as owned without real purchase')
-            // Call reset API to clear server-side data
-            await resetHousingData()
             housingData.ownedLevels = []
           }
         } else if (housingResponse.status === 404) {
