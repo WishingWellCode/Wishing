@@ -303,7 +303,7 @@ export default function House() {
         )}
         
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-10">
+        <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 bg-black/60 z-[100]">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.push('/')}
@@ -320,6 +320,17 @@ export default function House() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* DEBUG BUTTON - MOVED TO TOP RIGHT */}
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className={`px-4 py-2 rounded font-pixel text-sm font-bold border-2 transition-all ${
+                debugMode 
+                  ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-lg shadow-red-500/50' 
+                  : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-lg shadow-orange-500/50 animate-pulse'
+              }`}
+            >
+              {debugMode ? '❌ Close Debug' : '🔧 Debug Portal'}
+            </button>
             <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
           </div>
         </div>
@@ -328,16 +339,7 @@ export default function House() {
         <div className="absolute bottom-4 left-4 bg-black/80 p-4 rounded-lg border-2 border-purple-400 text-white font-pixel text-xs z-50">
           <p>WASD/Arrow Keys - Move around your house</p>
           <p>You are in your {currentHouse.name}</p>
-          <button
-            onClick={() => setDebugMode(!debugMode)}
-            className={`mt-3 px-4 py-2 rounded font-pixel text-sm font-bold border-2 transition-all ${
-              debugMode 
-                ? 'bg-red-600 hover:bg-red-700 border-red-400 text-white shadow-lg shadow-red-500/50' 
-                : 'bg-orange-600 hover:bg-orange-700 border-orange-400 text-white shadow-lg shadow-orange-500/50 animate-pulse'
-            }`}
-          >
-            {debugMode ? '❌ Close Debug' : '🔧 Debug Portal'}
-          </button>
+          <p className="text-yellow-400 mt-2">Debug button is in top-right corner</p>
         </div>
         
         {/* Level Selector and House Info */}
