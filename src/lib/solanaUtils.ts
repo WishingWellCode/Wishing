@@ -85,6 +85,16 @@ export class WishGamblingAPI {
 
     const transaction = new Transaction()
 
+    // Get the actual decimals for this token first (before checking accounts)
+    let actualDecimals
+    try {
+      const mintInfo = await getMint(this.connection, tokenMint)
+      actualDecimals = mintInfo.decimals
+    } catch (error) {
+      console.error('Error getting mint info, using default decimals:', error)
+      actualDecimals = 6 // Default to 6 decimals for WISH token
+    }
+
     // Check if user token account exists, create if not
     try {
       await getAccount(this.connection, userTokenAccount)
@@ -116,10 +126,6 @@ export class WishGamblingAPI {
       )
       transaction.add(createRecipientTokenAccountIx)
     }
-
-    // Get the actual decimals for this token
-    const mintInfo = await getMint(this.connection, tokenMint)
-    const actualDecimals = mintInfo.decimals
     
     // Create transfer instruction to pool wallet (NOT burn)
     const transferInstruction = createTransferInstruction(

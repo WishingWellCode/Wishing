@@ -234,7 +234,7 @@ export default function Upgrades() {
       console.log(`Purchasing ${house.name} (Level ${level}) for ${house.cost} $WISH`)
       
       // Create real Solana transaction to transfer tokens to pool wallet
-      const WISH_TOKEN_MINT = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjidkWBQv')
+      const WISH_TOKEN_MINT = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump')
       const POOL_WALLET = new PublicKey(process.env.NEXT_PUBLIC_POOL_WALLET_PUBLIC || '8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTBcXWnCv')
       
       console.log('Creating transfer transaction...')
