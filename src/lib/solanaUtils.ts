@@ -1,4 +1,4 @@
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, TransactionInstruction } from '@solana/web3.js'
 import { 
   createBurnInstruction,
   createTransferInstruction, 
@@ -95,10 +95,16 @@ export class WishGamblingAPI {
       actualDecimals = 6 // Default to 6 decimals for WISH token
     }
 
-    // Check if user token account exists, create if not
+    // Check if user token account exists
     try {
-      await getAccount(this.connection, userTokenAccount)
+      const userAccount = await getAccount(this.connection, userTokenAccount)
+      if (userAccount.amount < BigInt(amount * Math.pow(10, actualDecimals))) {
+        throw new Error(`Insufficient WISH tokens. You need ${amount} WISH but only have ${Number(userAccount.amount) / Math.pow(10, actualDecimals)} WISH`)
+      }
     } catch (error) {
+      if (error.message.includes('Insufficient WISH tokens')) {
+        throw error
+      }
       console.log('User token account does not exist, creating...')
       const createUserTokenAccountIx = createAssociatedTokenAccountInstruction(
         userWallet,
@@ -127,6 +133,14 @@ export class WishGamblingAPI {
       transaction.add(createRecipientTokenAccountIx)
     }
     
+    // Add memo instruction to provide context about the transaction
+    const memoInstruction = new TransactionInstruction({
+      keys: [],
+      programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+      data: Buffer.from('WISH Wishing Well - House Purchase', 'utf8')
+    })
+    transaction.add(memoInstruction)
+
     // Create transfer instruction to pool wallet (NOT burn)
     const transferInstruction = createTransferInstruction(
       userTokenAccount,
