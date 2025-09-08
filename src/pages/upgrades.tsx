@@ -643,7 +643,7 @@ export default function Upgrades() {
                     <img 
                       src={`/assets/houses/tier${house.level}.png`} 
                       alt={house.name}
-                      className="w-32 h-32 mx-auto object-contain"
+                      className="w-12 h-12 mx-auto object-contain"
                     />
                   </div>
                   
