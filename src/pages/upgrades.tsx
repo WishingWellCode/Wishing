@@ -241,45 +241,49 @@ export default function Upgrades() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 bg-black/20 backdrop-blur-sm border-b border-purple-500/20">
-          <button 
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Game
-          </button>
-          
-          <div className="flex items-center gap-4">
-            {highestOwnedLevel > 0 && (
-              <button
-                onClick={visitHouse}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+        <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <button 
+                onClick={() => router.push('/')}
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                🏠 Visit House
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Game
               </button>
-            )}
-            <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-pink-600 hover:!from-purple-700 hover:!to-pink-700 !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-200" />
+              
+              <div className="flex items-center gap-4">
+                {highestOwnedLevel > 0 && (
+                  <button
+                    onClick={visitHouse}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    🏠 Visit House
+                  </button>
+                )}
+                <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-pink-600 hover:!from-purple-700 hover:!to-pink-700 !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-200 !px-6 !py-3 !font-semibold" />
+              </div>
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* Main Content */}
-        <div className="container mx-auto px-6 py-12">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-16">
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6">
               Housing District
             </h1>
-            <p className="text-2xl text-slate-300 font-medium mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-300 font-medium mb-12 max-w-4xl mx-auto leading-relaxed">
               Upgrade your housing to boost your Wishing Well odds and unlock exclusive benefits!
             </p>
             
             {/* User Stats */}
-            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-8 rounded-2xl inline-block shadow-2xl">
-              <div className="grid grid-cols-3 gap-8 text-center">
+            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-6 md:p-8 rounded-2xl max-w-4xl mx-auto shadow-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 text-center">
                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4 rounded-xl border border-green-500/30">
                   <div className="text-3xl font-bold text-green-400 mb-1">{highestOwnedLevel}</div>
                   <div className="text-sm font-medium text-slate-300">Current Level</div>
@@ -297,7 +301,7 @@ export default function Upgrades() {
           </div>
 
           {/* Housing Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
             {HOUSE_LEVELS.map((house) => {
               const status = getHouseStatus(house.level)
               const canPurchase = status === 'available'
@@ -334,28 +338,28 @@ export default function Upgrades() {
                   </div>
                   
                   {/* House Info */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-3">
+                  <div className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-3">
                       Level {house.level}: {house.name}
                     </h3>
-                    <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                    <p className="text-sm text-slate-300 mb-4 md:mb-6 leading-relaxed">
                       {house.description}
                     </p>
                     
                     {/* Stats */}
-                    <div className="space-y-3 mb-6">
-                      <div className="flex justify-between items-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
-                        <span className="font-semibold text-green-400">🚀 Win Boost:</span>
-                        <span className="font-bold text-white">+{house.boostPercent}%</span>
+                    <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+                      <div className="flex justify-between items-center p-2 md:p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <span className="text-sm md:text-base font-semibold text-green-400">🚀 Win Boost:</span>
+                        <span className="text-sm md:text-base font-bold text-white">+{house.boostPercent}%</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                        <span className="font-semibold text-blue-400">💎 Cost:</span>
-                        <span className="font-bold text-white">{house.cost.toLocaleString()} $WISH</span>
+                      <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <span className="text-sm md:text-base font-semibold text-blue-400">💎 Cost:</span>
+                        <span className="text-sm md:text-base font-bold text-white">{house.cost.toLocaleString()} $WISH</span>
                       </div>
                       {house.burnRequirement > 0 && (
-                        <div className="flex justify-between items-center p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                          <span className="font-semibold text-yellow-400">🔥 Requires:</span>
-                          <span className="font-bold text-white">{house.burnRequirement.toLocaleString()} burned</span>
+                        <div className="flex justify-between items-center p-2 md:p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                          <span className="text-sm md:text-base font-semibold text-yellow-400">🔥 Requires:</span>
+                          <span className="text-sm md:text-base font-bold text-white">{house.burnRequirement.toLocaleString()} burned</span>
                         </div>
                       )}
                     </div>
@@ -364,7 +368,7 @@ export default function Upgrades() {
                     {isOwned ? (
                       <button 
                         disabled 
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-xl font-bold opacity-75 cursor-not-allowed shadow-lg"
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 md:py-4 rounded-xl font-bold opacity-75 cursor-not-allowed shadow-lg text-sm md:text-base"
                       >
                         ✅ PURCHASED
                       </button>
@@ -372,7 +376,7 @@ export default function Upgrades() {
                       <button
                         onClick={() => purchaseHouse(house.level)}
                         disabled={purchasing === house.level}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-4 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 md:py-4 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                       >
                         {purchasing === house.level ? (
                           <div className="flex items-center justify-center gap-2">
@@ -386,7 +390,7 @@ export default function Upgrades() {
                     ) : (
                       <button 
                         disabled 
-                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 py-4 rounded-xl font-bold cursor-not-allowed shadow-lg text-xs"
+                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 py-3 md:py-4 rounded-xl font-bold cursor-not-allowed shadow-lg text-xs md:text-sm"
                       >
                         {house.level === 1 ? '❌ REQUIREMENTS NOT MET' : 
                          userHousing.totalBurned < house.burnRequirement ? 
@@ -401,26 +405,26 @@ export default function Upgrades() {
           </div>
           
           {/* Info Section */}
-          <div className="mt-16 text-center">
-            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-12 rounded-3xl max-w-5xl mx-auto shadow-2xl">
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-8">
+          <div className="mt-12 md:mt-16 text-center">
+            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 p-6 md:p-12 rounded-2xl md:rounded-3xl shadow-2xl">
+              <h2 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-6 md:mb-8">
                 How Housing Works
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
-                <div className="bg-green-500/10 p-6 rounded-2xl border border-green-500/20">
-                  <h3 className="text-2xl font-bold text-green-400 mb-4 flex items-center gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 text-left">
+                <div className="bg-green-500/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-green-500/20">
+                  <h3 className="text-lg md:text-2xl font-bold text-green-400 mb-3 md:mb-4 flex items-center gap-2">
                     🚀 Boost System
                   </h3>
-                  <p className="text-slate-300 text-lg leading-relaxed">
+                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
                     Each house level provides a win rate boost that stacks with previous levels.
                     The boost percentage is deducted from your loss chance, giving you better odds!
                   </p>
                 </div>
-                <div className="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20">
-                  <h3 className="text-2xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                <div className="bg-blue-500/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-blue-500/20">
+                  <h3 className="text-lg md:text-2xl font-bold text-blue-400 mb-3 md:mb-4 flex items-center gap-2">
                     📋 Requirements
                   </h3>
-                  <p className="text-slate-300 text-lg leading-relaxed">
+                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
                     Houses must be purchased in order, and higher levels require you to have
                     burned a certain amount of $WISH tokens through gambling to unlock.
                   </p>
@@ -428,7 +432,7 @@ export default function Upgrades() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </>
   )
