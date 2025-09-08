@@ -816,20 +816,28 @@ async function getLeaderboard(env) {
             const payout = event.payout || 0
             const gambledAmount = event.gambled || 1000000000 // Default 1 SOL if not specified
             
-            // For wins, show payout tx; for losses/break-even, show burn tx
+            // For wins, prioritize showing payout tx (from pool to winner)
+            // For losses/break-even, show burn tx (from winner to burn address)
             let txId = null
-            if (payout > 0 && event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
-              txId = event.payoutTx  // Show payout transaction for wins
-            } else if (event.burnTx) {
-              txId = event.burnTx    // Show burn transaction for losses/break-even
+            if (payout > 0) {
+              // For wins, only show payout transaction if it's real (not PROCESSING_)
+              if (event.payoutTx && !event.payoutTx.startsWith('PROCESSING_')) {
+                txId = event.payoutTx  // Show payout transaction for wins
+              }
+              // If no valid payout tx, don't show any link for wins
+            } else {
+              // For losses and break-even, show burn transaction
+              if (event.burnTx) {
+                txId = event.burnTx
+              }
             }
             
             const result = {
               winner: event.walletAddress,
-              amount: Math.round(payout / 1000000).toString(), // Convert to WISH tokens (6 decimals)
+              amount: payout.toString(), // Keep as WISH tokens (already in correct units)
               timestamp: new Date(event.timestamp).toISOString(),
-              tier: event.result?.tier || (payout >= gambledAmount ? 'break-even' : 'loss'),
-              isWin: payout > 0
+              tier: event.result?.tier || (payout >= 1000 ? 'break-even' : 'loss'),
+              isWin: payout > 1000  // Only true wins (more than break-even)
             }
             
             // Only include tx field if we have a valid transaction ID
