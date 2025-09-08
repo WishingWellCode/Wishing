@@ -26,49 +26,49 @@ const HOUSE_LEVELS: HouseLevel[] = [
     level: 1,
     name: "Starter Shack",
     description: "A humble beginning to your housing journey. Basic shelter with minimal amenities.",
-    cost: 5000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 0.5,
-    burnRequirement: 0
+    burnRequirement: 1000 // Now requires 1000 tokens burned
   },
   {
     level: 2,
     name: "Cozy Cottage", 
     description: "A comfortable upgrade with a small garden and improved living space.",
-    cost: 20000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 1.5,
-    burnRequirement: 10000
+    burnRequirement: 30000 // Tripled from 10k
   },
   {
     level: 3,
     name: "Suburban Home",
     description: "A two-story house with modern amenities and a spacious backyard.",
-    cost: 60000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 4.0,
-    burnRequirement: 25000
+    burnRequirement: 75000 // Tripled from 25k
   },
   {
     level: 4,
     name: "Luxury Villa",
     description: "An elegant villa with premium finishes and multiple bedrooms.",
-    cost: 200000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 8.0,
-    burnRequirement: 75000
+    burnRequirement: 225000 // Tripled from 75k
   },
   {
     level: 5,
     name: "Grand Mansion",
     description: "A magnificent estate with sprawling grounds and luxurious features.",
-    cost: 500000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 15.0,
-    burnRequirement: 150000
+    burnRequirement: 450000 // Tripled from 150k
   },
   {
     level: 6,
     name: "Royal Palace",
     description: "The ultimate in luxury living - fit for royalty with unmatched grandeur.",
-    cost: 1000000,
+    cost: 0, // No longer costs WISH tokens
     boostPercent: 25.0,
-    burnRequirement: 250000
+    burnRequirement: 750000 // Tripled from 250k
   }
 ]
 
@@ -225,67 +225,45 @@ export default function Upgrades() {
   }
 
   const purchaseHouse = async (level: number) => {
-    if (!publicKey || !canPurchaseHouse(level) || !signTransaction || !sendTransaction) return
+    if (!publicKey || !canPurchaseHouse(level)) return
     
     try {
       setPurchasing(level)
       const house = HOUSE_LEVELS[level - 1]
       
-      console.log(`Purchasing ${house.name} (Level ${level}) for ${house.cost} $WISH`)
+      console.log(`Purchasing ${house.name} (Level ${level}) - requires ${house.burnRequirement.toLocaleString()} tokens burned`)
       
-      // Create real Solana transaction to transfer tokens to pool wallet
-      const WISH_TOKEN_MINT = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump')
-      const POOL_WALLET = new PublicKey(process.env.NEXT_PUBLIC_POOL_WALLET_PUBLIC || '8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTC4w27y8')
-      
-      console.log('Creating transfer transaction...')
-      const transaction = await gamblingAPI.createTransferTransaction(
-        publicKey,
-        POOL_WALLET,
-        WISH_TOKEN_MINT,
-        house.cost
-      )
-      
-      console.log('Signing transaction...')
-      const signedTransaction = await signTransaction(transaction)
-      
-      console.log('Sending transaction to network...')
-      const signature = await sendTransaction(signedTransaction, gamblingAPI.connection)
-      
-      console.log('Confirming transaction...')
-      await gamblingAPI.connection.confirmTransaction(signature, 'confirmed')
-      
-      console.log(`Transaction confirmed: ${signature}`)
-      
-      // Update Cloudflare Worker with purchase
+      // No token transfer needed - just update server with level purchase
+      // The server should verify the user has enough tokens burned
       const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/housing/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           walletAddress: publicKey.toString(),
           level: level,
-          cost: house.cost,
-          txSignature: signature
+          burnRequirement: house.burnRequirement
+          // No transaction signature since there's no blockchain transaction
         })
       })
       
       if (!response.ok) {
-        throw new Error('Failed to update housing data on server')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to purchase house')
       }
       
       // Refresh the UI with latest data
       await fetchUserHousingData()
       
       console.log(`Successfully purchased ${house.name}!`)
-      alert(`🎉 Successfully purchased ${house.name}!\\n\\nTransaction: ${signature}`)
+      alert(`🎉 Successfully purchased ${house.name}!\\n\\nYou now have ${house.boostPercent}% increased win odds!`)
       
     } catch (error: any) {
       console.error('Error purchasing house:', error)
       
       let errorMessage = 'Purchase failed. '
-      if (error.message.includes('insufficient funds')) {
-        errorMessage += 'Insufficient $WISH tokens in your wallet.'
-      } else if (error.message.includes('User rejected')) {
-        errorMessage += 'Transaction was cancelled.'
+      if (error.message.includes('insufficient')) {
+        const house = HOUSE_LEVELS[level - 1]
+        errorMessage += `You need ${house.burnRequirement.toLocaleString()} tokens burned, but you only have ${userHousing.totalBurned.toLocaleString()} burned.`
       } else {
         errorMessage += error.message || 'Unknown error occurred.'
       }
@@ -661,7 +639,13 @@ export default function Upgrades() {
                   canPurchase ? 'border-purple-500 bg-purple-500/5 available' : 
                   'border-gray-600 opacity-70 locked'
                 }`}>
-                  <div className="text-8xl mb-6 fallback-house-icon">🏠</div>
+                  <div className="mb-6">
+                    <img 
+                      src={`/assets/houses/tier${house.level}.png`} 
+                      alt={house.name}
+                      className="w-32 h-32 mx-auto object-contain"
+                    />
+                  </div>
                   
                   <h2 className="text-3xl font-bold text-white mb-2 fallback-house-title">
                     Level {house.level}
@@ -682,21 +666,14 @@ export default function Upgrades() {
                     </div>
                     
                     <div className="bg-black/30 p-4 rounded-lg flex justify-between items-center fallback-stat-row">
-                      <span className="text-blue-400 font-semibold">💎 Cost:</span>
-                      <span className="text-white font-bold text-xl">{house.cost.toLocaleString()} $WISH</span>
+                      <span className="text-yellow-400 font-semibold">🔥 Requires:</span>
+                      <span className="text-white font-bold">{house.burnRequirement.toLocaleString()} burned</span>
                     </div>
-                    
-                    {house.burnRequirement > 0 && (
-                      <div className="bg-black/30 p-4 rounded-lg flex justify-between items-center fallback-stat-row">
-                        <span className="text-yellow-400 font-semibold">🔥 Requires:</span>
-                        <span className="text-white font-bold">{house.burnRequirement.toLocaleString()} burned</span>
-                      </div>
-                    )}
                   </div>
                   
                   {isOwned ? (
                     <button disabled className="w-full bg-green-500 text-white py-4 px-6 rounded-xl font-bold text-lg opacity-75 cursor-not-allowed fallback-purchase-btn owned">
-                      ✅ PURCHASED
+                      ✅ UNLOCKED
                     </button>
                   ) : canPurchase ? (
                     <button
@@ -707,10 +684,10 @@ export default function Upgrades() {
                       {purchasing === house.level ? (
                         <div className="flex items-center justify-center gap-2">
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                          PURCHASING...
+                          UNLOCKING...
                         </div>
                       ) : (
-                        '🏠 PURCHASE NOW'
+                        '🏠 UNLOCK HOUSE'
                       )}
                     </button>
                   ) : (
