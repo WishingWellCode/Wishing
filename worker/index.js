@@ -1303,9 +1303,9 @@ async function handleHousePurchase(request, env) {
   console.log('🏠 Processing house purchase request...')
   
   try {
-    const { walletAddress, level, cost } = await request.json()
+    const { walletAddress, level, burnRequirement } = await request.json()
     
-    if (!walletAddress || !level || !cost) {
+    if (!walletAddress || !level || burnRequirement === undefined) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: {
@@ -1315,7 +1315,7 @@ async function handleHousePurchase(request, env) {
       })
     }
     
-    console.log(`🏠 Purchase request: Level ${level} for ${cost} $WISH by ${walletAddress}`)
+    console.log(`🏠 Purchase request: Level ${level} requiring ${burnRequirement} tokens burned by ${walletAddress}`)
     
     // Get current housing data
     const housingKey = `housing:${walletAddress}`
@@ -1383,19 +1383,15 @@ async function handleHousePurchase(request, env) {
       })
     }
     
-    // TODO: In a real implementation, we would:
-    // 1. Create a burn transaction for the cost amount
-    // 2. Verify the transaction was successful
-    // 3. Only then update the housing data
-    
-    // For now, simulate the purchase (mock implementation)
-    console.log(`🔥 Simulating burn of ${cost} $WISH tokens...`)
+    // Housing is now burn-based: no token transfer required
+    // Users unlock houses by having burned enough tokens through gambling
+    console.log(`🏠 Unlocking house level ${level} - no tokens burned for unlock`)
     
     // Update housing data
     housingData.ownedLevels.push(level)
     housingData.ownedLevels.sort((a, b) => a - b) // Keep sorted
     housingData.currentLevel = Math.max(...housingData.ownedLevels)
-    housingData.totalBurned += cost // Add to total burned
+    // Note: totalBurned comes from gambling sessions, not house purchases
     
     // Save updated data
     await env.GAMBLE_LOGS.put(housingKey, JSON.stringify(housingData))
