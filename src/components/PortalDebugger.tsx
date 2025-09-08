@@ -25,17 +25,24 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault()
-    if (!containerRef.current) return
+    event.stopPropagation()
+    
+    console.log('🖱️ Click detected at:', event.clientX, event.clientY)
+    
+    if (!containerRef.current) {
+      console.log('❌ No container ref')
+      return
+    }
 
     const rect = containerRef.current.getBoundingClientRect()
     const x = Math.round(event.clientX - rect.left)
     const y = Math.round(event.clientY - rect.top)
 
+    console.log(`📍 Adding Point ${nextId}: {x: ${x}, y: ${y}}`)
+    
     const newPoint: Point = { x, y, id: nextId }
     setPoints(prev => [...prev, newPoint])
     setNextId(prev => prev + 1)
-
-    console.log(`📍 Point ${nextId}: {x: ${x}, y: ${y}}`)
   }
 
   const handleRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -111,17 +118,32 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
 
   if (!isActive) return null
 
+  // Log that debugger is active
+  useEffect(() => {
+    console.log('🔧 Portal Debugger is ACTIVE - Click to add points')
+    return () => {
+      console.log('🔧 Portal Debugger CLOSED')
+    }
+  }, [])
+
   return (
     <>
       {/* Debug Overlay - COMPLETELY TRANSPARENT, NO BACKGROUND */}
       <div 
         ref={containerRef}
-        className="fixed inset-0 z-[9998] cursor-crosshair"
+        className="fixed inset-0 cursor-crosshair"
         onClick={handleClick}
         onContextMenu={handleRightClick}
         style={{ 
-          background: 'transparent',
-          pointerEvents: 'auto'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.01)', // Very slight tint to ensure it's there
+          pointerEvents: 'auto',
+          zIndex: 9998,
+          cursor: 'crosshair'
         }}
       >
         {/* Render points */}
@@ -206,8 +228,14 @@ export default function PortalDebugger({ isActive, onClose }: PortalDebuggerProp
         ))}
       </div>
 
-      {/* Control Panel - FIXED position, not absolute */}
-      <div className="fixed top-20 left-4 bg-black/90 p-3 rounded-lg border-2 border-red-500 text-white font-pixel text-xs max-w-xs z-[9999]" style={{ pointerEvents: 'auto' }}>
+      {/* Control Panel - FIXED position with higher z-index */}
+      <div className="fixed top-20 left-4 bg-black/95 p-3 rounded-lg border-4 border-red-500 text-white font-pixel text-xs" 
+        style={{ 
+          pointerEvents: 'auto',
+          zIndex: 10000,
+          maxWidth: '250px',
+          boxShadow: '0 0 20px rgba(255,0,0,0.5)'
+        }}>
         <h3 className="text-sm text-red-400 mb-2">Portal Debugger</h3>
         
         <div className="space-y-1 mb-3 text-xs">
