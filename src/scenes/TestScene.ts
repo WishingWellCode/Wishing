@@ -23,6 +23,18 @@ export class TestScene extends Phaser.Scene {
     keyHandler?: (event: KeyboardEvent) => void
   } | null = null
   
+  private portal1Warning: {
+    background: Phaser.GameObjects.Rectangle
+    title: Phaser.GameObjects.Text
+    message: Phaser.GameObjects.Text
+    continueButton: Phaser.GameObjects.Rectangle
+    continueText: Phaser.GameObjects.Text
+    cancelButton: Phaser.GameObjects.Rectangle
+    cancelText: Phaser.GameObjects.Text
+    elements: Phaser.GameObjects.GameObject[]
+    keyHandler?: (event: KeyboardEvent) => void
+  } | null = null
+  
   constructor() {
     super({ key: 'TestScene' })
   }
@@ -309,11 +321,16 @@ export class TestScene extends Phaser.Scene {
   onPortalEnter(portalName: string) {
     console.log(`✨ Portal "${portalName}" activated`)
     
+    // Portal 1 - Housing/Upgrades warning modal
+    if (portalName === 'Portal 1') {
+      this.showPortal1Warning()
+    }
+    
     // Portal 3 - Winners overlay
     if (portalName === 'Portal 3') {
       this.showWinnersOverlay()
     }
-    // Add other portal functionality here for Portal 1, 2, and 4
+    // Add other portal functionality here for Portal 2 and 4
   }
 
   async showWinnersOverlay() {
@@ -623,6 +640,181 @@ export class TestScene extends Phaser.Scene {
     console.log('Winners overlay closed')
   }
 
+  showPortal1Warning() {
+    // Prevent multiple warning modals
+    if (this.portal1Warning) return
+
+    console.log('🏠 Showing Portal 1 housing upgrade warning...')
+
+    const screenWidth = this.cameras.main.width
+    const screenHeight = this.cameras.main.height
+    const modalWidth = Math.min(screenWidth * 0.6, 600)
+    const modalHeight = Math.min(screenHeight * 0.5, 400)
+
+    // Create modal background
+    const background = this.add.rectangle(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY,
+      modalWidth,
+      modalHeight,
+      0x000000,
+      0.95
+    )
+    background.setDepth(3000)
+    background.setStrokeStyle(3, 0x8b5cf6)
+
+    // Create title
+    const title = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - modalHeight/2 + 60,
+      'Portal 1: Housing District',
+      {
+        fontSize: '24px',
+        fill: '#8b5cf6',
+        fontFamily: '"Press Start 2P"',
+        align: 'center'
+      }
+    )
+    title.setOrigin(0.5)
+    title.setDepth(3001)
+
+    // Create message
+    const message = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - 20,
+      'Welcome to the Housing District!\n\nTo access this portal, you need to visit\nthe Upgrades page first to purchase\nyour housing upgrades.\n\nWould you like to go there now?',
+      {
+        fontSize: '16px',
+        fill: '#ffffff',
+        fontFamily: '"Press Start 2P"',
+        align: 'center',
+        lineSpacing: 8
+      }
+    )
+    message.setOrigin(0.5)
+    message.setDepth(3001)
+
+    // Continue button
+    const continueButton = this.add.rectangle(
+      this.cameras.main.centerX - 100,
+      this.cameras.main.centerY + modalHeight/2 - 60,
+      180,
+      40,
+      0x22c55e
+    )
+    continueButton.setDepth(3001)
+    continueButton.setStrokeStyle(2, 0x16a34a)
+
+    const continueText = this.add.text(
+      continueButton.x,
+      continueButton.y,
+      'CONTINUE',
+      {
+        fontSize: '14px',
+        fill: '#ffffff',
+        fontFamily: '"Press Start 2P"'
+      }
+    )
+    continueText.setOrigin(0.5)
+    continueText.setDepth(3002)
+
+    // Cancel button
+    const cancelButton = this.add.rectangle(
+      this.cameras.main.centerX + 100,
+      this.cameras.main.centerY + modalHeight/2 - 60,
+      140,
+      40,
+      0xef4444
+    )
+    cancelButton.setDepth(3001)
+    cancelButton.setStrokeStyle(2, 0xdc2626)
+
+    const cancelText = this.add.text(
+      cancelButton.x,
+      cancelButton.y,
+      'CANCEL',
+      {
+        fontSize: '14px',
+        fill: '#ffffff',
+        fontFamily: '"Press Start 2P"'
+      }
+    )
+    cancelText.setOrigin(0.5)
+    cancelText.setDepth(3002)
+
+    // Make buttons interactive
+    continueButton.setInteractive({ useHandCursor: true })
+    continueText.setInteractive({ useHandCursor: true })
+    
+    cancelButton.setInteractive({ useHandCursor: true })
+    cancelText.setInteractive({ useHandCursor: true })
+
+    // Store all elements for cleanup
+    const elements = [background, title, message, continueButton, continueText, cancelButton, cancelText]
+    
+    this.portal1Warning = {
+      background,
+      title,
+      message,
+      continueButton,
+      continueText,
+      cancelButton,
+      cancelText,
+      elements
+    }
+
+    // Handle continue button click
+    const handleContinue = () => {
+      console.log('🚀 Redirecting to /upgrades...')
+      this.closePortal1Warning()
+      // Redirect to upgrades page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/upgrades'
+      }
+    }
+
+    // Handle cancel button click
+    const handleCancel = () => {
+      console.log('❌ Portal 1 access cancelled')
+      this.closePortal1Warning()
+    }
+
+    // Add click handlers
+    continueButton.on('pointerdown', handleContinue)
+    continueText.on('pointerdown', handleContinue)
+    cancelButton.on('pointerdown', handleCancel)
+    cancelText.on('pointerdown', handleCancel)
+
+    // Keyboard handling
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCancel()
+      }
+    }
+
+    this.input.keyboard?.on('keydown', handleEscKey)
+    this.portal1Warning.keyHandler = handleEscKey
+  }
+
+  closePortal1Warning() {
+    if (!this.portal1Warning) return
+
+    // Clean up all elements
+    this.portal1Warning.elements.forEach((element: Phaser.GameObjects.GameObject) => {
+      if (element && element.destroy) {
+        element.destroy()
+      }
+    })
+
+    // Remove keyboard handler
+    if (this.portal1Warning.keyHandler) {
+      this.input.keyboard?.off('keydown', this.portal1Warning.keyHandler)
+    }
+
+    this.portal1Warning = null
+    console.log('Portal 1 warning closed')
+  }
+
   // Handle window resize for overlay
   handleOverlayResize() {
     if (this.winnersOverlay) {
@@ -634,6 +826,11 @@ export class TestScene extends Phaser.Scene {
 
   onPortalLeave(portalName: string) {
     console.log(`👋 Left portal "${portalName}"`)
+    
+    // Close Portal 1 warning when leaving Portal 1
+    if (portalName === 'Portal 1' && this.portal1Warning) {
+      this.closePortal1Warning()
+    }
     
     // Close winners overlay when leaving Portal 3
     if (portalName === 'Portal 3' && this.winnersOverlay) {

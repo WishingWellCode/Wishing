@@ -330,6 +330,16 @@ export default {
       return handleLeaderboard(request, env) // Same as leaderboard for now
     }
     
+    // Housing API routes
+    if (url.pathname === '/api/housing/purchase') {
+      return handleHousePurchase(request, env)
+    }
+    
+    if (url.pathname.startsWith('/api/housing/') && url.pathname.split('/').length === 4 && url.pathname !== '/api/housing/purchase') {
+      const walletAddress = url.pathname.split('/')[3]
+      return handleGetHousingData(walletAddress, env)
+    }
+    
     return new Response('Not Found', { 
       status: 404,
       headers: { 'Access-Control-Allow-Origin': '*' }
@@ -573,8 +583,12 @@ async function handleFountainResolve(request, env) {
     })
   }
 
-  // Generate result using commit-reveal
-  const result = await calculateGamblingResult(session.serverSeed, session.clientSeed, txSignature)
+  // Get user's house boost before calculating result
+  const houseBoost = await getUserHouseBoost(session.walletAddress, env)
+  console.log(`🏠 Applying house boost of +${houseBoost}% for ${session.walletAddress}`)
+  
+  // Generate result using commit-reveal with house boost
+  const result = await calculateGamblingResult(session.serverSeed, session.clientSeed, txSignature, houseBoost)
   
   // Calculate payout
   const payout = Math.floor(1000 * result.multiplier)
@@ -678,7 +692,7 @@ async function handleFountainResolve(request, env) {
   })
 }
 
-async function calculateGamblingResult(serverSeed, clientSeed, blockHash) {
+async function calculateGamblingResult(serverSeed, clientSeed, blockHash, houseBoost = 0) {
   // Combine seeds and blockhash for randomness
   const combined = serverSeed + clientSeed + blockHash
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(combined))
@@ -690,7 +704,18 @@ async function calculateGamblingResult(serverSeed, clientSeed, blockHash) {
     roll += hashArray[i] / Math.pow(256, i + 1)
   }
   
-  // Apply probability tiers (same as frontend)
+  console.log(`🎲 Original roll: ${roll}, House boost: +${houseBoost}%`)
+  
+  // Apply house boost by reducing the roll value (better odds)
+  // House boost reduces the loss chance, so we subtract from the roll
+  if (houseBoost > 0) {
+    // Convert boost percentage to a roll reduction
+    const boostReduction = (houseBoost / 100) * 0.6 // Scale boost to affect the loss zone
+    roll = Math.max(0, roll - boostReduction)
+    console.log(`🏠 Boosted roll: ${roll} (reduced by ${boostReduction})`)
+  }
+  
+  // Apply probability tiers with house boost applied
   if (roll < 0.0000001) {
     return { tier: 'JACKPOT', multiplier: 15000 }
   } else if (roll < 0.0014999) {
@@ -1200,6 +1225,257 @@ function getResultMessage(tier) {
     lose: "The fountain keeps your wishes for now..."
   }
   return messages[tier] || "Unknown result"
+}
+
+// Housing system constants and functions
+const HOUSE_LEVELS = [
+  { level: 1, name: "Starter Shack", cost: 1000, boostPercent: 0.5, burnRequirement: 0 },
+  { level: 2, name: "Cozy Cottage", cost: 5000, boostPercent: 1.5, burnRequirement: 10000 },
+  { level: 3, name: "Suburban Home", cost: 15000, boostPercent: 4.0, burnRequirement: 25000 },
+  { level: 4, name: "Luxury Villa", cost: 50000, boostPercent: 8.0, burnRequirement: 75000 },
+  { level: 5, name: "Grand Mansion", cost: 150000, boostPercent: 15.0, burnRequirement: 150000 },
+  { level: 6, name: "Royal Palace", cost: 500000, boostPercent: 25.0, burnRequirement: 250000 }
+]
+
+async function handleGetHousingData(walletAddress, env) {
+  console.log('🏠 Fetching housing data for:', walletAddress)
+  
+  try {
+    // Get user housing data from KV storage
+    const housingKey = `housing:${walletAddress}`
+    const housingDataStr = await env.GAMBLE_LOGS.get(housingKey)
+    
+    let housingData = {
+      currentLevel: 0,
+      totalBurned: 0,
+      ownedLevels: []
+    }
+    
+    if (housingDataStr) {
+      const stored = JSON.parse(housingDataStr)
+      housingData = {
+        currentLevel: stored.currentLevel || 0,
+        totalBurned: stored.totalBurned || 0,
+        ownedLevels: stored.ownedLevels || []
+      }
+    }
+    
+    // Calculate total burned from gambling sessions if not stored
+    if (housingData.totalBurned === 0) {
+      const totalBurned = await calculateTotalBurned(walletAddress, env)
+      housingData.totalBurned = totalBurned
+      // Update storage with calculated value
+      await env.GAMBLE_LOGS.put(housingKey, JSON.stringify(housingData))
+    }
+    
+    console.log('🏠 Retrieved housing data:', housingData)
+    
+    return new Response(JSON.stringify(housingData), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error fetching housing data:', error)
+    return new Response(JSON.stringify({ error: 'Failed to fetch housing data' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+}
+
+async function handleHousePurchase(request, env) {
+  console.log('🏠 Processing house purchase request...')
+  
+  try {
+    const { walletAddress, level, cost } = await request.json()
+    
+    if (!walletAddress || !level || !cost) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
+    }
+    
+    console.log(`🏠 Purchase request: Level ${level} for ${cost} $WISH by ${walletAddress}`)
+    
+    // Get current housing data
+    const housingKey = `housing:${walletAddress}`
+    const housingDataStr = await env.GAMBLE_LOGS.get(housingKey)
+    
+    let housingData = {
+      currentLevel: 0,
+      totalBurned: 0,
+      ownedLevels: []
+    }
+    
+    if (housingDataStr) {
+      housingData = JSON.parse(housingDataStr)
+    }
+    
+    // Calculate total burned if not available
+    if (housingData.totalBurned === 0) {
+      housingData.totalBurned = await calculateTotalBurned(walletAddress, env)
+    }
+    
+    // Validate purchase
+    const house = HOUSE_LEVELS[level - 1]
+    if (!house) {
+      return new Response(JSON.stringify({ error: 'Invalid house level' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
+    }
+    
+    // Check if already owned
+    if (housingData.ownedLevels.includes(level)) {
+      return new Response(JSON.stringify({ error: 'House already owned' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
+    }
+    
+    // Check prerequisites
+    if (level > 1 && !housingData.ownedLevels.includes(level - 1)) {
+      return new Response(JSON.stringify({ error: 'Must own previous house level first' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
+    }
+    
+    // Check burn requirement
+    if (housingData.totalBurned < house.burnRequirement) {
+      return new Response(JSON.stringify({ 
+        error: `Need ${house.burnRequirement - housingData.totalBurned} more $WISH burned` 
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      })
+    }
+    
+    // TODO: In a real implementation, we would:
+    // 1. Create a burn transaction for the cost amount
+    // 2. Verify the transaction was successful
+    // 3. Only then update the housing data
+    
+    // For now, simulate the purchase (mock implementation)
+    console.log(`🔥 Simulating burn of ${cost} $WISH tokens...`)
+    
+    // Update housing data
+    housingData.ownedLevels.push(level)
+    housingData.ownedLevels.sort((a, b) => a - b) // Keep sorted
+    housingData.currentLevel = Math.max(...housingData.ownedLevels)
+    housingData.totalBurned += cost // Add to total burned
+    
+    // Save updated data
+    await env.GAMBLE_LOGS.put(housingKey, JSON.stringify(housingData))
+    
+    console.log(`✅ Successfully purchased ${house.name} for ${walletAddress}`)
+    console.log('🏠 Updated housing data:', housingData)
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: `Successfully purchased ${house.name}!`,
+      housingData 
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ Error processing house purchase:', error)
+    return new Response(JSON.stringify({ error: 'Failed to process purchase' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+}
+
+async function calculateTotalBurned(walletAddress, env) {
+  console.log('🔥 Calculating total burned for:', walletAddress)
+  
+  try {
+    // Get all gambling logs for this wallet
+    const listResult = await env.GAMBLE_LOGS.list({ prefix: `session:${walletAddress}:` })
+    
+    let totalBurned = 0
+    
+    for (const key of listResult.keys) {
+      try {
+        const sessionData = await env.GAMBLE_LOGS.get(key.name)
+        if (sessionData) {
+          const session = JSON.parse(sessionData)
+          if (session.exactStake && session.status === 'resolved') {
+            totalBurned += session.exactStake
+          }
+        }
+      } catch (e) {
+        console.warn('Error processing session:', key.name, e)
+      }
+    }
+    
+    console.log(`🔥 Total burned for ${walletAddress}: ${totalBurned}`)
+    return totalBurned
+    
+  } catch (error) {
+    console.error('❌ Error calculating total burned:', error)
+    return 0
+  }
+}
+
+async function getUserHouseBoost(walletAddress, env) {
+  console.log('🏠 Getting house boost for:', walletAddress)
+  
+  try {
+    const housingKey = `housing:${walletAddress}`
+    const housingDataStr = await env.GAMBLE_LOGS.get(housingKey)
+    
+    if (!housingDataStr) {
+      console.log('🏠 No housing data found')
+      return 0
+    }
+    
+    const housingData = JSON.parse(housingDataStr)
+    const totalBoost = housingData.ownedLevels.reduce((sum, level) => {
+      const house = HOUSE_LEVELS[level - 1]
+      return sum + (house ? house.boostPercent : 0)
+    }, 0)
+    
+    console.log(`🏠 Total house boost: +${totalBoost}%`)
+    return totalBoost
+    
+  } catch (error) {
+    console.error('❌ Error getting house boost:', error)
+    return 0
+  }
 }
 
 // Durable Object for game state management
