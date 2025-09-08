@@ -237,9 +237,10 @@ export class HouseScene extends Phaser.Scene {
     )
     dialogContainer.setDepth(2000)
     
-    // Dialog background  
+    // Dialog background - make it interactive to block clicks behind
     const dialogBg = this.add.rectangle(0, 0, 400, 200, 0x000000, 0.95)
     dialogBg.setStrokeStyle(3, 0xff0000)
+    dialogBg.setInteractive() // Block clicks behind dialog
     
     // Title
     const title = this.add.text(0, -60, 'EXIT HOUSE?', {
@@ -270,6 +271,7 @@ export class HouseScene extends Phaser.Scene {
       fontFamily: 'monospace'
     })
     yesText.setOrigin(0.5)
+    yesText.setInteractive({ useHandCursor: true })
     
     // No button
     const noBtn = this.add.rectangle(80, 40, 120, 40, 0xff0000, 0.8)
@@ -282,6 +284,7 @@ export class HouseScene extends Phaser.Scene {
       fontFamily: 'monospace'
     })
     noText.setOrigin(0.5)
+    noText.setInteractive({ useHandCursor: true })
     
     dialogContainer.add([dialogBg, title, message, yesBtn, yesText, noBtn, noText])
     
@@ -289,6 +292,7 @@ export class HouseScene extends Phaser.Scene {
     const handleYes = () => {
       console.log('✅ User confirmed exit')
       dialogContainer.destroy()
+      this.confirmationShowing = false
       this.returnToMainGame()
     }
     
@@ -301,10 +305,20 @@ export class HouseScene extends Phaser.Scene {
       this.isNearPortal = false
     }
     
+    // Add event handlers
     yesBtn.on('pointerdown', handleYes)
     yesText.on('pointerdown', handleYes)
     noBtn.on('pointerdown', handleNo)
     noText.on('pointerdown', handleNo)
+    
+    // Also add keyboard shortcuts
+    if (this.input.keyboard) {
+      const escKey = this.input.keyboard.addKey('ESC')
+      escKey.once('down', handleNo)
+      
+      const enterKey = this.input.keyboard.addKey('ENTER')
+      enterKey.once('down', handleYes)
+    }
   }
 
   returnToMainGame() {
