@@ -235,7 +235,7 @@ export default function Upgrades() {
       
       // Create real Solana transaction to transfer tokens to pool wallet
       const WISH_TOKEN_MINT = new PublicKey(process.env.NEXT_PUBLIC_WISH_TOKEN_MINT || '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump')
-      const POOL_WALLET = new PublicKey(process.env.NEXT_PUBLIC_POOL_WALLET_PUBLIC || '8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTBcXWnCv')
+      const POOL_WALLET = new PublicKey(process.env.NEXT_PUBLIC_POOL_WALLET_PUBLIC || '8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTC4w27y8')
       
       console.log('Creating transfer transaction...')
       const transaction = await gamblingAPI.createTransferTransaction(
