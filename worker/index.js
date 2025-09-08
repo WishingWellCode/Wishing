@@ -871,9 +871,21 @@ async function getLeaderboard(env) {
 }
 
 async function sendPayout(env, recipientWalletAddress, amount) {
-  if (!env.POOL_WALLET_PRIVATE_KEY) {
+  console.log(`🔐 Checking for pool wallet configuration...`)
+  
+  // Check various possible environment variable names
+  const privateKey = env.POOL_WALLET_PRIVATE_KEY || 
+                     env.POOL_WALLET_PRIVATE || 
+                     env.POOL_PRIVATE_KEY ||
+                     env.PRIVATE_KEY
+  
+  if (!privateKey) {
+    console.error('❌ No pool wallet private key found in environment variables')
+    console.log('Checked: POOL_WALLET_PRIVATE_KEY, POOL_WALLET_PRIVATE, POOL_PRIVATE_KEY, PRIVATE_KEY')
     throw new Error('Pool wallet private key not configured')
   }
+  
+  console.log(`✅ Found pool wallet private key`)
   
   const connection = new Connection(env.SOLANA_RPC_URL)
   
@@ -881,12 +893,12 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   let poolWalletPrivateKey
   
   // Handle different private key formats
-  if (env.POOL_WALLET_PRIVATE_KEY.startsWith('[')) {
+  if (privateKey.startsWith('[')) {
     // JSON array format like [1,2,3,...]
-    poolWalletPrivateKey = new Uint8Array(JSON.parse(env.POOL_WALLET_PRIVATE_KEY))
+    poolWalletPrivateKey = new Uint8Array(JSON.parse(privateKey))
   } else {
     // Base58 string format
-    poolWalletPrivateKey = base58ToUint8Array(env.POOL_WALLET_PRIVATE_KEY)
+    poolWalletPrivateKey = base58ToUint8Array(privateKey)
   }
   
   const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
