@@ -38,7 +38,7 @@ export class LandingScene extends Phaser.Scene {
     this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
     this.player.setVisible(true) // Make player visible
     this.player.setDepth(100) // High depth to show above background
-    this.player.setScale(2) // Make it bigger so it's easier to see
+    this.player.setScale(0.13) // Small size like the green placeholder
     
     // Set up controls
     this.cursors = this.input.keyboard!.createCursorKeys()
