@@ -2,17 +2,28 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 export default function PreWalletOverlay() {
   return (
-    <div 
-      className="fixed inset-0 z-50"
-      style={{
-        backgroundImage: 'url(/assets/backgrounds/sixseven.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        zIndex: 10000
-      }}
-    >
+    <>
+      <style jsx>{`
+        .pre-wallet-bg::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
+          z-index: -1;
+        }
+        .pre-wallet-bg::after {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.45);
+          z-index: -1;
+        }
+      `}</style>
+      
+      <div 
+        className="pre-wallet-bg fixed inset-0 z-50"
+        style={{ zIndex: 10000 }}
+      >
       {/* Centered layout container */}
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         
@@ -30,12 +41,13 @@ export default function PreWalletOverlay() {
           </WalletMultiButton>
         </div>
 
-        {/* Info-style Card Container */}
+        {/* Info-style Card Container - exact match to Info page */}
         <div 
-          className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 shadow-2xl max-w-4xl w-full"
+          className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 max-w-4xl w-full"
           style={{
             boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
-            fontFamily: '"Press Start 2P"'
+            fontFamily: '"Press Start 2P"',
+            color: '#fff'
           }}
         >
           {/* Main content with Info page styling */}
