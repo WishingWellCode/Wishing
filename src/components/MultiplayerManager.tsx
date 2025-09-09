@@ -149,7 +149,10 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const handleMultiplayerMessage = (message: any) => {
-    console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
+    // Only log important events, not movement spam
+    if (message.type !== 'playerMoved') {
+      console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
+    }
     
     switch (message.type) {
       case 'joined':
@@ -188,7 +191,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         break
         
       case 'playerMoved':
-        console.log(`🎮 🏃 PLAYER MOVED: ${message.playerId.slice(0,8)} to (${message.x},${message.y})`)
+        // Reduced movement logging to prevent spam
         setPlayers(prev => {
           const updated = prev.map(p => 
             p.id === message.playerId 

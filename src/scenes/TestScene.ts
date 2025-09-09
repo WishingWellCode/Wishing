@@ -259,12 +259,7 @@ export class TestScene extends Phaser.Scene {
     const playerPos = { x: this.testPlayer.x, y: this.testPlayer.y }
     let foundPortal: string | null = null
     
-    // Debug player position every few seconds
-    if (!this.lastPortalDebug || Date.now() - this.lastPortalDebug > 3000) {
-      console.log('🔍 DEBUG: Player position:', playerPos)
-      console.log('🔍 DEBUG: Checking', Object.keys(this.portals).length, 'portals')
-      this.lastPortalDebug = Date.now()
-    }
+    // Removed excessive debug logging
     
     // Check each portal
     for (const [portalName, portal] of Object.entries(this.portals)) {
@@ -1332,11 +1327,7 @@ export class TestScene extends Phaser.Scene {
       return
     }
     
-    // Debug update loop every 5 seconds
-    if (!this.lastUpdateDebug || time - this.lastUpdateDebug > 5000) {
-      console.log('🔍 DEBUG: TestScene update loop running, player at:', this.testPlayer.x, this.testPlayer.y)
-      this.lastUpdateDebug = time
-    }
+    // Removed excessive debug logging
     
     // Smooth movement system with delta time normalization
     // Base speed at 60fps, normalized for any refresh rate
