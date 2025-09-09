@@ -22,6 +22,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
   const mountedRef = useRef(false)
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Trigger connection check on mount
   useEffect(() => {
@@ -96,6 +97,19 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         } catch (error) {
           console.error('🎮 ❌ ERROR sending join message:', error)
         }
+        
+        // Start keepalive ping every 30 seconds to prevent disconnection
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current)
+        }
+        pingIntervalRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ 
+              type: 'ping', 
+              timestamp: Date.now() 
+            }))
+          }
+        }, 30000) // Ping every 30 seconds
       }
       
       ws.onmessage = (event) => {
@@ -114,6 +128,13 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           wasClean: event.wasClean,
           url: workerUrl
         })
+        
+        // Clean up ping interval
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current)
+          pingIntervalRef.current = null
+        }
+        
         setIsConnected(false)
         wsRef.current = null
         playerIdRef.current = null
@@ -135,6 +156,11 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     if (wsRef.current) {
       wsRef.current.close()
       wsRef.current = null
+    }
+    
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current)
+      pingIntervalRef.current = null
     }
     
     setIsConnected(false)
@@ -232,10 +258,13 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     const now = Date.now()
     const timeSinceLastSend = now - lastSendTime.current
     
-    // Check if position actually changed
-    if (lastSentPosition.current.x !== roundedX || lastSentPosition.current.y !== roundedY) {
-      // Send immediately if 16ms have passed (60fps) or position changed significantly
-      if (timeSinceLastSend >= 16) {
+    // Check if position actually changed significantly (at least 2 pixels)
+    const deltaX = Math.abs(lastSentPosition.current.x - roundedX)
+    const deltaY = Math.abs(lastSentPosition.current.y - roundedY)
+    
+    if (deltaX >= 2 || deltaY >= 2) {
+      // Send at 30fps (33ms) for smoother, less stuttery movement
+      if (timeSinceLastSend >= 33) {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           try {
             wsRef.current.send(JSON.stringify({
