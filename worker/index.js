@@ -373,16 +373,12 @@ export default {
 }
 
 async function handleWebSocketUpgrade(request, env) {
-  const pair = new WebSocketPair()
-  const [client, server] = Object.values(pair)
+  // Use a single global Durable Object instance for all multiplayer connections
+  const id = env.LOBBY_DO.idFromName('global-lobby')
+  const lobbyStub = env.LOBBY_DO.get(id)
   
-  // Don't await the session handler - let it run async
-  handleWebSocketSession(server, env)
-  
-  return new Response(null, {
-    status: 101,
-    webSocket: client
-  })
+  // Forward the WebSocket connection to the Durable Object
+  return lobbyStub.fetch(request)
 }
 
 // Simple global WebSocket connections storage

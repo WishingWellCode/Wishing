@@ -59,6 +59,10 @@ export class LobbyDO {
       case 'join':
         await this.handleJoin(playerId, message)
         break
+      case 'move':
+        // Handle simple position updates from client
+        await this.handleMove(playerId, message)
+        break
       case 'input':
         await this.handleInput(playerId, message)
         break
@@ -67,6 +71,24 @@ export class LobbyDO {
         this.sendToPlayer(playerId, { type: 'pong', timestamp: message.timestamp })
         break
     }
+  }
+
+  async handleMove(playerId, message) {
+    const player = this.players.get(playerId)
+    if (!player) return
+
+    // Update player position
+    player.x = message.x
+    player.y = message.y
+    player.lastSeen = Date.now()
+
+    // Broadcast position update to other players
+    this.broadcast({
+      type: 'playerMoved',
+      playerId,
+      x: message.x,
+      y: message.y
+    }, playerId)
   }
 
   async handleJoin(playerId, message) {
@@ -103,18 +125,38 @@ export class LobbyDO {
 
     console.log(`🎮 Player ${username} joined with sprite ${spriteName}`)
 
-    // Send welcome message with current state
+    // Convert player data to match client expectations
+    const clientPlayer = {
+      id: player.id,
+      walletAddress: player.walletAddress,
+      username: player.username,
+      x: player.x,
+      y: player.y,
+      sprite: player.spriteName
+    }
+
+    // Get all players in client format
+    const allPlayersClient = Array.from(this.players.values()).map(p => ({
+      id: p.id,
+      walletAddress: p.walletAddress,
+      username: p.username,
+      x: p.x,
+      y: p.y,
+      sprite: p.spriteName
+    }))
+
+    // Send welcome message with current state (matching client expectations)
     this.sendToPlayer(playerId, {
-      type: 'welcome',
+      type: 'joined',
       playerId,
-      player,
-      allPlayers: Array.from(this.players.values())
+      player: clientPlayer,
+      allPlayers: allPlayersClient
     })
 
-    // Broadcast new player to others
+    // Broadcast new player to others (matching client expectations)
     this.broadcast({
-      type: 'player_joined',
-      player
+      type: 'playerJoined',
+      player: clientPlayer
     }, playerId)
   }
 
@@ -235,9 +277,9 @@ export class LobbyDO {
     if (player) {
       console.log(`🎮 Player ${player.username} disconnected`)
       
-      // Broadcast player left
+      // Broadcast player left (matching client expectations)
       this.broadcast({
-        type: 'player_left',
+        type: 'playerLeft',
         playerId
       }, playerId)
     }
