@@ -466,6 +466,22 @@ export default function InfoPage() {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
         }
+        
+        /* Custom scrollbar for stats table */
+        .stats-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+        .stats-scroll::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+        }
+        .stats-scroll::-webkit-scrollbar-thumb {
+          background: linear-gradient(45deg, rgba(0, 255, 255, 0.6), rgba(255, 0, 255, 0.4));
+          border-radius: 4px;
+        }
+        .stats-scroll::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(45deg, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.6));
+        }
       `}</style>
 
       <div className="info-bg min-h-screen fallback-container">
@@ -645,9 +661,62 @@ export default function InfoPage() {
             
           </div>
           
-          {/* Results Table Section - Full Width */}
+          {/* Tokenomics Section */}
           <div className="mb-16">
-            <div className="glass-table-container max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="text-6xl mb-6">💰</div>
+              <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,165,0,0.6)'}}>
+                TOKENOMICS
+              </h2>
+              <p className="text-orange-300 mb-8" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>
+                Fair Distribution & Transparent Economics
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-green-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
+                <div className="text-4xl mb-4">🌐</div>
+                <h3 className="text-xl font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>COMMUNITY</h3>
+                <div className="text-3xl text-green-300 font-bold mb-2">90%</div>
+                <p className="text-gray-300 text-sm">Distributed to community through fair gameplay</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-purple-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
+                <div className="text-4xl mb-4">👨‍💻</div>
+                <h3 className="text-xl font-bold text-purple-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>DEVELOPMENT</h3>
+                <div className="text-3xl text-purple-300 font-bold mb-2">10%</div>
+                <p className="text-gray-300 text-sm">Developer allocation for ongoing support</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
+                <div className="text-4xl mb-4">💧</div>
+                <h3 className="text-xl font-bold text-blue-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LIQUIDITY POOL</h3>
+                <div className="text-3xl text-blue-300 font-bold mb-2">5%</div>
+                <p className="text-gray-300 text-sm">Open liquidity for trading and accessibility</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-orange-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
+                <div className="text-4xl mb-4">🔒</div>
+                <h3 className="text-xl font-bold text-orange-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LOCKED RESERVES</h3>
+                <div className="text-3xl text-orange-300 font-bold mb-2">5%</div>
+                <p className="text-gray-300 text-sm">Locked for 5 days for stability</p>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-yellow-500/30 p-6 max-w-3xl mx-auto">
+              <h4 className="text-xl font-bold text-yellow-400 mb-4 text-center" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>
+                📈 BUYBACK MECHANISM
+              </h4>
+              <p className="text-gray-300 text-center leading-relaxed">
+                When the liquidity pool runs low on tokens, automatic dev buybacks will be executed to refund the pool 
+                with fresh tokens, ensuring continuous gameplay and liquidity for all players.
+              </p>
+            </div>
+          </div>
+
+          {/* Results Table Section - Half Width Scrollable */}
+          <div className="mb-16">
+            <div className="glass-table-container max-w-4xl mx-auto">
               <div className="flex justify-center items-center gap-3 mb-6">
                 <h3 className="text-2xl font-bold text-cyan-400" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>RECENT RESULTS</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

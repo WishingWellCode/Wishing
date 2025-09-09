@@ -76,9 +76,13 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
       background: 'rgba(15, 15, 25, 0.85)',
       backdropFilter: 'blur(10px)',
       border: '1px solid rgba(0, 255, 255, 0.3)',
-      boxShadow: '0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(255, 0, 255, 0.05)'
+      boxShadow: '0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(255, 0, 255, 0.05)',
+      height: '400px'
     }}>
-      <div className="w-full">
+      <div className="w-full h-full overflow-y-auto stats-scroll" style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(0, 255, 255, 0.5) transparent'
+      }}>
         <table className="results-table" style={{ 
           width: '100%',
           tableLayout: 'fixed',

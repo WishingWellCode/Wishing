@@ -315,8 +315,8 @@ export class MultiplayerClient {
     this.localPlayer.y += vy * deltaTime
     
     // Keep within bounds
-    this.localPlayer.x = Math.max(32, Math.min(1200 - 32, this.localPlayer.x))
-    this.localPlayer.y = Math.max(32, Math.min(800 - 32, this.localPlayer.y))
+    this.localPlayer.x = Math.max(24, Math.min(window.innerWidth - 24, this.localPlayer.x))
+    this.localPlayer.y = Math.max(24, Math.min(window.innerHeight - 24, this.localPlayer.y))
     
     const inputMessage = {
       type: 'move',
@@ -343,7 +343,7 @@ export class MultiplayerClient {
   }
 
   private applyInput(player: Player, input: InputState, deltaTime: number) {
-    const speed = 200 // pixels per second
+    const speed = 300 // pixels per second (increased for smoother movement)
     let vx = 0, vy = 0
     
     if (input.left || input.a) vx -= speed
@@ -351,13 +351,16 @@ export class MultiplayerClient {
     if (input.up || input.w) vy -= speed
     if (input.down || input.s) vy += speed
     
-    // Apply movement
-    player.x += vx * deltaTime
-    player.y += vy * deltaTime
+    // Use fixed deltaTime for consistent movement
+    const fixedDeltaTime = 1/60 // 60 FPS
     
-    // Keep within bounds
-    player.x = Math.max(32, Math.min(1200 - 32, player.x))
-    player.y = Math.max(32, Math.min(800 - 32, player.y))
+    // Apply movement
+    player.x += vx * fixedDeltaTime
+    player.y += vy * fixedDeltaTime
+    
+    // Keep within bounds (expand viewport bounds)
+    player.x = Math.max(24, Math.min(window.innerWidth - 24, player.x))
+    player.y = Math.max(24, Math.min(window.innerHeight - 24, player.y))
   }
 
   private interpolateOtherPlayers() {
