@@ -80,12 +80,14 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   return (
     <div 
       ref={containerRef}
-      className="w-full h-full"
+      className="w-full h-full absolute inset-0"
       style={{ 
-        position: 'relative',
-        zIndex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
         width: '100vw',
-        height: '100vh'
+        height: '100vh',
+        zIndex: 1
       }}
     />
   )

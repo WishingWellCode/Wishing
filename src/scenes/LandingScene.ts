@@ -34,21 +34,22 @@ export class LandingScene extends Phaser.Scene {
     background.setDisplaySize(this.cameras.main.width, this.cameras.main.height)
     background.setDepth(-1000)
     
-    // Add overlay text
+    // Add overlay text (hidden initially - only show if wallet not connected)
     this.instructions = this.add.text(
       this.cameras.main.centerX, 
       100, 
-      'Welcome to the $WISH Wishing Well\nConnect your Phantom wallet to enter the magical realm\n\nMove around with WASD keys and see other players!', {
-      fontSize: '20px',
+      'Move around with WASD keys and see other players!', {
+      fontSize: '16px',
       fontFamily: '"Press Start 2P"',
       color: '#ffffff',
-      backgroundColor: '#000000',
-      padding: { x: 20, y: 15 },
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      padding: { x: 15, y: 10 },
       align: 'center'
     })
     this.instructions.setOrigin(0.5)
-    this.instructions.setDepth(1)
+    this.instructions.setDepth(1000) // High depth to show above everything
     this.instructions.setScrollFactor(0)
+    this.instructions.setVisible(true) // Always visible now since wallet is connected
     
     // Create invisible player for position tracking (visible player shown via overlay)
     this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')

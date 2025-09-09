@@ -27,10 +27,11 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       return hasValidData && isInBounds
     })
     
-    console.log('👥 Filtered players for overlay:', filtered.length, 'of', players.length)
-    console.log('👥 Current player ID:', currentPlayerId)
-    console.log('👥 All players with data:', players)
-    console.log('👥 Filtered visible players:', filtered)
+    // Only log if there's a meaningful change
+    if (filtered.length !== visiblePlayers.length || JSON.stringify(filtered) !== JSON.stringify(visiblePlayers)) {
+      console.log('👥 Filtered players for overlay:', filtered.length, 'of', players.length)
+      console.log('👥 Current player ID:', currentPlayerId)
+    }
     
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])

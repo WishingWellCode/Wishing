@@ -91,9 +91,8 @@ export default function Home() {
         {/* Game content when wallet connected */}
         {connected && (
           <>
-            <div className="relative z-10">
-              <GameCanvas isWalletConnected={connected} />
-            </div>
+            {/* Game Canvas - Full screen game */}
+            <GameCanvas isWalletConnected={connected} />
 
             {/* Multiplayer Manager - handles connection and data */}
             <MultiplayerManager 
