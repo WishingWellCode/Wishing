@@ -355,27 +355,16 @@ export default function Upgrades() {
       <style jsx>{`
         .fallback-container {
           min-height: 100vh;
-          background: 
-            radial-gradient(2px 2px at 20% 30%, #fff, transparent),
-            radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.8), transparent),
-            radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.6), transparent),
-            radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4), transparent),
-            radial-gradient(2px 2px at 80% 10%, rgba(255,255,255,0.7), transparent),
-            radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.5), transparent),
-            radial-gradient(1px 1px at 30% 20%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,0.6), transparent),
-            radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.4), transparent),
-            radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(2px 2px at 85% 60%, rgba(255,255,255,0.5), transparent),
-            radial-gradient(1px 1px at 15% 40%, rgba(255,255,255,0.4), transparent),
-            linear-gradient(135deg, #1a0b2e 0%, #16213e 20%, #0f3460 40%, #533b7d 60%, #7209b7 80%, #2d1b69 100%),
-            radial-gradient(ellipse at center, rgba(138, 43, 226, 0.15) 0%, transparent 50%);
-          background-size: 
-            400px 400px, 300px 300px, 200px 200px, 250px 250px, 350px 350px,
-            180px 180px, 220px 220px, 320px 320px, 280px 280px, 240px 240px,
-            360px 360px, 160px 160px, 100% 100%, 100% 100%;
+          position: relative;
           font-family: system-ui, -apple-system, sans-serif;
           color: white;
+        }
+        .upgrades-bg::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
+          z-index: -1;
         }
         .fallback-header {
           position: sticky;
@@ -588,7 +577,7 @@ export default function Upgrades() {
         }
       `}</style>
 
-      <div className="min-h-screen relative overflow-hidden fallback-container">
+      <div className="upgrades-bg min-h-screen relative overflow-hidden fallback-container">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20 fallback-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 fallback-header-content">

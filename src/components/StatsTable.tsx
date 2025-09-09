@@ -72,51 +72,104 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
   }
 
   return (
-    <div className="bg-gray-800/50 rounded-lg overflow-hidden">
+    <div className="rounded-xl overflow-hidden" style={{
+      background: 'rgba(15, 15, 25, 0.85)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(0, 255, 255, 0.3)',
+      boxShadow: '0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(255, 0, 255, 0.05)'
+    }}>
       <div className="overflow-x-auto">
-        <table className="w-full font-pixel text-xs">
+        <table className="w-full" style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '11px' }}>
           <thead>
-            <tr className="bg-purple-800/50 border-b border-purple-500">
-              <th className="text-left p-3 text-purple-400">Winner</th>
-              <th className="text-left p-3 text-purple-400">Won (WISH)</th>
-              <th className="text-left p-3 text-purple-400">Tx Link</th>
-              <th className="text-left p-3 text-purple-400">Date/Time</th>
+            <tr style={{ 
+              background: 'linear-gradient(90deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%)',
+              borderBottom: '2px solid rgba(0, 255, 255, 0.5)'
+            }}>
+              <th className="text-left p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>👤 WALLET</th>
+              <th className="text-left p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>💰 AMOUNT</th>
+              <th className="text-left p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>🔗 VERIFY</th>
+              <th className="text-left p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)' }}>⏰ TIME</th>
             </tr>
           </thead>
           <tbody>
             {stats.map((entry, index) => (
               <tr 
                 key={`${entry.tx || 'unknown'}-${index}`}
-                className={`border-b border-gray-700/50 ${
-                  index % 2 === 0 ? 'bg-gray-700/20' : 'bg-gray-700/10'
-                } hover:bg-gray-600/30 transition-colors`}
+                style={{
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: index % 2 === 0 ? 'rgba(138, 43, 226, 0.05)' : 'rgba(6, 182, 212, 0.05)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(0, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateX(5px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = index % 2 === 0 ? 'rgba(138, 43, 226, 0.05)' : 'rgba(6, 182, 212, 0.05)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
               >
-                <td className="p-3">
+                <td className="p-4">
                   <span 
-                    className="text-white font-mono cursor-help"
+                    className="cursor-help"
+                    style={{ 
+                      color: '#fff',
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      textShadow: '0 0 5px rgba(255, 255, 255, 0.3)'
+                    }}
                     title={entry.winner}
                   >
                     {formatWallet(entry.winner)}
                   </span>
                 </td>
-                <td className="p-3 text-green-400 font-bold">
-                  {entry.amount || '0'}
+                <td className="p-4">
+                  <span style={{ 
+                    color: '#00ff00',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                    textShadow: '0 0 10px rgba(0, 255, 0, 0.5)'
+                  }}>
+                    {entry.amount || '0'}
+                  </span>
                 </td>
-                <td className="p-3">
+                <td className="p-4">
                   {isValidTx(entry.tx) ? (
                     <a
                       href={`https://solscan.io/tx/${entry.tx}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+                      style={{
+                        display: 'inline-block',
+                        padding: '6px 12px',
+                        background: 'linear-gradient(45deg, #7c3aed, #06b6d4)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        textDecoration: 'none',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        boxShadow: '0 0 15px rgba(124, 58, 237, 0.3)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 0 25px rgba(6, 182, 212, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 0 15px rgba(124, 58, 237, 0.3)';
+                      }}
                     >
                       VIEW TX
                     </a>
                   ) : (
-                    <span className="text-gray-500">-</span>
+                    <span style={{ color: '#666', fontSize: '12px' }}>-</span>
                   )}
                 </td>
-                <td className="p-3 text-gray-300">
+                <td className="p-4" style={{ 
+                  color: '#a0a0a0',
+                  fontSize: '11px'
+                }}>
                   {formatDate(entry.ts)}
                 </td>
               </tr>
@@ -126,8 +179,16 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
       </div>
       
       {stats.length >= 20 && (
-        <div className="p-3 text-center text-gray-400 font-pixel text-xs border-t border-gray-700/50">
-          Showing most recent 20 results
+        <div style={{
+          padding: '16px',
+          textAlign: 'center',
+          color: '#00ffff',
+          fontFamily: '"Press Start 2P"',
+          fontSize: '10px',
+          borderTop: '1px solid rgba(0, 255, 255, 0.3)',
+          background: 'rgba(0, 0, 0, 0.3)'
+        }}>
+          SHOWING MOST RECENT 20 RESULTS
         </div>
       )}
     </div>
