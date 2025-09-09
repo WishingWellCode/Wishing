@@ -353,6 +353,11 @@ export default {
       }
     }
     
+    // Multiplayer API routes
+    if (url.pathname === '/api/multiplayer/players') {
+      return handleGetMultiplayerPlayers(request, env)
+    }
+    
     return new Response('Not Found', { 
       status: 404,
       headers: { 'Access-Control-Allow-Origin': '*' }
@@ -377,6 +382,11 @@ async function handleWebSocketSession(websocket, env) {
   
   const playerId = crypto.randomUUID()
   let playerData = null
+  let gameState = null
+  
+  // Get the game state Durable Object
+  const gameStateId = env.GAME_STATE.idFromName('main')
+  gameState = env.GAME_STATE.get(gameStateId)
   
   websocket.addEventListener('message', async (event) => {
     try {
@@ -384,56 +394,77 @@ async function handleWebSocketSession(websocket, env) {
       
       switch (message.type) {
         case 'join':
+          // Format wallet address as username (first 3 + last 2 chars)
+          const walletAddress = message.walletAddress
+          const username = walletAddress.length >= 5 ? 
+            walletAddress.substring(0, 3) + walletAddress.slice(-2) : 
+            walletAddress
+          
           playerData = {
             id: playerId,
-            walletAddress: message.walletAddress,
-            x: 400,
-            y: 300,
-            sprite: 'player'
+            walletAddress: walletAddress,
+            username: username,
+            x: Math.random() * 800 + 100, // Random starting position
+            y: Math.random() * 600 + 100,
+            sprite: null // Will be assigned by GameState
           }
           
-          // Store player in Durable Object
-          const id = env.GAME_STATE.idFromName('main')
-          const gameState = env.GAME_STATE.get(id)
-          await gameState.fetch(new Request('http://game/addPlayer', {
+          // Add player to Durable Object
+          const addResponse = await gameState.fetch(new Request('http://game/addPlayer', {
             method: 'POST',
             body: JSON.stringify(playerData)
           }))
           
-          // Send confirmation
+          const addResult = await addResponse.json()
+          if (addResult.success) {
+            playerData = addResult.player
+          }
+          
+          // Add WebSocket reference to Durable Object
+          gameState.addWebSocket(playerId, websocket)
+          
+          // Get all current players
+          const playersResponse = await gameState.fetch(new Request('http://game/getPlayers'))
+          const allPlayers = await playersResponse.json()
+          
+          // Send confirmation with all current players
           websocket.send(JSON.stringify({
             type: 'joined',
             playerId,
-            player: playerData
+            player: playerData,
+            allPlayers: allPlayers
           }))
           
-          // Broadcast to other players
-          broadcast(env, {
-            type: 'playerJoined',
-            player: playerData
-          }, playerId)
+          console.log(`🎮 Player ${username} joined with sprite ${playerData.sprite}`)
           break
           
         case 'move':
-          if (playerData) {
-            playerData.x = message.x
-            playerData.y = message.y
-            
-            broadcast(env, {
-              type: 'playerMoved',
-              playerId,
-              x: message.x,
-              y: message.y
-            }, playerId)
+          if (playerData && gameState) {
+            // Update position in Durable Object
+            await gameState.fetch(new Request('http://game/updatePosition', {
+              method: 'POST',
+              body: JSON.stringify({
+                playerId,
+                x: message.x,
+                y: message.y
+              })
+            }))
           }
           break
           
         case 'gamble':
-          broadcast(env, {
-            type: 'fountainUpdate',
-            pool: await getFountainPool(env),
-            lastWinners: message.result
-          })
+          // Broadcast gambling events to all players
+          if (gameState) {
+            gameState.broadcast({
+              type: 'fountainUpdate',
+              pool: await getFountainPool(env),
+              lastWinner: {
+                playerId,
+                username: playerData?.username,
+                result: message.result
+              }
+            })
+          }
           break
       }
     } catch (error) {
@@ -442,18 +473,17 @@ async function handleWebSocketSession(websocket, env) {
   })
   
   websocket.addEventListener('close', async () => {
-    if (playerData) {
-      const id = env.GAME_STATE.idFromName('main')
-      const gameState = env.GAME_STATE.get(id)
+    if (playerData && gameState) {
+      // Remove WebSocket reference
+      gameState.removeWebSocket(playerId)
+      
+      // Remove player from Durable Object
       await gameState.fetch(new Request('http://game/removePlayer', {
         method: 'POST',
         body: JSON.stringify({ playerId })
       }))
       
-      broadcast(env, {
-        type: 'playerLeft',
-        playerId
-      }, playerId)
+      console.log(`🎮 Player ${playerData.username} left`)
     }
   })
 }
@@ -1613,12 +1643,51 @@ async function getUserHouseBoost(walletAddress, env) {
   }
 }
 
-// Durable Object for game state management
+async function handleGetMultiplayerPlayers(request, env) {
+  try {
+    const gameStateId = env.GAME_STATE.idFromName('main')
+    const gameState = env.GAME_STATE.get(gameStateId)
+    
+    const playersResponse = await gameState.fetch(new Request('http://game/getPlayers'))
+    const players = await playersResponse.json()
+    
+    return new Response(JSON.stringify({
+      success: true,
+      players: players,
+      count: players.length
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error getting multiplayer players:', error)
+    return new Response(JSON.stringify({
+      success: false,
+      players: [],
+      count: 0,
+      error: 'Failed to fetch players'
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+}
+
+// Multiplayer Durable Object for game state management
 export class GameState {
   constructor(state, env) {
     this.state = state
     this.env = env
     this.players = new Map()
+    this.websockets = new Map() // Map playerId to WebSocket
+    this.sprites = ['sprite1', 'sprite2', 'sprite3', 'sprite4', 'sprite5', 'sprite6']
   }
 
   async fetch(request) {
@@ -1626,13 +1695,30 @@ export class GameState {
     
     if (url.pathname === '/addPlayer') {
       const player = await request.json()
+      // Assign random sprite
+      player.sprite = this.sprites[Math.floor(Math.random() * this.sprites.length)]
       this.players.set(player.id, player)
-      return new Response('OK')
+      
+      // Broadcast to all other players
+      this.broadcast({
+        type: 'playerJoined',
+        player: player
+      }, player.id)
+      
+      return new Response(JSON.stringify({ success: true, player }))
     }
     
     if (url.pathname === '/removePlayer') {
       const { playerId } = await request.json()
       this.players.delete(playerId)
+      this.websockets.delete(playerId)
+      
+      // Broadcast to all players
+      this.broadcast({
+        type: 'playerLeft',
+        playerId: playerId
+      })
+      
       return new Response('OK')
     }
     
@@ -1640,6 +1726,53 @@ export class GameState {
       return new Response(JSON.stringify(Array.from(this.players.values())))
     }
     
+    if (url.pathname === '/updatePosition') {
+      const { playerId, x, y } = await request.json()
+      const player = this.players.get(playerId)
+      if (player) {
+        player.x = x
+        player.y = y
+        
+        // Broadcast position update
+        this.broadcast({
+          type: 'playerMoved',
+          playerId,
+          x,
+          y
+        }, playerId)
+      }
+      return new Response('OK')
+    }
+    
+    if (url.pathname === '/addWebSocket') {
+      const { playerId } = await request.json()
+      // WebSocket will be handled separately
+      return new Response('OK')
+    }
+    
     return new Response('Not found', { status: 404 })
+  }
+  
+  broadcast(message, excludePlayerId = null) {
+    const messageStr = JSON.stringify(message)
+    for (const [playerId, ws] of this.websockets) {
+      if (playerId !== excludePlayerId && ws.readyState === WebSocket.READY_STATE_OPEN) {
+        try {
+          ws.send(messageStr)
+        } catch (error) {
+          console.error('Error broadcasting to player:', playerId, error)
+          // Remove dead websocket
+          this.websockets.delete(playerId)
+        }
+      }
+    }
+  }
+  
+  addWebSocket(playerId, websocket) {
+    this.websockets.set(playerId, websocket)
+  }
+  
+  removeWebSocket(playerId) {
+    this.websockets.delete(playerId)
   }
 }

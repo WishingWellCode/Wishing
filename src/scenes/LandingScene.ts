@@ -2,6 +2,11 @@ import Phaser from 'phaser'
 
 export class LandingScene extends Phaser.Scene {
   private instructions!: Phaser.GameObjects.Text
+  private player!: Phaser.GameObjects.Sprite
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+  private wasd!: any
+  private lastPosition = { x: 0, y: 0 }
+  private positionUpdateTimer = 0
   
   constructor() {
     super({ key: 'LandingScene' })
@@ -10,6 +15,14 @@ export class LandingScene extends Phaser.Scene {
   preload() {
     // Load the real vaporwave background
     this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
+    
+    // Load player sprites for multiplayer
+    this.load.image('sprite1', '/assets/sprites/sprite1.svg')
+    this.load.image('sprite2', '/assets/sprites/sprite2.svg')
+    this.load.image('sprite3', '/assets/sprites/sprite3.svg')
+    this.load.image('sprite4', '/assets/sprites/sprite4.svg')
+    this.load.image('sprite5', '/assets/sprites/sprite5.svg')
+    this.load.image('sprite6', '/assets/sprites/sprite6.svg')
   }
 
   create() {
@@ -25,8 +38,8 @@ export class LandingScene extends Phaser.Scene {
     this.instructions = this.add.text(
       this.cameras.main.centerX, 
       100, 
-      'Welcome to the $WISH Wishing Well\nConnect your Phantom wallet to enter the magical realm', {
-      fontSize: '24px',
+      'Welcome to the $WISH Wishing Well\nConnect your Phantom wallet to enter the magical realm\n\nMove around with WASD keys and see other players!', {
+      fontSize: '20px',
       fontFamily: '"Press Start 2P"',
       color: '#ffffff',
       backgroundColor: '#000000',
@@ -37,7 +50,71 @@ export class LandingScene extends Phaser.Scene {
     this.instructions.setDepth(1)
     this.instructions.setScrollFactor(0)
     
+    // Create invisible player for position tracking (visible player shown via overlay)
+    this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'sprite1')
+    this.player.setVisible(false) // Hide since we show it in overlay
+    this.player.setDepth(0)
+    
+    // Set up controls
+    this.cursors = this.input.keyboard!.createCursorKeys()
+    this.wasd = this.input.keyboard!.addKeys('W,S,A,D')
+    
     // Camera setup
     this.cameras.main.setZoom(1)
+    
+    // Store initial position
+    this.lastPosition.x = this.player.x
+    this.lastPosition.y = this.player.y
+  }
+  
+  update(time: number, delta: number) {
+    if (!this.player) return
+    
+    const speed = 200
+    const deltaSeconds = delta / 1000
+    
+    // Handle movement
+    let moving = false
+    
+    if (this.cursors.left.isDown || this.wasd.A.isDown) {
+      this.player.x -= speed * deltaSeconds
+      moving = true
+    }
+    if (this.cursors.right.isDown || this.wasd.D.isDown) {
+      this.player.x += speed * deltaSeconds
+      moving = true
+    }
+    if (this.cursors.up.isDown || this.wasd.W.isDown) {
+      this.player.y -= speed * deltaSeconds
+      moving = true
+    }
+    if (this.cursors.down.isDown || this.wasd.S.isDown) {
+      this.player.y += speed * deltaSeconds
+      moving = true
+    }
+    
+    // Keep player within bounds
+    this.player.x = Phaser.Math.Clamp(this.player.x, 50, this.cameras.main.width - 50)
+    this.player.y = Phaser.Math.Clamp(this.player.y, 50, this.cameras.main.height - 50)
+    
+    // Update multiplayer position if moved
+    if (moving || time - this.positionUpdateTimer > 1000) { // Update every second even if not moving
+      const dx = Math.abs(this.player.x - this.lastPosition.x)
+      const dy = Math.abs(this.player.y - this.lastPosition.y)
+      
+      if (dx > 5 || dy > 5 || time - this.positionUpdateTimer > 1000) {
+        this.updateMultiplayerPosition(this.player.x, this.player.y)
+        this.lastPosition.x = this.player.x
+        this.lastPosition.y = this.player.y
+        this.positionUpdateTimer = time
+      }
+    }
+  }
+  
+  private updateMultiplayerPosition(x: number, y: number) {
+    // Send position to multiplayer manager
+    if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
+      (window as any).multiplayerManager.updatePosition(x, y)
+    }
   }
 }

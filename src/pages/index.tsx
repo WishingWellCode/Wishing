@@ -6,11 +6,24 @@ import Head from 'next/head'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
 const CoordinateDebugger = dynamic(() => import('@/components/CoordinateDebugger'), { ssr: false })
+const MultiplayerManager = dynamic(() => import('@/components/MultiplayerManager'), { ssr: false })
+const MultiplayerOverlay = dynamic(() => import('@/components/MultiplayerOverlay'), { ssr: false })
+
+interface Player {
+  id: string
+  walletAddress: string
+  username: string
+  x: number
+  y: number
+  sprite: string
+}
 
 export default function Home() {
   const { publicKey, connected } = useWallet()
   const [isGameReady, setIsGameReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [multiplayerPlayers, setMultiplayerPlayers] = useState<Player[]>([])
+  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null)
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -65,10 +78,30 @@ export default function Home() {
           <GameCanvas isWalletConnected={connected} />
         </div>
 
+        {/* Multiplayer Manager - handles WebSocket connection */}
+        <MultiplayerManager
+          isActive={true} // Always active on landing page
+          onPlayersUpdate={(players) => {
+            setMultiplayerPlayers(players)
+            // Extract current player ID from window
+            const multiplayerManager = (window as any).multiplayerManager
+            if (multiplayerManager) {
+              setCurrentPlayerId(multiplayerManager.playerId)
+            }
+          }}
+        />
+
+        {/* Multiplayer Overlay - shows other players */}
+        <MultiplayerOverlay 
+          players={multiplayerPlayers}
+          currentPlayerId={currentPlayerId}
+        />
+
         {connected && (
           <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
             <p>WASD/Arrow Keys - Move</p>
             <p>E - Interact</p>
+            <p className="text-cyan-400 mt-1">🎮 Multiplayer Active</p>
           </div>
         )}
 

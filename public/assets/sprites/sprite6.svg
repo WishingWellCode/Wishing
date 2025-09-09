@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Orange player sprite -->
+  <!-- Head -->
+  <circle cx="16" cy="10" r="6" fill="#ff8844" stroke="#aa4400" stroke-width="1"/>
+  <!-- Body -->
+  <rect x="12" y="16" width="8" height="12" fill="#cc6633" stroke="#aa4400" stroke-width="1"/>
+  <!-- Arms -->
+  <rect x="6" y="18" width="6" height="3" fill="#cc6633" stroke="#aa4400" stroke-width="1"/>
+  <rect x="20" y="18" width="6" height="3" fill="#cc6633" stroke="#aa4400" stroke-width="1"/>
+  <!-- Legs -->
+  <rect x="13" y="28" width="3" height="4" fill="#cc6633" stroke="#aa4400" stroke-width="1"/>
+  <rect x="16" y="28" width="3" height="4" fill="#cc6633" stroke="#aa4400" stroke-width="1"/>
+  <!-- Eyes -->
+  <circle cx="13" cy="8" r="1" fill="white"/>
+  <circle cx="19" cy="8" r="1" fill="white"/>
+  <circle cx="13" cy="8" r="0.5" fill="black"/>
+  <circle cx="19" cy="8" r="0.5" fill="black"/>
+</svg>
