@@ -44,8 +44,6 @@ export class LandingScene extends Phaser.Scene {
     this.cursors = this.input.keyboard!.createCursorKeys()
     this.wasd = this.input.keyboard!.addKeys('W,S,A,D')
     
-    console.log('🎮 Controls initialized:', this.cursors, this.wasd)
-    
     // Camera setup
     this.cameras.main.setZoom(1)
     
@@ -66,22 +64,18 @@ export class LandingScene extends Phaser.Scene {
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
       this.player.x -= frameSpeed
       moved = true
-      console.log('🎮 Moving LEFT, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.right.isDown || this.wasd.D.isDown) {
       this.player.x += frameSpeed
       moved = true
-      console.log('🎮 Moving RIGHT, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.up.isDown || this.wasd.W.isDown) {
       this.player.y -= frameSpeed
       moved = true
-      console.log('🎮 Moving UP, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.down.isDown || this.wasd.S.isDown) {
       this.player.y += frameSpeed
       moved = true
-      console.log('🎮 Moving DOWN, player at:', this.player.x, this.player.y)
     }
     
     // Keep player within bounds
