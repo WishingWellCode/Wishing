@@ -1441,7 +1441,16 @@ export class TestScene extends Phaser.Scene {
       (window as any).multiplayerManager.updatePosition(x, y)
       console.log('🔍 DEBUG: Updated multiplayer position to:', x, y)
     } else {
-      console.log('🔍 DEBUG: No multiplayerManager found')
+      console.log('🔍 DEBUG: No multiplayerManager found, retrying in 1 second...')
+      // Retry after 1 second if multiplayerManager isn't ready yet
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
+          (window as any).multiplayerManager.updatePosition(x, y)
+          console.log('🔍 DEBUG: Updated multiplayer position (retry) to:', x, y)
+        } else {
+          console.log('🔍 DEBUG: MultiplayerManager still not available after retry')
+        }
+      }, 1000)
     }
   }
 }

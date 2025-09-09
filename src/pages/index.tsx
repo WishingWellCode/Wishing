@@ -91,30 +91,28 @@ export default function Home() {
         {/* Game Canvas - Always render, switches scenes based on wallet connection */}
         <GameCanvas isWalletConnected={connected} />
 
-        {/* Multiplayer content when wallet connected */}
+        {/* Multiplayer Manager - handles connection and data */}
         {connected && (
-          <>
-            {/* Multiplayer Manager - handles connection and data */}
-            <MultiplayerManager 
-              isActive={connected} 
-              onPlayersUpdate={(players) => {
-                setPlayers(players)
-                // Find current player in the list
-                const currentPlayer = players.find(p => p.walletAddress === publicKey?.toString())
-                setCurrentPlayerId(currentPlayer?.id || null)
-              }}
-            />
-
-            {/* Multiplayer Overlay - shows player sprites */}
-            <MultiplayerOverlay 
-              players={players}
-              currentPlayerId={currentPlayerId}
-            />
-          </>
+          <MultiplayerManager 
+            isActive={connected} 
+            onPlayersUpdate={(players) => {
+              setPlayers(players)
+              // Find current player in the list
+              const currentPlayer = players.find(p => p.walletAddress === publicKey?.toString())
+              setCurrentPlayerId(currentPlayer?.id || null)
+            }}
+          />
         )}
 
-
       </div>
+
+      {/* Multiplayer Overlay - OUTSIDE main container to be above everything */}
+      {connected && (
+        <MultiplayerOverlay 
+          players={players}
+          currentPlayerId={currentPlayerId}
+        />
+      )}
     </>
   )
 }

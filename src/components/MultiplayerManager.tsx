@@ -22,22 +22,48 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
   const positionUpdateTimeout = useRef<NodeJS.Timeout | null>(null)
+  const mountedRef = useRef(false)
+
+  // Trigger connection check on mount
+  useEffect(() => {
+    mountedRef.current = true
+    console.log('🎮 MultiplayerManager mounted, checking connection')
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
   
   // Connect to multiplayer when wallet is connected and component is active
   useEffect(() => {
-    if (isActive && connected && publicKey && !wsRef.current) {
-      connectMultiplayer()
+    if (isActive && connected && publicKey) {
+      // Always attempt to connect if we should be connected but aren't
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        console.log('🎮 MultiplayerManager: Connecting/Reconnecting to multiplayer')
+        connectMultiplayer()
+      }
     } else if ((!isActive || !connected) && wsRef.current) {
+      console.log('🎮 MultiplayerManager: Disconnecting from multiplayer')
       disconnectMultiplayer()
     }
     
     return () => {
-      disconnectMultiplayer()
+      // Don't disconnect on unmount if we should stay connected
+      if (!isActive || !connected) {
+        disconnectMultiplayer()
+      }
     }
   }, [isActive, connected, publicKey])
 
   const connectMultiplayer = () => {
     if (!publicKey) return
+
+    // Clean up existing connection first
+    if (wsRef.current) {
+      console.log('🎮 Cleaning up existing connection')
+      wsRef.current.close()
+      wsRef.current = null
+      setIsConnected(false)
+    }
 
     try {
       // Connect to Cloudflare Worker WebSocket endpoint
@@ -47,12 +73,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         ? 'ws://localhost:8787' // Local wrangler dev server
         : 'wss://wish-well-worker.stealthbundlebot.workers.dev' // Production worker
       
-      console.log('🎮 Connecting to multiplayer server:', workerUrl)
+      console.log('🎮 DEBUG: Connection details:', {
+        hostname: window.location.hostname,
+        isLocal,
+        workerUrl,
+        publicKey: publicKey.toString()
+      })
       
       const ws = new WebSocket(workerUrl)
       
       ws.onopen = () => {
-        console.log('🎮 Connected to multiplayer server at:', workerUrl)
+        console.log('🎮 ✅ CONNECTED to multiplayer server at:', workerUrl)
         setIsConnected(true)
         
         // Join the game
@@ -61,10 +92,10 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
             type: 'join',
             walletAddress: publicKey.toString()
           }
-          console.log('🎮 Sending join message:', joinMessage)
+          console.log('🎮 📤 SENDING JOIN MESSAGE:', joinMessage)
           ws.send(JSON.stringify(joinMessage))
         } catch (error) {
-          console.error('Error sending join message:', error)
+          console.error('🎮 ❌ ERROR sending join message:', error)
         }
       }
       
@@ -77,15 +108,20 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         }
       }
       
-      ws.onclose = () => {
-        console.log('🎮 Disconnected from multiplayer server')
+      ws.onclose = (event) => {
+        console.log('🎮 ❌ DISCONNECTED from multiplayer server', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+          url: workerUrl
+        })
         setIsConnected(false)
         wsRef.current = null
         playerIdRef.current = null
       }
       
       ws.onerror = (error) => {
-        console.error('🎮 Multiplayer WebSocket error:', error)
+        console.error('🎮 💥 WEBSOCKET ERROR:', error, 'URL:', workerUrl)
         setIsConnected(false)
       }
       
@@ -113,37 +149,46 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const handleMultiplayerMessage = (message: any) => {
+    console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
+    
     switch (message.type) {
       case 'joined':
         playerIdRef.current = message.playerId
         if (message.allPlayers) {
           // Include ALL players including current player for proper display
-          console.log(`🎮 Received ${message.allPlayers.length} players:`, message.allPlayers)
+          console.log(`🎮 ✅ JOINED SUCCESSFULLY! Received ${message.allPlayers.length} total players:`)
+          message.allPlayers.forEach((player: any, index: number) => {
+            console.log(`  🧑‍🤝‍🧑 Player ${index + 1}: ${player.username} (${player.id.slice(0,8)}) at (${player.x},${player.y}) sprite:${player.sprite}`)
+          })
           setPlayers(message.allPlayers)
           onPlayersUpdate?.(message.allPlayers)
         }
-        console.log(`🎮 Joined as player ${message.playerId} with sprite ${message.player.sprite} and username ${message.player.username}`)
+        console.log(`🎮 🆔 YOU ARE PLAYER: ${message.playerId} with sprite ${message.player.sprite} and username ${message.player.username}`)
         break
         
       case 'playerJoined':
+        console.log(`🎮 🆕 NEW PLAYER JOINED: ${message.player.username} (${message.player.id.slice(0,8)}) sprite:${message.player.sprite} at (${message.player.x},${message.player.y})`)
         setPlayers(prev => {
           const updated = [...prev, message.player]
+          console.log(`🎮 👥 TOTAL PLAYERS AFTER JOIN: ${updated.length}`)
+          console.log(`🎮 📋 ALL CURRENT PLAYERS:`, updated.map(p => `${p.username}(${p.id.slice(0,8)})`))
           onPlayersUpdate?.(updated)
           return updated
         })
-        console.log(`🎮 Player joined: ${message.player.username}`)
         break
         
       case 'playerLeft':
+        console.log(`🎮 PLAYER LEFT: ${message.playerId}`)
         setPlayers(prev => {
           const updated = prev.filter(p => p.id !== message.playerId)
+          console.log(`🎮 Total players after leave: ${updated.length}`)
           onPlayersUpdate?.(updated)
           return updated
         })
-        console.log(`🎮 Player left: ${message.playerId}`)
         break
         
       case 'playerMoved':
+        console.log(`🎮 🏃 PLAYER MOVED: ${message.playerId.slice(0,8)} to (${message.x},${message.y})`)
         setPlayers(prev => {
           const updated = prev.map(p => 
             p.id === message.playerId 
@@ -158,6 +203,10 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       case 'fountainUpdate':
         console.log('🎮 Fountain update:', message)
         // Handle fountain/gambling updates if needed
+        break
+        
+      default:
+        console.log('🎮 Unknown message type:', message.type)
         break
     }
   }

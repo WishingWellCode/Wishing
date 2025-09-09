@@ -20,12 +20,25 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
   console.log('👀 DEBUG: MultiplayerOverlay rendered with', players.length, 'players, current:', currentPlayerId)
 
   useEffect(() => {
+    console.log('👀 DEBUG: MultiplayerOverlay useEffect - Raw players:', players)
+    console.log('👀 DEBUG: MultiplayerOverlay useEffect - Current player ID:', currentPlayerId)
+    
     // Show ALL players including current player (don't filter out current player)
     // and ensure players are within reasonable bounds
     const filtered = players.filter(player => {
       const hasValidData = player.x !== undefined && player.y !== undefined && player.username
       const isInBounds = player.x >= -100 && player.x <= window.innerWidth + 100 &&
                         player.y >= -100 && player.y <= window.innerHeight + 100
+      
+      console.log('👀 DEBUG: Player filter check:', {
+        username: player.username,
+        x: player.x,
+        y: player.y,
+        hasValidData,
+        isInBounds,
+        windowSize: { width: window.innerWidth, height: window.innerHeight }
+      })
+      
       return hasValidData && isInBounds
     })
     
@@ -47,17 +60,36 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     return spriteMap[spriteName] || '/assets/sprites/Multiplayer-sprites/default.png'
   }
 
+  // Debug sprite rendering
+  if (visiblePlayers.length > 0) {
+    console.log('👀 DEBUG: Rendering', visiblePlayers.length, 'sprites')
+  }
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-40">
-      {visiblePlayers.length > 0 && console.log('👀 DEBUG: Rendering', visiblePlayers.length, 'sprites')}
+    <div 
+      className="fixed inset-0 pointer-events-none" 
+      style={{ 
+        zIndex: 2147483647, // Maximum z-index value
+        position: 'fixed', // Force new stacking context
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none' // Ensure no pointer interference
+      }}
+    >
       {visiblePlayers.map((player) => (
         <div
           key={player.id}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          className="pointer-events-none"
           style={{
+            position: 'fixed',
             left: `${player.x}px`,
             top: `${player.y}px`,
-            transition: 'left 0.1s ease-out, top 0.1s ease-out' // Smooth movement
+            transform: 'translate(-50%, -50%)',
+            transition: 'left 0.1s ease-out, top 0.1s ease-out',
+            zIndex: 2147483647,
+            pointerEvents: 'none' // Ensure sprite doesn't block portal interactions
           }}
         >
           {/* Player sprite */}
@@ -65,23 +97,47 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             <img
               src={getSpriteUrl(player.sprite)}
               alt={`Player ${player.username}`}
-              className="w-8 h-8 drop-shadow-lg"
+              className="drop-shadow-lg"
               style={{
+                width: '45px',
+                height: '45px',
                 imageRendering: 'pixelated',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
               }}
+              onLoad={() => console.log('👀 DEBUG: Sprite loaded for', player.username, 'at', player.x, player.y)}
+              onError={(e) => console.error('👀 DEBUG: Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite), 'error:', e)}
             />
             
-            {/* Username label */}
+            {/* Username label - black banner with white text */}
             <div
-              className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-2 py-1 rounded text-xs font-pixel whitespace-nowrap"
               style={{
-                fontSize: '10px',
-                textShadow: '1px 1px 2px rgba(0,0,0,1)',
-                border: '1px solid rgba(255,255,255,0.3)'
+                position: 'absolute',
+                top: '-32px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'black',
+                border: '1px solid white',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: 'fit-content',
+                whiteSpace: 'nowrap'
               }}
             >
-              {player.username}
+              <span
+                style={{
+                  color: 'white',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  lineHeight: '1',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {player.username}
+              </span>
             </div>
             
             {/* Presence indicator (optional glowing effect) */}
@@ -96,14 +152,31 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
         </div>
       ))}
       
-      {/* Player count indicator */}
-      <div className="fixed bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg text-xs font-pixel">
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full animate-pulse ${visiblePlayers.length > 0 ? 'bg-green-400' : 'bg-red-400'}`} />
-          <span>{visiblePlayers.length} players visible</span>
-        </div>
-        <div className="text-xs mt-1 opacity-75">
-          Total: {players.length} | Current: {currentPlayerId ? 'Yes' : 'No'}
+      {/* Player count indicator - moved to bottom-right with white text */}
+      <div 
+        className="pointer-events-none"
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          right: '16px',
+          zIndex: 2147483647
+        }}
+      >
+        <div 
+          className="px-3 py-2 text-white font-pixel"
+          style={{
+            backgroundColor: 'black',
+            border: '1px solid white',
+            borderRadius: '4px',
+            fontSize: '10px'
+          }}
+        >
+          <div style={{ color: 'white', fontWeight: 'bold' }}>
+            {visiblePlayers.length} players visible
+          </div>
+          <div style={{ color: 'white', fontSize: '9px', marginTop: '2px' }}>
+            Total: {players.length} | Current: {currentPlayerId ? 'Yes' : 'No'}
+          </div>
         </div>
       </div>
     </div>

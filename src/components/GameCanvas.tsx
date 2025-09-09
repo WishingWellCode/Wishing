@@ -72,7 +72,6 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         height: window.innerHeight,
         pixelArt: true,
         transparent: true,
-        backgroundColor: 0x000000,
         antialias: false, // Disable antialiasing for better performance
         roundPixels: true, // Prevent pixel rounding issues
         physics: {
