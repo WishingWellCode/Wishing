@@ -16,13 +16,8 @@ interface MultiplayerOverlayProps {
 
 export default function MultiplayerOverlay({ players, currentPlayerId }: MultiplayerOverlayProps) {
   const [visiblePlayers, setVisiblePlayers] = useState<Player[]>([])
-  
-  console.log('👀 DEBUG: MultiplayerOverlay rendered with', players.length, 'players, current:', currentPlayerId)
 
   useEffect(() => {
-    console.log('👀 DEBUG: MultiplayerOverlay useEffect - Raw players:', players)
-    console.log('👀 DEBUG: MultiplayerOverlay useEffect - Current player ID:', currentPlayerId)
-    
     // Show ALL players including current player (don't filter out current player)
     // and ensure players are within reasonable bounds
     const filtered = players.filter(player => {
@@ -30,20 +25,10 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       const isInBounds = player.x >= -100 && player.x <= window.innerWidth + 100 &&
                         player.y >= -100 && player.y <= window.innerHeight + 100
       
-      console.log('👀 DEBUG: Player filter check:', {
-        username: player.username,
-        x: player.x,
-        y: player.y,
-        hasValidData,
-        isInBounds,
-        windowSize: { width: window.innerWidth, height: window.innerHeight }
-      })
-      
       return hasValidData && isInBounds
     })
     
     setVisiblePlayers(filtered)
-    console.log('👀 DEBUG: MultiplayerOverlay filtered', filtered.length, 'visible players:', filtered.map(p => `${p.username}(${p.x},${p.y})`))
   }, [players, currentPlayerId])
 
   const getSpriteUrl = (spriteName: string) => {
@@ -60,10 +45,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     return spriteMap[spriteName] || '/assets/sprites/Multiplayer-sprites/default.png'
   }
 
-  // Debug sprite rendering
-  if (visiblePlayers.length > 0) {
-    console.log('👀 DEBUG: Rendering', visiblePlayers.length, 'sprites')
-  }
+  // Removed debug logging spam
 
   return (
     <div 
@@ -104,8 +86,8 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
                 imageRendering: 'pixelated',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
               }}
-              onLoad={() => console.log('👀 DEBUG: Sprite loaded for', player.username, 'at', player.x, player.y)}
-              onError={(e) => console.error('👀 DEBUG: Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite), 'error:', e)}
+              onLoad={() => {/* Sprite loaded successfully */}}
+              onError={(e) => console.error('Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite))}
             />
             
             {/* Username label - black banner with white text */}
