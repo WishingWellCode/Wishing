@@ -16,6 +16,8 @@ interface MultiplayerOverlayProps {
 
 export default function MultiplayerOverlay({ players, currentPlayerId }: MultiplayerOverlayProps) {
   const [visiblePlayers, setVisiblePlayers] = useState<Player[]>([])
+  
+  console.log('👀 DEBUG: MultiplayerOverlay rendered with', players.length, 'players, current:', currentPlayerId)
 
   useEffect(() => {
     // Show ALL players including current player (don't filter out current player)
@@ -28,6 +30,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     })
     
     setVisiblePlayers(filtered)
+    console.log('👀 DEBUG: MultiplayerOverlay filtered', filtered.length, 'visible players:', filtered.map(p => `${p.username}(${p.x},${p.y})`))
   }, [players, currentPlayerId])
 
   const getSpriteUrl = (spriteName: string) => {
@@ -46,6 +49,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40">
+      {visiblePlayers.length > 0 && console.log('👀 DEBUG: Rendering', visiblePlayers.length, 'sprites')}
       {visiblePlayers.map((player) => (
         <div
           key={player.id}
