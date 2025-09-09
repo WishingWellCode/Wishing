@@ -1,122 +1,91 @@
-import { useEffect, useRef, useState } from 'react'
-import Phaser from 'phaser'
-import { useGame } from '@/lib/GameContext'
-import { HubWorldScene } from '@/scenes/HubWorldScene'
-import { PreloadScene } from '@/scenes/PreloadScene'
-import { CharacterSelectScene } from '@/scenes/CharacterSelectScene'
-import { TestScene } from '@/scenes/TestScene'
-import { LandingScene } from '@/scenes/LandingScene'
+import { useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 
 interface GameCanvasProps {
   isWalletConnected?: boolean
 }
 
 export default function GameCanvas({ isWalletConnected = false }: GameCanvasProps) {
-  const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { gameState, updatePlayerPosition, throwCoins } = useGame()
+  const gameRef = useRef<Phaser.Game | null>(null)
 
   useEffect(() => {
-    if (!containerRef.current || gameRef.current) return
+    const initializeGame = async () => {
+      if (!containerRef.current || !isWalletConnected || gameRef.current) return
 
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO, // Let Phaser choose the best renderer
-      parent: containerRef.current,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      pixelArt: true,
-      transparent: true,
-      backgroundColor: 0x000000,
-      antialias: false, // Disable antialiasing for better performance
-      roundPixels: true, // Prevent pixel rounding issues
-      physics: {
-        default: 'arcade',
-        arcade: {
-          gravity: { x: 0, y: 0 },
-          debug: false // Disable debug for better performance
+      // Dynamic import to avoid SSR issues
+      const Phaser = await import('phaser')
+      const { LandingScene } = await import('../scenes/LandingScene')
+
+      const config: Phaser.Types.Core.GameConfig = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        parent: containerRef.current,
+        backgroundColor: 'transparent',
+        scene: [LandingScene],
+        physics: {
+          default: 'arcade',
+          arcade: {
+            gravity: { x: 0, y: 0 },
+            debug: false
+          }
+        },
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        render: {
+          antialias: false,
+          pixelArt: true
+        },
+        fps: {
+          target: 60,
+          forceSetTimeOut: true
         }
-      },
-      scene: [LandingScene, TestScene],
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: '100%',
-        height: '100%'
-      },
-      render: {
-        powerPreference: 'high-performance',
-        antialias: false,
-        mipmapFilter: 'LINEAR',
-        roundPixels: true
-      },
-      fps: {
-        target: 60,
-        forceSetTimeOut: true
+      }
+
+      try {
+        gameRef.current = new Phaser.Game(config)
+        console.log('🎮 Phaser game initialized successfully')
+      } catch (error) {
+        console.error('❌ Failed to initialize Phaser game:', error)
       }
     }
 
-    gameRef.current = new Phaser.Game(config)
+    initializeGame()
 
-    gameRef.current.registry.set('gameContext', {
-      gameState,
-      updatePlayerPosition,
-      throwCoins
-    })
-
-    // Phaser's RESIZE scale mode will handle resize automatically
-    // No need for manual resize handling
-    
+    // Cleanup on unmount
     return () => {
       if (gameRef.current) {
         gameRef.current.destroy(true)
         gameRef.current = null
-      }
-    }
-  }, [])
-
-  // Handle wallet connection changes
-  useEffect(() => {
-    if (gameRef.current && gameRef.current.scene) {
-      const sceneManager = gameRef.current.scene
-      
-      if (isWalletConnected) {
-        // Switch to TestScene when wallet connects
-        if (sceneManager.getScene('LandingScene')?.scene.isActive()) {
-          sceneManager.stop('LandingScene')
-        }
-        if (!sceneManager.getScene('TestScene')?.scene.isActive()) {
-          sceneManager.start('TestScene')
-        }
-      } else {
-        // Switch to LandingScene when wallet disconnects  
-        if (sceneManager.getScene('TestScene')?.scene.isActive()) {
-          sceneManager.stop('TestScene')
-        }
-        if (!sceneManager.getScene('LandingScene')?.scene.isActive()) {
-          sceneManager.start('LandingScene')
-        }
+        console.log('🎮 Phaser game destroyed')
       }
     }
   }, [isWalletConnected])
 
+  // Handle window resize
   useEffect(() => {
-    if (gameRef.current) {
-      gameRef.current.registry.set('gameContext', {
-        gameState,
-        updatePlayerPosition,
-        throwCoins
-      })
+    const handleResize = () => {
+      if (gameRef.current) {
+        gameRef.current.scale.resize(window.innerWidth, window.innerHeight)
+      }
     }
-  }, [gameState, updatePlayerPosition, throwCoins])
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <div 
-      ref={containerRef} 
+      ref={containerRef}
       className="w-full h-full"
       style={{ 
-        background: 'transparent',
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        width: '100vw',
+        height: '100vh'
       }}
     />
   )

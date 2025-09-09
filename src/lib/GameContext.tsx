@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { Connection, PublicKey } from '@solana/web3.js'
 
 interface Player {
   id: string
@@ -39,78 +38,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     fountainPool: 0,
     lastWinners: []
   })
-  const [ws, setWs] = useState<WebSocket | null>(null)
 
-  useEffect(() => {
-    if (publicKey) {
-      connectToGame()
-    }
-    return () => {
-      ws?.close()
-    }
-  }, [publicKey])
-
+  // DISABLED: Old multiplayer system - using new LobbyDO system instead
   const connectToGame = async () => {
-    if (!publicKey) return
-
-    // Hardcode the worker URL since env vars aren't loading in production
-    const workerUrl = 'wss://wish-well-worker.stealthbundlebot.workers.dev'
-    const socket = new WebSocket(`${workerUrl}/game`)
-    
-    socket.onopen = () => {
-      socket.send(JSON.stringify({
-        type: 'join',
-        walletAddress: publicKey.toString()
-      }))
-    }
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      handleGameMessage(data)
-    }
-
-    setWs(socket)
-  }
-
-  const handleGameMessage = (message: any) => {
-    switch (message.type) {
-      case 'playerJoined':
-        setGameState(prev => {
-          const newPlayers = new Map(prev.players)
-          newPlayers.set(message.player.id, message.player)
-          return { ...prev, players: newPlayers }
-        })
-        break
-      case 'playerMoved':
-        setGameState(prev => {
-          const newPlayers = new Map(prev.players)
-          const player = newPlayers.get(message.playerId)
-          if (player) {
-            player.x = message.x
-            player.y = message.y
-            newPlayers.set(message.playerId, player)
-          }
-          return { ...prev, players: newPlayers }
-        })
-        break
-      case 'fountainUpdate':
-        setGameState(prev => ({
-          ...prev,
-          fountainPool: message.pool,
-          lastWinners: message.lastWinners || prev.lastWinners
-        }))
-        break
-    }
+    console.log('🎮 Old game connection disabled - using new LobbyDO system')
   }
 
   const updatePlayerPosition = (x: number, y: number) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'move',
-        x,
-        y
-      }))
-    }
+    // DISABLED: Old position updates - using new multiplayer system
   }
 
   const throwCoins = async (amount: number): Promise<any> => {
@@ -127,16 +62,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       })
     })
 
-    const result = await response.json()
-    
-    if (result.success && ws) {
-      ws.send(JSON.stringify({
-        type: 'gamble',
-        result: result
-      }))
-    }
-
-    return result
+    return await response.json()
   }
 
   return (

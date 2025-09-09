@@ -16,13 +16,13 @@ export class LandingScene extends Phaser.Scene {
     // Load the real vaporwave background
     this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
     
-    // Load player sprites for multiplayer
-    this.load.image('sprite1', '/assets/sprites/sprite1.svg')
-    this.load.image('sprite2', '/assets/sprites/sprite2.svg')
-    this.load.image('sprite3', '/assets/sprites/sprite3.svg')
-    this.load.image('sprite4', '/assets/sprites/sprite4.svg')
-    this.load.image('sprite5', '/assets/sprites/sprite5.svg')
-    this.load.image('sprite6', '/assets/sprites/sprite6.svg')
+    // Load custom multiplayer sprites
+    this.load.image('blue', '/assets/sprites/Multiplayer-sprites/blue.png')
+    this.load.image('default', '/assets/sprites/Multiplayer-sprites/default.png')
+    this.load.image('grey', '/assets/sprites/Multiplayer-sprites/grey.png')
+    this.load.image('lime', '/assets/sprites/Multiplayer-sprites/lime.png')
+    this.load.image('ping', '/assets/sprites/Multiplayer-sprites/ping.png')
+    this.load.image('red', '/assets/sprites/Multiplayer-sprites/red.png')
   }
 
   create() {
@@ -51,7 +51,7 @@ export class LandingScene extends Phaser.Scene {
     this.instructions.setScrollFactor(0)
     
     // Create invisible player for position tracking (visible player shown via overlay)
-    this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'sprite1')
+    this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
     this.player.setVisible(false) // Hide since we show it in overlay
     this.player.setDepth(0)
     
@@ -70,49 +70,44 @@ export class LandingScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (!this.player) return
     
-    const speed = 300
-    const deltaSeconds = delta / 1000
+    // Smooth movement with delta time scaling - 200px/second
+    const baseSpeed = 200 // pixels per second
+    const frameSpeed = (baseSpeed * delta) / 1000 // scale by frame time
     
-    // Handle movement with better performance
-    let velocityX = 0
-    let velocityY = 0
+    let moved = false
     
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
-      velocityX = -speed
+      this.player.x -= frameSpeed
+      moved = true
     }
     if (this.cursors.right.isDown || this.wasd.D.isDown) {
-      velocityX = speed
+      this.player.x += frameSpeed
+      moved = true
     }
     if (this.cursors.up.isDown || this.wasd.W.isDown) {
-      velocityY = -speed
+      this.player.y -= frameSpeed
+      moved = true
     }
     if (this.cursors.down.isDown || this.wasd.S.isDown) {
-      velocityY = speed
+      this.player.y += frameSpeed
+      moved = true
     }
     
-    // Apply movement
-    const moving = velocityX !== 0 || velocityY !== 0
-    if (moving) {
-      this.player.x += velocityX * deltaSeconds
-      this.player.y += velocityY * deltaSeconds
-      
-      // Keep player within bounds
-      this.player.x = Phaser.Math.Clamp(this.player.x, 32, this.cameras.main.width - 32)
-      this.player.y = Phaser.Math.Clamp(this.player.y, 32, this.cameras.main.height - 32)
-    }
+    // Keep player within bounds
+    this.player.x = Phaser.Math.Clamp(this.player.x, 32, this.cameras.main.width - 32)
+    this.player.y = Phaser.Math.Clamp(this.player.y, 32, this.cameras.main.height - 32)
     
-    // Throttle multiplayer position updates for performance
-    if (time - this.positionUpdateTimer > 100) { // Update every 100ms max
-      const dx = Math.abs(this.player.x - this.lastPosition.x)
-      const dy = Math.abs(this.player.y - this.lastPosition.y)
-      
-      // Only update if moved significantly or been a while
-      if (dx > 10 || dy > 10 || time - this.positionUpdateTimer > 2000) {
-        this.updateMultiplayerPosition(this.player.x, this.player.y)
-        this.lastPosition.x = this.player.x
-        this.lastPosition.y = this.player.y
-        this.positionUpdateTimer = time
-      }
+    // Update multiplayer position more frequently when moving
+    if (moved && time - this.positionUpdateTimer > 50) { // Update every 50ms when moving
+      this.updateMultiplayerPosition(this.player.x, this.player.y)
+      this.lastPosition.x = this.player.x
+      this.lastPosition.y = this.player.y
+      this.positionUpdateTimer = time
+    } else if (!moved && time - this.positionUpdateTimer > 1000) { // Update every second when not moving
+      this.updateMultiplayerPosition(this.player.x, this.player.y)
+      this.lastPosition.x = this.player.x
+      this.lastPosition.y = this.player.y
+      this.positionUpdateTimer = time
     }
   }
   

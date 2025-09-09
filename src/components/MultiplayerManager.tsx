@@ -52,15 +52,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       const ws = new WebSocket(workerUrl)
       
       ws.onopen = () => {
-        console.log('🎮 Connected to multiplayer server')
+        console.log('🎮 Connected to multiplayer server at:', workerUrl)
         setIsConnected(true)
         
         // Join the game
         try {
-          ws.send(JSON.stringify({
+          const joinMessage = {
             type: 'join',
             walletAddress: publicKey.toString()
-          }))
+          }
+          console.log('🎮 Sending join message:', joinMessage)
+          ws.send(JSON.stringify(joinMessage))
         } catch (error) {
           console.error('Error sending join message:', error)
         }
@@ -115,10 +117,12 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       case 'joined':
         playerIdRef.current = message.playerId
         if (message.allPlayers) {
+          // Include ALL players including current player for proper display
+          console.log(`🎮 Received ${message.allPlayers.length} players:`, message.allPlayers)
           setPlayers(message.allPlayers)
           onPlayersUpdate?.(message.allPlayers)
         }
-        console.log(`🎮 Joined as player ${message.playerId} with sprite ${message.player.sprite}`)
+        console.log(`🎮 Joined as player ${message.playerId} with sprite ${message.player.sprite} and username ${message.player.username}`)
         break
         
       case 'playerJoined':
@@ -160,6 +164,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
 
   const updatePosition = (x: number, y: number) => {
     if (!wsRef.current || !playerIdRef.current || !isConnected) return
+    
+    // Update local player position in state immediately for smooth movement
+    setPlayers(prev => {
+      const updated = prev.map(p => 
+        p.id === playerIdRef.current 
+          ? { ...p, x: Math.round(x), y: Math.round(y) }
+          : p
+      )
+      onPlayersUpdate?.(updated)
+      return updated
+    })
     
     // More aggressive throttling for better performance
     if (positionUpdateTimeout.current) {

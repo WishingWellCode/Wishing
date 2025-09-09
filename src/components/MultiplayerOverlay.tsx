@@ -18,28 +18,35 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
   const [visiblePlayers, setVisiblePlayers] = useState<Player[]>([])
 
   useEffect(() => {
-    // Filter out current player and ensure players are within visible bounds
-    const filtered = players.filter(player => 
-      player.id !== currentPlayerId &&
-      player.x >= 0 && player.x <= window.innerWidth &&
-      player.y >= 0 && player.y <= window.innerHeight
-    )
+    // Show ALL players including current player (don't filter out current player)
+    // and ensure players are within reasonable bounds
+    const filtered = players.filter(player => {
+      const hasValidData = player.x !== undefined && player.y !== undefined && player.username
+      const isInBounds = player.x >= -100 && player.x <= window.innerWidth + 100 &&
+                        player.y >= -100 && player.y <= window.innerHeight + 100
+      return hasValidData && isInBounds
+    })
+    
+    console.log('👥 Filtered players for overlay:', filtered.length, 'of', players.length)
+    console.log('👥 Current player ID:', currentPlayerId)
+    console.log('👥 All players with data:', players)
+    console.log('👥 Filtered visible players:', filtered)
     
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
   const getSpriteUrl = (spriteName: string) => {
-    // Map sprite names to actual files
+    // Map sprite names to actual custom multiplayer sprite files
     const spriteMap: { [key: string]: string } = {
-      sprite1: '/assets/sprites/sprite1.svg',
-      sprite2: '/assets/sprites/sprite2.svg',
-      sprite3: '/assets/sprites/sprite3.svg',
-      sprite4: '/assets/sprites/sprite4.svg',
-      sprite5: '/assets/sprites/sprite5.svg',
-      sprite6: '/assets/sprites/sprite6.svg'
+      blue: '/assets/sprites/Multiplayer-sprites/blue.png',
+      default: '/assets/sprites/Multiplayer-sprites/default.png',
+      grey: '/assets/sprites/Multiplayer-sprites/grey.png',
+      lime: '/assets/sprites/Multiplayer-sprites/lime.png',
+      ping: '/assets/sprites/Multiplayer-sprites/ping.png',
+      red: '/assets/sprites/Multiplayer-sprites/red.png'
     }
     
-    return spriteMap[spriteName] || '/assets/sprites/sprite1.svg'
+    return spriteMap[spriteName] || '/assets/sprites/Multiplayer-sprites/default.png'
   }
 
   return (
@@ -91,14 +98,15 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       ))}
       
       {/* Player count indicator */}
-      {visiblePlayers.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg text-xs font-pixel">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span>{visiblePlayers.length + 1} players online</span>
-          </div>
+      <div className="fixed bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg text-xs font-pixel">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full animate-pulse ${visiblePlayers.length > 0 ? 'bg-green-400' : 'bg-red-400'}`} />
+          <span>{visiblePlayers.length} players visible</span>
         </div>
-      )}
+        <div className="text-xs mt-1 opacity-75">
+          Total: {players.length} | Current: {currentPlayerId ? 'Yes' : 'No'}
+        </div>
+      </div>
     </div>
   )
 }
