@@ -10,6 +10,52 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   const containerRef = useRef<HTMLDivElement>(null)
   const { gameState, updatePlayerPosition, throwCoins } = useGame()
 
+  const handleSceneSwitching = (walletConnected: boolean) => {
+    if (!gameRef.current || !gameRef.current.scene) return
+    
+    const sceneManager = gameRef.current.scene
+    
+    console.log('🔍 DEBUG: Wallet connection changed:', walletConnected)
+    console.log('🔍 DEBUG: Available scenes:', sceneManager.scenes.map(s => s.scene.key))
+    console.log('🔍 DEBUG: Active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
+    
+    if (walletConnected) {
+      // Switch to TestScene when wallet connects
+      const landingScene = sceneManager.getScene('LandingScene')
+      const testScene = sceneManager.getScene('TestScene')
+      
+      console.log('🔍 DEBUG: LandingScene active?', landingScene?.scene.isActive())
+      console.log('🔍 DEBUG: TestScene active?', testScene?.scene.isActive())
+      
+      if (landingScene?.scene.isActive()) {
+        console.log('🔍 DEBUG: Stopping LandingScene')
+        sceneManager.stop('LandingScene')
+      }
+      if (!testScene?.scene.isActive()) {
+        console.log('🔍 DEBUG: Starting TestScene')
+        sceneManager.start('TestScene')
+      }
+      console.log('🎮 Switched to TestScene (with portals and gambling)')
+    } else {
+      // Switch to LandingScene when wallet disconnects  
+      const landingScene = sceneManager.getScene('LandingScene')
+      const testScene = sceneManager.getScene('TestScene')
+      
+      if (testScene?.scene.isActive()) {
+        console.log('🔍 DEBUG: Stopping TestScene')
+        sceneManager.stop('TestScene')
+      }
+      if (!landingScene?.scene.isActive()) {
+        console.log('🔍 DEBUG: Starting LandingScene')
+        sceneManager.start('LandingScene')
+      }
+      console.log('🎮 Switched to LandingScene (landing page)')
+    }
+    
+    // Final state check
+    console.log('🔍 DEBUG: Final active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
+  }
+
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return
 
@@ -74,6 +120,15 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         console.log('🔍 DEBUG: Starting with LandingScene (no wallet)')
         sceneManager.start('LandingScene')
       }
+      
+      // Trigger scene switching check after game is ready
+      setTimeout(() => {
+        console.log('🔍 DEBUG: Game ready, checking wallet state again:', isWalletConnected)
+        // Force run the wallet useEffect after game initialization
+        if (gameRef.current && gameRef.current.scene) {
+          handleSceneSwitching(isWalletConnected)
+        }
+      }, 100)
     }
 
     initializeGame()
@@ -90,47 +145,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   useEffect(() => {
     console.log('🔍 DEBUG: Wallet connection useEffect triggered, wallet:', isWalletConnected, 'gameRef exists:', !!gameRef.current)
     if (gameRef.current && gameRef.current.scene) {
-      const sceneManager = gameRef.current.scene
-      
-      console.log('🔍 DEBUG: Wallet connection changed:', isWalletConnected)
-      console.log('🔍 DEBUG: Available scenes:', sceneManager.scenes.map(s => s.scene.key))
-      console.log('🔍 DEBUG: Active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
-      
-      if (isWalletConnected) {
-        // Switch to TestScene when wallet connects
-        const landingScene = sceneManager.getScene('LandingScene')
-        const testScene = sceneManager.getScene('TestScene')
-        
-        console.log('🔍 DEBUG: LandingScene active?', landingScene?.scene.isActive())
-        console.log('🔍 DEBUG: TestScene active?', testScene?.scene.isActive())
-        
-        if (landingScene?.scene.isActive()) {
-          console.log('🔍 DEBUG: Stopping LandingScene')
-          sceneManager.stop('LandingScene')
-        }
-        if (!testScene?.scene.isActive()) {
-          console.log('🔍 DEBUG: Starting TestScene')
-          sceneManager.start('TestScene')
-        }
-        console.log('🎮 Switched to TestScene (with portals and gambling)')
-      } else {
-        // Switch to LandingScene when wallet disconnects  
-        const landingScene = sceneManager.getScene('LandingScene')
-        const testScene = sceneManager.getScene('TestScene')
-        
-        if (testScene?.scene.isActive()) {
-          console.log('🔍 DEBUG: Stopping TestScene')
-          sceneManager.stop('TestScene')
-        }
-        if (!landingScene?.scene.isActive()) {
-          console.log('🔍 DEBUG: Starting LandingScene')
-          sceneManager.start('LandingScene')
-        }
-        console.log('🎮 Switched to LandingScene (landing page)')
-      }
-      
-      // Final state check
-      console.log('🔍 DEBUG: Final active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
+      handleSceneSwitching(isWalletConnected)
     }
   }, [isWalletConnected])
 
