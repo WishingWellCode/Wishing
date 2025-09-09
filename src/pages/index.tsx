@@ -5,25 +5,12 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
-const CoordinateDebugger = dynamic(() => import('@/components/CoordinateDebugger'), { ssr: false })
-const MultiplayerManager = dynamic(() => import('@/components/MultiplayerManager'), { ssr: false })
-const MultiplayerOverlay = dynamic(() => import('@/components/MultiplayerOverlay'), { ssr: false })
-
-interface Player {
-  id: string
-  walletAddress: string
-  username: string
-  x: number
-  y: number
-  sprite: string
-}
+const MultiplayerSystem = dynamic(() => import('@/components/MultiplayerSystem'), { ssr: false })
 
 export default function Home() {
   const { publicKey, connected } = useWallet()
   const [isGameReady, setIsGameReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [multiplayerPlayers, setMultiplayerPlayers] = useState<Player[]>([])
-  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null)
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -60,8 +47,7 @@ export default function Home() {
           backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
+          backgroundRepeat: 'no-repeat'
         }}
       >
         {/* Wallet button only */}
@@ -74,39 +60,38 @@ export default function Home() {
           </WalletMultiButton>
         </div>
 
-        <div className="relative z-10">
-          <GameCanvas isWalletConnected={connected} />
-        </div>
-
-        {/* Multiplayer Manager - handles WebSocket connection */}
-        <MultiplayerManager
-          isActive={true} // Always active on landing page
-          onPlayersUpdate={(players) => {
-            setMultiplayerPlayers(players)
-            // Extract current player ID from window
-            const multiplayerManager = (window as any).multiplayerManager
-            if (multiplayerManager) {
-              setCurrentPlayerId(multiplayerManager.playerId)
-            }
-          }}
-        />
-
-        {/* Multiplayer Overlay - shows other players */}
-        <MultiplayerOverlay 
-          players={multiplayerPlayers}
-          currentPlayerId={currentPlayerId}
-        />
-
-        {connected && (
-          <div className="absolute bottom-4 left-4 bg-black/70 p-4 rounded-lg text-white font-pixel text-xs z-50">
-            <p>WASD/Arrow Keys - Move</p>
-            <p>E - Interact</p>
-            <p className="text-cyan-400 mt-1">🎮 Multiplayer Active</p>
+        {/* Landing page content before wallet connection */}
+        {!connected && (
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <h1 className="text-6xl font-pixel text-white mb-8 drop-shadow-lg">
+                $WISH Wishing Well
+              </h1>
+              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto font-pixel">
+                Connect your Phantom wallet to enter the magical realm and play with other users!
+              </p>
+              <div className="text-white/70 font-pixel text-sm">
+                <p>🎮 Multiplayer Gaming</p>
+                <p>💰 Crypto Rewards</p>
+                <p>✨ Magical Experience</p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Coordinate Debugger */}
-        <CoordinateDebugger />
+        {/* Game content when wallet connected */}
+        {connected && (
+          <>
+            <div className="relative z-10">
+              <GameCanvas isWalletConnected={connected} />
+            </div>
+
+            {/* New Multiplayer System - only when wallet connected */}
+            <MultiplayerSystem isActive={connected} />
+          </>
+        )}
+
+
       </div>
     </>
   )

@@ -53,6 +53,8 @@ import {
   Keypair
 } from '@solana/web3.js'
 
+import { LobbyDO } from './LobbyDO.js'
+
 import { 
   createBurnInstruction,
   createTransferInstruction,
@@ -282,6 +284,16 @@ export default {
       return new Response('Asset not found', { status: 404 })
     }
     
+    // Handle WebSocket upgrade for multiplayer FIRST
+    if (request.headers.get('Upgrade') === 'websocket') {
+      try {
+        return handleWebSocketUpgrade(request, env)
+      } catch (error) {
+        console.error('WebSocket upgrade error:', error)
+        return new Response('WebSocket upgrade failed', { status: 503 })
+      }
+    }
+    
     // Serve HTML for root path
     if (url.pathname === '/' || url.pathname === '/index.html') {
       return new Response(HTML_CONTENT, {
@@ -290,11 +302,6 @@ export default {
           'Access-Control-Allow-Origin': '*'
         }
       })
-    }
-    
-    // Handle WebSocket upgrade for multiplayer
-    if (request.headers.get('Upgrade') === 'websocket') {
-      return handleWebSocketUpgrade(request, env)
     }
     
     // Handle API routes
@@ -369,7 +376,8 @@ async function handleWebSocketUpgrade(request, env) {
   const pair = new WebSocketPair()
   const [client, server] = Object.values(pair)
   
-  await handleWebSocketSession(server, env)
+  // Don't await the session handler - let it run async
+  handleWebSocketSession(server, env)
   
   return new Response(null, {
     status: 101,
@@ -408,8 +416,8 @@ async function handleWebSocketSession(websocket, env) {
             walletAddress.substring(0, 3) + walletAddress.slice(-2) : 
             walletAddress
           
-          // Random sprite selection
-          const sprites = ['sprite1', 'sprite2', 'sprite3', 'sprite4', 'sprite5', 'sprite6']
+          // Random sprite selection from your custom sprites
+          const sprites = ['blue', 'default', 'grey', 'lime', 'ping', 'red']
           const randomSprite = sprites[Math.floor(Math.random() * sprites.length)]
           
           playerData = {
@@ -519,7 +527,7 @@ function broadcast(message) {
   
   for (const [playerId, session] of webSocketSessions) {
     try {
-      if (session.websocket.readyState === WebSocket.READY_STATE_OPEN) {
+      if (session.websocket.readyState === 1) { // 1 = OPEN
         session.websocket.send(messageStr)
         sent++
       } else {
@@ -547,7 +555,7 @@ function broadcastToOthers(excludePlayerId, message) {
     if (playerId === excludePlayerId) continue
     
     try {
-      if (session.websocket.readyState === WebSocket.READY_STATE_OPEN) {
+      if (session.websocket.readyState === 1) { // 1 = OPEN
         session.websocket.send(messageStr)
         sent++
       } else {
@@ -1754,7 +1762,10 @@ async function handleGetMultiplayerPlayers(request, env) {
   }
 }
 
-// Simplified Durable Object (not used for multiplayer anymore, but keeping for other features)
+// Export LobbyDO for Durable Object
+export { LobbyDO }
+
+// Keep GameState for compatibility (used by other parts)
 export class GameState {
   constructor(state, env) {
     this.state = state

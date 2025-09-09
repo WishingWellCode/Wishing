@@ -3,6 +3,8 @@ main = "worker/index.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Worker configuration only
+
 [vars]
 SOLANA_RPC_URL = "https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki"
 WISH_TOKEN_MINT = "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump"
@@ -32,6 +34,10 @@ id = "afb73024aeed42638a844fa90c68c5ca"
 name = "GAME_STATE"
 class_name = "GameState"
 
+[[durable_objects.bindings]]
+name = "LOBBY_DO"
+class_name = "LobbyDO"
+
 [[r2_buckets]]
 bucket_name = "wish-well-assets"
 binding = "ASSETS_BUCKET"
@@ -39,3 +45,7 @@ binding = "ASSETS_BUCKET"
 [[migrations]]
 tag = "v1"
 new_classes = ["GameState"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["LobbyDO"]
