@@ -18,6 +18,18 @@ export class LobbyDO {
     this.startCleanupTimer()
   }
 
+  // Create deterministic sprite assignment based on wallet address
+  getWalletSpriteId(walletAddress, spriteCount) {
+    // Simple hash function for deterministic sprite selection
+    let hash = 0
+    for (let i = 0; i < walletAddress.length; i++) {
+      const char = walletAddress.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    return Math.abs(hash) % spriteCount
+  }
+
   async fetch(request) {
     const webSocketPair = new WebSocketPair()
     const [client, server] = Object.values(webSocketPair)
@@ -126,9 +138,9 @@ export class LobbyDO {
       walletAddress.substring(0, 3) + walletAddress.slice(-2) : 
       walletAddress.substring(0, 5)
 
-    // Assign random sprite (0-5 mapping to your sprite files)
+    // Assign persistent sprite based on wallet address hash
     const spriteNames = ['blue', 'default', 'grey', 'lime', 'ping', 'red']
-    const spriteId = Math.floor(Math.random() * spriteNames.length)
+    const spriteId = this.getWalletSpriteId(walletAddress, spriteNames.length)
     const spriteName = spriteNames[spriteId]
 
     // Create player state
