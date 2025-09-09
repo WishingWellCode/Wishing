@@ -7,11 +7,15 @@ export class LobbyDO {
     this.lastTickTime = Date.now()
     this.tickInterval = null
     this.broadcastInterval = null
+    this.cleanupInterval = null
     
     console.log('🎮 LobbyDO constructor called - instance created')
     
     // Disable game loop for now - just handle simple position updates
     // this.startGameLoop()
+    
+    // Start cleanup timer to handle ghost players
+    this.startCleanupTimer()
   }
 
   async fetch(request) {
@@ -97,12 +101,30 @@ export class LobbyDO {
     const { walletAddress } = message
     
     console.log(`🎮 handleJoin called for ${playerId}, current players: ${this.players.size}`)
-    console.log(`🎮 Existing players:`, Array.from(this.players.keys()))
+    console.log(`🎮 Join attempt from wallet: ${walletAddress}`)
+    
+    // Basic validation for wallet address
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      console.log(`🎮 ❌ Invalid wallet address format: ${walletAddress}`)
+      return
+    }
+    
+    // Check if wallet address looks like a Solana address (base58, 32-44 chars)
+    if (walletAddress.length < 32 || walletAddress.length > 44) {
+      console.log(`🎮 ❌ Suspicious wallet address length: ${walletAddress} (${walletAddress.length} chars)`)
+      return
+    }
+    
+    // Check for suspicious patterns in the wallet address
+    if (!/^[1-9A-HJ-NP-Za-km-z]+$/.test(walletAddress)) {
+      console.log(`🎮 ❌ Invalid base58 characters in wallet: ${walletAddress}`)
+      return
+    }
     
     // Generate username from wallet (first 3 + last 2 chars)
     const username = walletAddress.length >= 5 ? 
       walletAddress.substring(0, 3) + walletAddress.slice(-2) : 
-      walletAddress
+      walletAddress.substring(0, 5)
 
     // Assign random sprite (0-5 mapping to your sprite files)
     const spriteNames = ['blue', 'default', 'grey', 'lime', 'ping', 'red']
@@ -126,9 +148,19 @@ export class LobbyDO {
       inputQueue: []
     }
 
-    this.players.set(playerId, player)
+    // Check for duplicate wallet addresses BEFORE adding new player
+    for (const [existingId, existingPlayer] of this.players) {
+      if (existingPlayer.walletAddress === walletAddress) {
+        console.log(`🎮 ❌ Wallet ${walletAddress} already connected as ${existingPlayer.username}, disconnecting old session`)
+        // Disconnect the old connection and allow the new one
+        this.handleDisconnect(existingId)
+        break
+      }
+    }
 
-    console.log(`🎮 Player ${username} joined with sprite ${spriteName}`)
+    this.players.set(playerId, player)
+    
+    console.log(`🎮 ✅ Player ${username} joined with sprite ${spriteName}`)
 
     // Convert player data to match client expectations
     const clientPlayer = {
@@ -266,15 +298,12 @@ export class LobbyDO {
   }
 
   cleanupDisconnectedPlayers() {
-    // Disabled for now - only disconnect when WebSocket actually closes
-    return
-    
     const now = Date.now()
-    const timeout = 1000 // 1 second timeout
+    const timeout = 60000 // 60 second timeout (longer to avoid false positives)
 
     for (const [playerId, player] of this.players) {
       if (now - player.lastSeen > timeout) {
-        console.log(`🎮 Cleaning up disconnected player ${player.username}`)
+        console.log(`🎮 Cleaning up inactive player ${player.username} (${playerId.slice(0,8)})`)
         this.handleDisconnect(playerId)
       }
     }
@@ -302,6 +331,13 @@ export class LobbyDO {
     }
   }
 
+  startCleanupTimer() {
+    // Run cleanup every 30 seconds to remove inactive players
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupDisconnectedPlayers()
+    }, 30000) // 30 seconds
+  }
+
   stopGameLoop() {
     if (this.tickInterval) {
       clearInterval(this.tickInterval)
@@ -310,6 +346,10 @@ export class LobbyDO {
     if (this.broadcastInterval) {
       clearInterval(this.broadcastInterval)
       this.broadcastInterval = null
+    }
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval)
+      this.cleanupInterval = null
     }
   }
 

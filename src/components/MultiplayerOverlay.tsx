@@ -51,7 +51,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     <div 
       className="fixed inset-0 pointer-events-none" 
       style={{ 
-        zIndex: 2147483647, // Maximum z-index value
+        zIndex: 100, // Below portal popups (3000+) but above game elements
         position: 'fixed', // Force new stacking context
         top: 0,
         left: 0,
@@ -70,7 +70,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             top: `${player.y}px`,
             transform: 'translate(-50%, -50%)',
             transition: 'left 0.033s linear, top 0.033s linear',
-            zIndex: 2147483647,
+            zIndex: 100,
             pointerEvents: 'none' // Ensure sprite doesn't block portal interactions
           }}
         >
@@ -141,7 +141,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
           position: 'fixed',
           bottom: '16px',
           right: '16px',
-          zIndex: 2147483647
+          zIndex: 100
         }}
       >
         <div 
