@@ -175,25 +175,14 @@ export default function InfoPage() {
         }
         .fallback-container {
           min-height: 100vh;
-          background-image: url('/assets/backgrounds/sixseven.png');
-          background-size: cover;
-          background-position: center;
-          background-attachment: fixed;
           position: relative;
         }
-        .fallback-container::before {
+        .info-bg::before {
           content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: 
-            linear-gradient(45deg, rgba(0,255,255,0.1) 0%, transparent 50%, rgba(255,0,255,0.1) 100%),
-            radial-gradient(circle at 20% 50%, rgba(0,255,0,0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(138,43,226,0.2) 0%, transparent 50%),
-            linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%);
-          z-index: 1;
+          position: fixed;
+          inset: 0;
+          background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
+          z-index: -1;
         }
         .fallback-header {
           background: rgba(0,0,0,0.2);
@@ -266,13 +255,20 @@ export default function InfoPage() {
           }
         }
         .fallback-card {
-          background: rgba(255,255,255,0.1);
+          background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border-radius: 16px;
-          border: 2px solid rgba(139, 92, 246, 0.3);
+          border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
           text-align: center;
           transition: all 0.3s;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+          color: #fff;
+        }
+        .fallback-card h2, .fallback-card h3, .fallback-card p, .fallback-card a,
+        .fallback-card div {
+          color: #fff !important;
         }
         .fallback-card:hover {
           transform: scale(1.05);
@@ -294,22 +290,34 @@ export default function InfoPage() {
           line-height: 1.6;
         }
         .fallback-verification-section {
-          background: rgba(255,255,255,0.1);
+          background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border-radius: 16px;
-          border: 2px solid rgba(139, 92, 246, 0.3);
+          border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
           margin-bottom: 48px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+          color: #fff;
         }
         
-        /* Housing Cards */
+        /* Section Styling */
+        .info-section {
+          position: relative;
+          z-index: 0;
+        }
+        .info-section .content {
+          position: relative;
+          z-index: 2;
+        }
         .housing-section {
           position: relative;
           z-index: 2;
         }
         .housing-card {
-          background: rgba(0,0,0,0.7);
-          backdrop-filter: blur(10px);
+          background: rgba(15, 15, 25, 0.72);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border-radius: 16px;
           border: 2px solid transparent;
           background-clip: padding-box;
@@ -318,6 +326,7 @@ export default function InfoPage() {
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
+          color: #fff;
         }
         .housing-card::before {
           content: '';
@@ -352,15 +361,24 @@ export default function InfoPage() {
           position: relative;
           z-index: 2;
         }
-        .trust-card {
-          background: rgba(0,0,0,0.8);
-          backdrop-filter: blur(15px);
+        .trust-card, .info-card {
+          background: rgba(15, 15, 25, 0.72);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border-radius: 12px;
-          border: 1px solid rgba(0,255,255,0.3);
+          border: 1px solid rgba(255,255,255,0.10);
           padding: 20px;
           text-align: center;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+          color: #fff;
+        }
+        .info-card h2, .info-card h3, .info-card p, .info-card a, 
+        .trust-card h2, .trust-card h3, .trust-card p, .trust-card a {
+          color: #fff !important;
+        }
+        .info-card a, .trust-card a {
+          text-decoration: underline;
         }
         .trust-card:hover {
           transform: translateY(-5px);
@@ -386,14 +404,14 @@ export default function InfoPage() {
         }
         
         .glass-table-container {
-          background: rgba(0,0,0,0.85);
-          backdrop-filter: blur(20px);
+          background: rgba(15, 15, 25, 0.72);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border-radius: 20px;
-          border: 2px solid rgba(0,255,255,0.3);
+          border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
-          box-shadow: 
-            0 0 50px rgba(0,255,255,0.2),
-            inset 0 0 50px rgba(255,0,255,0.1);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+          color: #fff;
         }
         
         .neon-button {
@@ -443,7 +461,7 @@ export default function InfoPage() {
         }
       `}</style>
 
-      <div className="min-h-screen fallback-container">
+      <div className="info-bg min-h-screen fallback-container">
         <div className="relative z-10 min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20 fallback-header">

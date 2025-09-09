@@ -34,7 +34,6 @@ const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel, 
       height: window.innerHeight,
       pixelArt: true,
       transparent: true,
-      backgroundColor: 0x000000,
       physics: {
         default: 'arcade',
         arcade: {
@@ -128,9 +127,9 @@ const HouseCanvas = forwardRef<HouseCanvasRef, HouseCanvasProps>(({ houseLevel, 
   return (
     <div 
       ref={containerRef} 
-      className="w-full h-full absolute inset-0"
+      className="phaser-game-container w-full h-full absolute inset-0"
       style={{ 
-        background: 'transparent',
+        background: 'transparent !important',
         position: 'absolute',
         zIndex: 1
       }}

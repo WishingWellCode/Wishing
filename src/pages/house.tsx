@@ -162,15 +162,26 @@ export default function House() {
           <meta name="description" content="Visit your house in the Housing District!" />
         </Head>
         
-        <div style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
+        <div className="bg-page" style={{
+          position: 'relative',
+          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
+          <style jsx>{`
+            .bg-page::before {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: url("/assets/backgrounds/sixseven.png") center/cover no-repeat fixed;
+              z-index: -1;
+              opacity: 1;
+              pointer-events: none;
+              will-change: transform;
+              transform: translateZ(0);
+            }
+          `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg">
             <h1 className="text-4xl font-pixel text-purple-400 mb-4">Your House</h1>
             <p className="text-white mb-6 font-pixel">Connect your wallet to visit your house</p>
@@ -188,15 +199,26 @@ export default function House() {
           <title>No House Owned - $WISH Wishing Well</title>
         </Head>
         
-        <div style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
+        <div className="bg-page" style={{
+          position: 'relative',
+          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
+          <style jsx>{`
+            .bg-page::before {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: url("/assets/backgrounds/sixseven.png") center/cover no-repeat fixed;
+              z-index: -1;
+              opacity: 1;
+              pointer-events: none;
+              will-change: transform;
+              transform: translateZ(0);
+            }
+          `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg max-w-md">
             <h1 className="text-3xl font-pixel text-red-400 mb-4">No House Owned</h1>
             <p className="text-white mb-6 font-pixel text-sm leading-relaxed">
@@ -229,15 +251,26 @@ export default function House() {
           <title>House Not Owned - $WISH Wishing Well</title>
         </Head>
         
-        <div style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
+        <div className="bg-page" style={{
+          position: 'relative',
+          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
+          <style jsx>{`
+            .bg-page::before {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: url("/assets/backgrounds/sixseven.png") center/cover no-repeat fixed;
+              z-index: -1;
+              opacity: 1;
+              pointer-events: none;
+              will-change: transform;
+              transform: translateZ(0);
+            }
+          `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg max-w-md">
             <h1 className="text-3xl font-pixel text-red-400 mb-4">House Not Owned</h1>
             <p className="text-white mb-6 font-pixel text-sm leading-relaxed">
@@ -276,7 +309,23 @@ export default function House() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="relative w-full h-screen overflow-hidden">
+      <div className="bg-page relative w-full h-screen overflow-hidden">
+        <style jsx>{`
+          .bg-page::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("/assets/backgrounds/sixseven.png") center/cover no-repeat fixed;
+            z-index: -1;
+            opacity: 1;
+            pointer-events: none;
+            will-change: transform;
+            transform: translateZ(0);
+          }
+          .phaser-game-container, canvas {
+            background: transparent !important;
+          }
+        `}</style>
         {/* HouseCanvas for tier background and character movement */}
         <HouseCanvas 
           ref={houseCanvasRef} 
