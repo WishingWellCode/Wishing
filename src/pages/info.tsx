@@ -643,8 +643,11 @@ export default function InfoPage() {
               </div>
             </div>
             
-            {/* Results Table */}
-            <div className="glass-table-container">
+          </div>
+          
+          {/* Results Table Section - Full Width */}
+          <div className="mb-16">
+            <div className="glass-table-container max-w-7xl mx-auto">
               <div className="flex justify-center items-center gap-3 mb-6">
                 <h3 className="text-2xl font-bold text-cyan-400" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>RECENT RESULTS</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

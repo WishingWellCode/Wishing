@@ -181,6 +181,14 @@ export default function House() {
               will-change: transform;
               transform: translateZ(0);
             }
+            .bg-page::after {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.7);
+              z-index: -1;
+              pointer-events: none;
+            }
           `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg">
             <h1 className="text-4xl font-pixel text-purple-400 mb-4">Your House</h1>
@@ -217,6 +225,14 @@ export default function House() {
               pointer-events: none;
               will-change: transform;
               transform: translateZ(0);
+            }
+            .bg-page::after {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.7);
+              z-index: -1;
+              pointer-events: none;
             }
           `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg max-w-md">
@@ -269,6 +285,14 @@ export default function House() {
               pointer-events: none;
               will-change: transform;
               transform: translateZ(0);
+            }
+            .bg-page::after {
+              content: "";
+              position: fixed;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.7);
+              z-index: -1;
+              pointer-events: none;
             }
           `}</style>
           <div className="text-center bg-black/80 p-8 rounded-lg max-w-md">

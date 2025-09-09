@@ -366,6 +366,14 @@ export default function Upgrades() {
           background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
           z-index: -1;
         }
+        .upgrades-bg::after {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.7);
+          z-index: -1;
+          pointer-events: none;
+        }
         .fallback-header {
           position: sticky;
           top: 0;
