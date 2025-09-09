@@ -330,6 +330,10 @@ export default {
       return handleLeaderboard(request, env) // Same as leaderboard for now
     }
     
+    if (url.pathname === '/api/stats/latest') {
+      return handleStatsLatest(request, env)
+    }
+    
     // Housing API routes
     if (url.pathname === '/api/housing/purchase') {
       return handleHousePurchase(request, env)
@@ -764,6 +768,75 @@ async function handleLeaderboard(request, env) {
       'Access-Control-Allow-Origin': '*'
     }
   })
+}
+
+async function handleStatsLatest(request, env) {
+  const url = new URL(request.url)
+  const limit = parseInt(url.searchParams.get('limit') || '20')
+  
+  try {
+    // Get recent gambling results for info page verification
+    const logs = []
+    const list = await env.GAMBLE_LOGS.list({
+      prefix: 'gamble:',
+      limit: 1000  // Get more entries to ensure we have enough recent ones
+    })
+    
+    // Sort keys by timestamp (most recent first) and take requested limit
+    const sortedKeys = list.keys.sort((a, b) => {
+      const timestampA = parseInt(a.name.split(':')[2] || '0')
+      const timestampB = parseInt(b.name.split(':')[2] || '0')
+      return timestampB - timestampA  // Descending order (newest first)
+    }).slice(0, Math.min(limit * 5, 500)) // Take more to ensure we get enough valid entries
+    
+    // Process entries to get gambling statistics
+    const promises = sortedKeys.map(async (key) => {
+      try {
+        const logData = await env.GAMBLE_LOGS.get(key.name)
+        if (logData) {
+          const event = JSON.parse(logData)
+          if (event.walletAddress && event.timestamp) {
+            return {
+              winner: event.walletAddress,
+              amount: event.payout ? event.payout.toString() : '0',
+              tx: event.payoutTx || event.burnTx || '',
+              ts: new Date(event.timestamp).toISOString(),
+              tier: event.result?.tier || 'UNKNOWN'
+            }
+          }
+        }
+      } catch (parseError) {
+        console.warn('Failed to parse log entry:', key.name, parseError)
+      }
+      return null
+    })
+    
+    const results = await Promise.all(promises)
+    results.forEach(result => {
+      if (result) logs.push(result)
+    })
+    
+    // Return the requested number of recent entries
+    const stats = logs.slice(0, limit)
+    
+    console.log(`📊 Stats Latest: Returning ${stats.length} entries`)
+    
+    return new Response(JSON.stringify(stats), {
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching latest stats:', error)
+    return new Response(JSON.stringify([]), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
 }
 
 async function handleClearSession(request, env) {
