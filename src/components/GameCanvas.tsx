@@ -20,18 +20,20 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     if (!containerRef.current || gameRef.current) return
 
     const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.CANVAS,
+      type: Phaser.AUTO, // Let Phaser choose the best renderer
       parent: containerRef.current,
       width: window.innerWidth,
       height: window.innerHeight,
       pixelArt: true,
       transparent: true,
       backgroundColor: 0x000000,
+      antialias: false, // Disable antialiasing for better performance
+      roundPixels: true, // Prevent pixel rounding issues
       physics: {
         default: 'arcade',
         arcade: {
           gravity: { x: 0, y: 0 },
-          debug: true
+          debug: false // Disable debug for better performance
         }
       },
       scene: [LandingScene, TestScene],
@@ -40,6 +42,16 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: '100%',
         height: '100%'
+      },
+      render: {
+        powerPreference: 'high-performance',
+        antialias: false,
+        mipmapFilter: 'LINEAR',
+        roundPixels: true
+      },
+      fps: {
+        target: 60,
+        forceSetTimeOut: true
       }
     }
 

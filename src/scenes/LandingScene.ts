@@ -70,39 +70,44 @@ export class LandingScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (!this.player) return
     
-    const speed = 200
+    const speed = 300
     const deltaSeconds = delta / 1000
     
-    // Handle movement
-    let moving = false
+    // Handle movement with better performance
+    let velocityX = 0
+    let velocityY = 0
     
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
-      this.player.x -= speed * deltaSeconds
-      moving = true
+      velocityX = -speed
     }
     if (this.cursors.right.isDown || this.wasd.D.isDown) {
-      this.player.x += speed * deltaSeconds
-      moving = true
+      velocityX = speed
     }
     if (this.cursors.up.isDown || this.wasd.W.isDown) {
-      this.player.y -= speed * deltaSeconds
-      moving = true
+      velocityY = -speed
     }
     if (this.cursors.down.isDown || this.wasd.S.isDown) {
-      this.player.y += speed * deltaSeconds
-      moving = true
+      velocityY = speed
     }
     
-    // Keep player within bounds
-    this.player.x = Phaser.Math.Clamp(this.player.x, 50, this.cameras.main.width - 50)
-    this.player.y = Phaser.Math.Clamp(this.player.y, 50, this.cameras.main.height - 50)
+    // Apply movement
+    const moving = velocityX !== 0 || velocityY !== 0
+    if (moving) {
+      this.player.x += velocityX * deltaSeconds
+      this.player.y += velocityY * deltaSeconds
+      
+      // Keep player within bounds
+      this.player.x = Phaser.Math.Clamp(this.player.x, 32, this.cameras.main.width - 32)
+      this.player.y = Phaser.Math.Clamp(this.player.y, 32, this.cameras.main.height - 32)
+    }
     
-    // Update multiplayer position if moved
-    if (moving || time - this.positionUpdateTimer > 1000) { // Update every second even if not moving
+    // Throttle multiplayer position updates for performance
+    if (time - this.positionUpdateTimer > 100) { // Update every 100ms max
       const dx = Math.abs(this.player.x - this.lastPosition.x)
       const dy = Math.abs(this.player.y - this.lastPosition.y)
       
-      if (dx > 5 || dy > 5 || time - this.positionUpdateTimer > 1000) {
+      // Only update if moved significantly or been a while
+      if (dx > 10 || dy > 10 || time - this.positionUpdateTimer > 2000) {
         this.updateMultiplayerPosition(this.player.x, this.player.y)
         this.lastPosition.x = this.player.x
         this.lastPosition.y = this.player.y

@@ -377,20 +377,28 @@ async function handleWebSocketUpgrade(request, env) {
   })
 }
 
+// Simple global WebSocket connections storage
+const webSocketSessions = new Map()
+
 async function handleWebSocketSession(websocket, env) {
   websocket.accept()
   
   const playerId = crypto.randomUUID()
   let playerData = null
-  let gameState = null
   
-  // Get the game state Durable Object
-  const gameStateId = env.GAME_STATE.idFromName('main')
-  gameState = env.GAME_STATE.get(gameStateId)
+  console.log(`🎮 New WebSocket connection: ${playerId}`)
+  
+  // Store WebSocket session
+  webSocketSessions.set(playerId, {
+    websocket,
+    playerData: null,
+    lastSeen: Date.now()
+  })
   
   websocket.addEventListener('message', async (event) => {
     try {
       const message = JSON.parse(event.data)
+      console.log(`🎮 Received message from ${playerId}:`, message)
       
       switch (message.type) {
         case 'join':
@@ -400,32 +408,30 @@ async function handleWebSocketSession(websocket, env) {
             walletAddress.substring(0, 3) + walletAddress.slice(-2) : 
             walletAddress
           
+          // Random sprite selection
+          const sprites = ['sprite1', 'sprite2', 'sprite3', 'sprite4', 'sprite5', 'sprite6']
+          const randomSprite = sprites[Math.floor(Math.random() * sprites.length)]
+          
           playerData = {
             id: playerId,
             walletAddress: walletAddress,
             username: username,
-            x: Math.random() * 800 + 100, // Random starting position
-            y: Math.random() * 600 + 100,
-            sprite: null // Will be assigned by GameState
+            x: Math.random() * 700 + 100, // Random starting position
+            y: Math.random() * 500 + 100,
+            sprite: randomSprite
           }
           
-          // Add player to Durable Object
-          const addResponse = await gameState.fetch(new Request('http://game/addPlayer', {
-            method: 'POST',
-            body: JSON.stringify(playerData)
-          }))
-          
-          const addResult = await addResponse.json()
-          if (addResult.success) {
-            playerData = addResult.player
+          // Update session
+          const session = webSocketSessions.get(playerId)
+          if (session) {
+            session.playerData = playerData
+            session.lastSeen = Date.now()
           }
-          
-          // Add WebSocket reference to Durable Object
-          gameState.addWebSocket(playerId, websocket)
           
           // Get all current players
-          const playersResponse = await gameState.fetch(new Request('http://game/getPlayers'))
-          const allPlayers = await playersResponse.json()
+          const allPlayers = Array.from(webSocketSessions.values())
+            .filter(s => s.playerData)
+            .map(s => s.playerData)
           
           // Send confirmation with all current players
           websocket.send(JSON.stringify({
@@ -435,57 +441,127 @@ async function handleWebSocketSession(websocket, env) {
             allPlayers: allPlayers
           }))
           
-          console.log(`🎮 Player ${username} joined with sprite ${playerData.sprite}`)
+          // Broadcast to other players
+          broadcastToOthers(playerId, {
+            type: 'playerJoined',
+            player: playerData
+          })
+          
+          console.log(`🎮 Player ${username} joined with sprite ${randomSprite}`)
           break
           
         case 'move':
-          if (playerData && gameState) {
-            // Update position in Durable Object
-            await gameState.fetch(new Request('http://game/updatePosition', {
-              method: 'POST',
-              body: JSON.stringify({
-                playerId,
-                x: message.x,
-                y: message.y
-              })
-            }))
+          if (playerData) {
+            playerData.x = message.x
+            playerData.y = message.y
+            
+            // Update session
+            const session = webSocketSessions.get(playerId)
+            if (session) {
+              session.playerData = playerData
+              session.lastSeen = Date.now()
+            }
+            
+            // Broadcast position update to other players
+            broadcastToOthers(playerId, {
+              type: 'playerMoved',
+              playerId,
+              x: message.x,
+              y: message.y
+            })
           }
           break
           
         case 'gamble':
           // Broadcast gambling events to all players
-          if (gameState) {
-            gameState.broadcast({
-              type: 'fountainUpdate',
-              pool: await getFountainPool(env),
-              lastWinner: {
-                playerId,
-                username: playerData?.username,
-                result: message.result
-              }
-            })
-          }
+          broadcast({
+            type: 'fountainUpdate',
+            pool: await getFountainPool(env),
+            lastWinner: {
+              playerId,
+              username: playerData?.username,
+              result: message.result
+            }
+          })
           break
       }
     } catch (error) {
-      console.error('WebSocket error:', error)
+      console.error('WebSocket message error:', error)
     }
   })
   
   websocket.addEventListener('close', async () => {
-    if (playerData && gameState) {
-      // Remove WebSocket reference
-      gameState.removeWebSocket(playerId)
-      
-      // Remove player from Durable Object
-      await gameState.fetch(new Request('http://game/removePlayer', {
-        method: 'POST',
-        body: JSON.stringify({ playerId })
-      }))
-      
-      console.log(`🎮 Player ${playerData.username} left`)
+    console.log(`🎮 WebSocket closed: ${playerId}`)
+    
+    // Broadcast player left
+    if (playerData) {
+      broadcastToOthers(playerId, {
+        type: 'playerLeft',
+        playerId
+      })
     }
+    
+    // Remove from sessions
+    webSocketSessions.delete(playerId)
   })
+  
+  websocket.addEventListener('error', (error) => {
+    console.error(`🎮 WebSocket error for ${playerId}:`, error)
+    webSocketSessions.delete(playerId)
+  })
+}
+
+// Broadcast to all connected players
+function broadcast(message) {
+  const messageStr = JSON.stringify(message)
+  let sent = 0
+  let failed = 0
+  
+  for (const [playerId, session] of webSocketSessions) {
+    try {
+      if (session.websocket.readyState === WebSocket.READY_STATE_OPEN) {
+        session.websocket.send(messageStr)
+        sent++
+      } else {
+        failed++
+        // Remove dead connections
+        webSocketSessions.delete(playerId)
+      }
+    } catch (error) {
+      failed++
+      console.error(`Failed to send to ${playerId}:`, error)
+      webSocketSessions.delete(playerId)
+    }
+  }
+  
+  console.log(`📡 Broadcast sent to ${sent} players, ${failed} failed`)
+}
+
+// Broadcast to all players except sender
+function broadcastToOthers(excludePlayerId, message) {
+  const messageStr = JSON.stringify(message)
+  let sent = 0
+  let failed = 0
+  
+  for (const [playerId, session] of webSocketSessions) {
+    if (playerId === excludePlayerId) continue
+    
+    try {
+      if (session.websocket.readyState === WebSocket.READY_STATE_OPEN) {
+        session.websocket.send(messageStr)
+        sent++
+      } else {
+        failed++
+        webSocketSessions.delete(playerId)
+      }
+    } catch (error) {
+      failed++
+      console.error(`Failed to send to ${playerId}:`, error)
+      webSocketSessions.delete(playerId)
+    }
+  }
+  
+  console.log(`📡 Broadcast sent to ${sent} others, ${failed} failed`)
 }
 
 async function handleFountainStart(request, env) {
@@ -899,11 +975,7 @@ async function handleClearSession(request, env) {
   })
 }
 
-// Helper functions
-async function broadcast(env, message, excludePlayerId = null) {
-  // Implementation would send to all connected WebSocket clients
-  // except the one specified by excludePlayerId
-}
+// Helper functions - removed old broadcast function (now implemented above)
 
 async function getFountainPool(env) {
   const pool = await env.FOUNTAIN_POOL.get('total')
@@ -1645,16 +1717,18 @@ async function getUserHouseBoost(walletAddress, env) {
 
 async function handleGetMultiplayerPlayers(request, env) {
   try {
-    const gameStateId = env.GAME_STATE.idFromName('main')
-    const gameState = env.GAME_STATE.get(gameStateId)
+    // Get current players from WebSocket sessions
+    const players = Array.from(webSocketSessions.values())
+      .filter(session => session.playerData)
+      .map(session => session.playerData)
     
-    const playersResponse = await gameState.fetch(new Request('http://game/getPlayers'))
-    const players = await playersResponse.json()
+    console.log(`📊 Current multiplayer players: ${players.length}`)
     
     return new Response(JSON.stringify({
       success: true,
       players: players,
-      count: players.length
+      count: players.length,
+      timestamp: Date.now()
     }), {
       headers: {
         'Content-Type': 'application/json',
@@ -1680,99 +1754,14 @@ async function handleGetMultiplayerPlayers(request, env) {
   }
 }
 
-// Multiplayer Durable Object for game state management
+// Simplified Durable Object (not used for multiplayer anymore, but keeping for other features)
 export class GameState {
   constructor(state, env) {
     this.state = state
     this.env = env
-    this.players = new Map()
-    this.websockets = new Map() // Map playerId to WebSocket
-    this.sprites = ['sprite1', 'sprite2', 'sprite3', 'sprite4', 'sprite5', 'sprite6']
   }
 
   async fetch(request) {
-    const url = new URL(request.url)
-    
-    if (url.pathname === '/addPlayer') {
-      const player = await request.json()
-      // Assign random sprite
-      player.sprite = this.sprites[Math.floor(Math.random() * this.sprites.length)]
-      this.players.set(player.id, player)
-      
-      // Broadcast to all other players
-      this.broadcast({
-        type: 'playerJoined',
-        player: player
-      }, player.id)
-      
-      return new Response(JSON.stringify({ success: true, player }))
-    }
-    
-    if (url.pathname === '/removePlayer') {
-      const { playerId } = await request.json()
-      this.players.delete(playerId)
-      this.websockets.delete(playerId)
-      
-      // Broadcast to all players
-      this.broadcast({
-        type: 'playerLeft',
-        playerId: playerId
-      })
-      
-      return new Response('OK')
-    }
-    
-    if (url.pathname === '/getPlayers') {
-      return new Response(JSON.stringify(Array.from(this.players.values())))
-    }
-    
-    if (url.pathname === '/updatePosition') {
-      const { playerId, x, y } = await request.json()
-      const player = this.players.get(playerId)
-      if (player) {
-        player.x = x
-        player.y = y
-        
-        // Broadcast position update
-        this.broadcast({
-          type: 'playerMoved',
-          playerId,
-          x,
-          y
-        }, playerId)
-      }
-      return new Response('OK')
-    }
-    
-    if (url.pathname === '/addWebSocket') {
-      const { playerId } = await request.json()
-      // WebSocket will be handled separately
-      return new Response('OK')
-    }
-    
-    return new Response('Not found', { status: 404 })
-  }
-  
-  broadcast(message, excludePlayerId = null) {
-    const messageStr = JSON.stringify(message)
-    for (const [playerId, ws] of this.websockets) {
-      if (playerId !== excludePlayerId && ws.readyState === WebSocket.READY_STATE_OPEN) {
-        try {
-          ws.send(messageStr)
-        } catch (error) {
-          console.error('Error broadcasting to player:', playerId, error)
-          // Remove dead websocket
-          this.websockets.delete(playerId)
-        }
-      }
-    }
-  }
-  
-  addWebSocket(playerId, websocket) {
-    this.websockets.set(playerId, websocket)
-  }
-  
-  removeWebSocket(playerId) {
-    this.websockets.delete(playerId)
+    return new Response('GameState Durable Object - reserved for future features', { status: 200 })
   }
 }

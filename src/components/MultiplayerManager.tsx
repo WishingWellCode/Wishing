@@ -40,24 +40,30 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     if (!publicKey) return
 
     try {
-      // Use WSS for production and WS for local development
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const host = window.location.host
-      const wsUrl = `${protocol}//${host}`
+      // Connect to Cloudflare Worker WebSocket endpoint
+      // For production, use the worker URL, for local development use localhost
+      const isLocal = window.location.hostname === 'localhost'
+      const workerUrl = isLocal 
+        ? 'ws://localhost:8787' // Local wrangler dev server
+        : 'wss://wish-well-worker.stealthbundlebot.workers.dev' // Production worker
       
-      console.log('🎮 Connecting to multiplayer server:', wsUrl)
+      console.log('🎮 Connecting to multiplayer server:', workerUrl)
       
-      const ws = new WebSocket(wsUrl)
+      const ws = new WebSocket(workerUrl)
       
       ws.onopen = () => {
         console.log('🎮 Connected to multiplayer server')
         setIsConnected(true)
         
         // Join the game
-        ws.send(JSON.stringify({
-          type: 'join',
-          walletAddress: publicKey.toString()
-        }))
+        try {
+          ws.send(JSON.stringify({
+            type: 'join',
+            walletAddress: publicKey.toString()
+          }))
+        } catch (error) {
+          console.error('Error sending join message:', error)
+        }
       }
       
       ws.onmessage = (event) => {
@@ -153,22 +159,27 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const updatePosition = (x: number, y: number) => {
-    if (!wsRef.current || !playerIdRef.current) return
+    if (!wsRef.current || !playerIdRef.current || !isConnected) return
     
-    // Throttle position updates to avoid spam
+    // More aggressive throttling for better performance
     if (positionUpdateTimeout.current) {
       clearTimeout(positionUpdateTimeout.current)
     }
     
     positionUpdateTimeout.current = setTimeout(() => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: 'move',
-          x,
-          y
-        }))
+        try {
+          wsRef.current.send(JSON.stringify({
+            type: 'move',
+            x: Math.round(x), // Round positions to reduce precision spam
+            y: Math.round(y)
+          }))
+        } catch (error) {
+          console.error('Error sending position update:', error)
+          setIsConnected(false)
+        }
       }
-    }, 50) // Update every 50ms at most
+    }, 100) // Update every 100ms at most (reduced from 50ms)
   }
 
   const sendGamblingUpdate = (result: any) => {
