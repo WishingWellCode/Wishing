@@ -121,14 +121,25 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         sceneManager.start('LandingScene')
       }
       
-      // Trigger scene switching check after game is ready
+      // Trigger scene switching check after game is ready - check wallet state multiple ways
       setTimeout(() => {
-        console.log('🔍 DEBUG: Game ready, checking wallet state again:', isWalletConnected)
-        // Force run the wallet useEffect after game initialization
+        const wallet = (window as any).solana
+        const isActuallyConnected = wallet?.isConnected || false
+        const hasPublicKey = !!wallet?.publicKey
+        console.log('🔍 DEBUG: Game ready, checking wallet states:')
+        console.log('  - React prop isWalletConnected:', isWalletConnected)
+        console.log('  - window.solana.isConnected:', isActuallyConnected)
+        console.log('  - window.solana.publicKey exists:', hasPublicKey)
+        console.log('  - Multiplayer connection active:', !!(window as any).multiplayerManager)
+        
+        // Use the most reliable indicator - if multiplayer is connected, wallet is connected
+        const shouldUseTestScene = isActuallyConnected || hasPublicKey || !!(window as any).multiplayerManager
+        console.log('  - Final decision: Use TestScene?', shouldUseTestScene)
+        
         if (gameRef.current && gameRef.current.scene) {
-          handleSceneSwitching(isWalletConnected)
+          handleSceneSwitching(shouldUseTestScene)
         }
-      }, 100)
+      }, 1000) // Increase delay to 1000ms to ensure everything has time to initialize
     }
 
     initializeGame()
