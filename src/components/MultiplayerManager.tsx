@@ -21,7 +21,6 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const [isConnected, setIsConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
-  const positionUpdateTimeout = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(false)
 
   // Trigger connection check on mount
@@ -138,11 +137,6 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       wsRef.current = null
     }
     
-    if (positionUpdateTimeout.current) {
-      clearTimeout(positionUpdateTimeout.current)
-      positionUpdateTimeout.current = null
-    }
-    
     setIsConnected(false)
     setPlayers([])
     playerIdRef.current = null
@@ -214,40 +208,50 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
   }
 
+  const lastSentPosition = useRef({ x: 0, y: 0 })
+  const lastSendTime = useRef(0)
+
   const updatePosition = (x: number, y: number) => {
     if (!wsRef.current || !playerIdRef.current || !isConnected) return
+    
+    const roundedX = Math.round(x)
+    const roundedY = Math.round(y)
     
     // Update local player position in state immediately for smooth movement
     setPlayers(prev => {
       const updated = prev.map(p => 
         p.id === playerIdRef.current 
-          ? { ...p, x: Math.round(x), y: Math.round(y) }
+          ? { ...p, x: roundedX, y: roundedY }
           : p
       )
       onPlayersUpdate?.(updated)
       return updated
     })
     
-    // Send position updates immediately for smooth real-time movement
-    // Use a much shorter throttle (16ms = ~60fps) for fluid movement
-    if (positionUpdateTimeout.current) {
-      clearTimeout(positionUpdateTimeout.current)
-    }
+    // Send updates immediately if position changed and enough time has passed
+    const now = Date.now()
+    const timeSinceLastSend = now - lastSendTime.current
     
-    positionUpdateTimeout.current = setTimeout(() => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        try {
-          wsRef.current.send(JSON.stringify({
-            type: 'move',
-            x: Math.round(x), // Round positions to reduce precision spam
-            y: Math.round(y)
-          }))
-        } catch (error) {
-          console.error('Error sending position update:', error)
-          setIsConnected(false)
+    // Check if position actually changed
+    if (lastSentPosition.current.x !== roundedX || lastSentPosition.current.y !== roundedY) {
+      // Send immediately if 16ms have passed (60fps) or position changed significantly
+      if (timeSinceLastSend >= 16) {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          try {
+            wsRef.current.send(JSON.stringify({
+              type: 'move',
+              x: roundedX,
+              y: roundedY
+            }))
+            lastSentPosition.current = { x: roundedX, y: roundedY }
+            lastSendTime.current = now
+          } catch (error) {
+            console.error('Error sending position update:', error)
+            setIsConnected(false)
+          }
         }
       }
-    }, 16) // Update at ~60fps for smooth movement
+    }
   }
 
   const sendGamblingUpdate = (result: any) => {
