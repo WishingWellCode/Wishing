@@ -69,36 +69,29 @@ export default function Home() {
           </WalletMultiButton>
         </div>
 
-        {/* Centered welcome popup before wallet connection */}
+        {/* Centered welcome box before wallet connection */}
         {!connected && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-black/80 backdrop-blur-md border border-white/20 rounded-lg p-8 max-w-md mx-4 text-center">
-              <h1 className="text-3xl font-pixel text-white mb-4 drop-shadow-lg">
-                $WISH Wishing Well
-              </h1>
-              <p className="text-sm text-white/90 mb-6 font-pixel leading-relaxed">
-                Connect your Phantom wallet to enter the magical realm and play with other users!
-              </p>
-              
-              <div className="text-white/80 font-pixel text-xs space-y-3 mb-6 text-left">
+            <div className="bg-black/80 backdrop-blur-md border border-white/20 rounded-lg p-6 max-w-lg mx-4">
+              <div className="text-white/90 font-pixel text-sm leading-relaxed space-y-4">
+                <p>Connect your Phantom wallet to enter the magical realm and play with other users!</p>
+                
                 <div>
-                  <h3 className="text-white mb-2">🎮 How to Play:</h3>
+                  <p className="text-white mb-2">🎮 How to Play:</p>
                   <p>• Use WASD or arrow keys to move around</p>
                   <p>• Click the fountain to throw WISH tokens</p>
                   <p>• Win big or lose it all in the magical well!</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-white mb-2">🚪 Portals:</h3>
+                  <p className="text-white mb-2">🚪 Portals:</p>
                   <p>• Info - Learn about the game</p>
                   <p>• House - Purchase and manage your property</p>
                   <p>• Links - Join our community</p>
                   <p>• Upgrades - Enhance your house</p>
                 </div>
-              </div>
-              
-              <div className="text-white/60 font-pixel text-xs">
-                <p>🎮 Multiplayer Gaming • 💰 Crypto Rewards • ✨ Magical Experience</p>
+                
+                <p className="text-white/60 text-center">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
               </div>
             </div>
           </div>
