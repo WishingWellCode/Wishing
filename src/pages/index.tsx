@@ -51,12 +51,13 @@ export default function Home() {
       <div 
         className="min-h-screen w-full relative"
         style={{
-          backgroundImage: 'url(/assets/backgrounds/sixseven.png)',
+          backgroundImage: connected ? 'none' : 'url(/assets/backgrounds/sixseven.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           height: '100vh',
-          width: '100vw'
+          width: '100vw',
+          backgroundColor: connected ? 'transparent' : undefined
         }}
       >
         {/* Wallet button only */}
