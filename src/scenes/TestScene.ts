@@ -1051,6 +1051,9 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.setDepth(1)
     this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
     console.log('✅ Invisible player spawned for portal detection')
+    
+    // Update multiplayer position immediately so visible sprite appears
+    this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
   }
 
   async startGambling() {
@@ -1436,6 +1439,9 @@ export class TestScene extends Phaser.Scene {
     // Send position to multiplayer manager
     if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
       (window as any).multiplayerManager.updatePosition(x, y)
+      console.log('🔍 DEBUG: Updated multiplayer position to:', x, y)
+    } else {
+      console.log('🔍 DEBUG: No multiplayerManager found')
     }
   }
 }

@@ -9,8 +9,6 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { gameState, updatePlayerPosition, throwCoins } = useGame()
-  
-  console.log('🔍 DEBUG: GameCanvas component rendered, wallet connected:', isWalletConnected)
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return
