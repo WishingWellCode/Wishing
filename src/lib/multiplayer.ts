@@ -332,7 +332,6 @@ export class MultiplayerClient {
       applied: false
     })
     
-    console.log('🎮 Sending move:', inputMessage)
     this.send(inputMessage)
   }
 

@@ -47,7 +47,9 @@ export default function Home() {
           backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          height: '100vh',
+          width: '100vw'
         }}
       >
         {/* Wallet button only */}

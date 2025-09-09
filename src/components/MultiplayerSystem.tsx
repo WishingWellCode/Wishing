@@ -112,7 +112,6 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
       
       if (changed && multiplayerClientRef.current) {
         multiplayerClientRef.current.updateInput(keysRef.current)
-        console.log('🎮 Key DOWN:', key, keysRef.current)
       }
     }
 
@@ -157,7 +156,6 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
       
       if (changed && multiplayerClientRef.current) {
         multiplayerClientRef.current.updateInput(keysRef.current)
-        console.log('🎮 Key UP:', key, keysRef.current)
       }
     }
 
@@ -213,7 +211,7 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
               <img
                 src={getSpriteUrl(player.spriteName)}
                 alt={`Player ${player.username}`}
-                className="w-6 h-6 drop-shadow-lg"
+                className="w-12 h-12 drop-shadow-lg"
                 style={{
                   imageRendering: 'pixelated',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
