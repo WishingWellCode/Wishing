@@ -87,7 +87,8 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 10
+        zIndex: 10,
+        pointerEvents: 'auto'
       }}
     />
   )

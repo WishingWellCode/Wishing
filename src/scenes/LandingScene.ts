@@ -34,14 +34,17 @@ export class LandingScene extends Phaser.Scene {
     // Remove instruction text as requested by user
     // this.instructions = this.add.text(...)
     
-    // Create invisible player for position tracking (visible player shown via overlay)
+    // Create visible player sprite
     this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
-    this.player.setVisible(false) // Hide since we show it in overlay
-    this.player.setDepth(0)
+    this.player.setVisible(true) // Make player visible
+    this.player.setDepth(100) // High depth to show above background
+    this.player.setScale(2) // Make it bigger so it's easier to see
     
     // Set up controls
     this.cursors = this.input.keyboard!.createCursorKeys()
     this.wasd = this.input.keyboard!.addKeys('W,S,A,D')
+    
+    console.log('🎮 Controls initialized:', this.cursors, this.wasd)
     
     // Camera setup
     this.cameras.main.setZoom(1)
@@ -63,18 +66,22 @@ export class LandingScene extends Phaser.Scene {
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
       this.player.x -= frameSpeed
       moved = true
+      console.log('🎮 Moving LEFT, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.right.isDown || this.wasd.D.isDown) {
       this.player.x += frameSpeed
       moved = true
+      console.log('🎮 Moving RIGHT, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.up.isDown || this.wasd.W.isDown) {
       this.player.y -= frameSpeed
       moved = true
+      console.log('🎮 Moving UP, player at:', this.player.x, this.player.y)
     }
     if (this.cursors.down.isDown || this.wasd.S.isDown) {
       this.player.y += frameSpeed
       moved = true
+      console.log('🎮 Moving DOWN, player at:', this.player.x, this.player.y)
     }
     
     // Keep player within bounds
