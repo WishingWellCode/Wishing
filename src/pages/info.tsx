@@ -184,6 +184,13 @@ export default function InfoPage() {
           background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
           z-index: -1;
         }
+        .info-bg::after {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.7);
+          z-index: -1;
+        }
         .fallback-header {
           background: rgba(0,0,0,0.2);
           backdrop-filter: blur(8px);
