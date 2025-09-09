@@ -188,6 +188,9 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
           {isConnected && (
             <div className="mt-1 text-xs opacity-75">
               {players.length} players online
+              {localPlayer && (
+                <div className="text-green-400">You: {localPlayer.username} ({Math.round(localPlayer.x)}, {Math.round(localPlayer.y)})</div>
+              )}
             </div>
           )}
         </div>
