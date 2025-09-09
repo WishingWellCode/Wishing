@@ -289,11 +289,20 @@ export default function Upgrades() {
             overflow: auto !important;
             overflow-x: hidden !important;
           }
+          .bg-gradient-radial {
+            background: radial-gradient(circle, var(--tw-gradient-stops));
+          }
         `}</style>
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #581c87, #0f172a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '64px', width: '64px', border: '4px solid #8b5cf6', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>Loading Housing District...</div>
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden flex items-center justify-center">
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
+          </div>
+          <div className="relative z-10 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+            <div className="text-2xl font-bold text-white">Loading Housing District...</div>
           </div>
         </div>
       </>
@@ -315,8 +324,14 @@ export default function Upgrades() {
           }
         `}</style>
         
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a, #581c87, #0f172a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '48px', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxWidth: '400px' }}>
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden flex items-center justify-center">
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
+          </div>
+          <div className="relative z-10 text-center bg-black/40 backdrop-blur-sm border border-purple-500/30 p-12 rounded-3xl shadow-2xl max-w-md">
             <div style={{ fontSize: '48px', marginBottom: '24px' }}>🏠</div>
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', background: 'linear-gradient(to right, #a855f7, #ec4899, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '16px' }}>
               Housing Upgrades
@@ -562,9 +577,20 @@ export default function Upgrades() {
           text-align: center;
           margin-bottom: 64px;
         }
+        .bg-gradient-radial {
+          background: radial-gradient(circle, var(--tw-gradient-stops));
+        }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 fallback-container">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden fallback-container">
+        {/* Purple Galaxy Background Pattern */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
+        </div>
+        <div className="relative z-10">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20 fallback-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 fallback-header-content">
@@ -735,6 +761,7 @@ export default function Upgrades() {
             </div>
           </div>
         </main>
+        </div>
       </div>
     </>
   )
