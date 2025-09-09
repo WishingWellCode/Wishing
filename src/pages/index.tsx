@@ -88,12 +88,12 @@ export default function Home() {
           </div>
         )}
 
-        {/* Game content when wallet connected */}
+        {/* Game Canvas - Always render, switches scenes based on wallet connection */}
+        <GameCanvas isWalletConnected={connected} />
+
+        {/* Multiplayer content when wallet connected */}
         {connected && (
           <>
-            {/* Game Canvas - Full screen game */}
-            <GameCanvas isWalletConnected={connected} />
-
             {/* Multiplayer Manager - handles connection and data */}
             <MultiplayerManager 
               isActive={connected} 

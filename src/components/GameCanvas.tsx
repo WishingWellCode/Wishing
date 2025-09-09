@@ -14,6 +14,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     if (!containerRef.current || gameRef.current) return
 
     const initializeGame = async () => {
+      console.log('🔍 DEBUG: Initializing game, wallet connected:', isWalletConnected)
       const Phaser = await import('phaser')
       const { LandingScene } = await import('../scenes/LandingScene')
       const { TestScene } = await import('../scenes/TestScene')
@@ -63,6 +64,16 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       })
 
       console.log('🎮 Phaser game initialized with both scenes')
+      
+      // Start with appropriate initial scene
+      const sceneManager = gameRef.current.scene
+      if (isWalletConnected) {
+        console.log('🔍 DEBUG: Starting with TestScene (wallet connected)')
+        sceneManager.start('TestScene')
+      } else {
+        console.log('🔍 DEBUG: Starting with LandingScene (no wallet)')
+        sceneManager.start('LandingScene')
+      }
     }
 
     initializeGame()
