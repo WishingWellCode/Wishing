@@ -1,0 +1,14 @@
+# Pages configuration
+pages_build_output_dir = "out"
+compatibility_date = "2024-12-01"
+
+# Durable Object bindings for Pages (need script_name)
+[[durable_objects.bindings]]
+name = "LOBBY_DO"
+class_name = "LobbyDO"
+script_name = "wish-well-worker"
+
+[[durable_objects.bindings]]
+name = "GAME_STATE"
+class_name = "GameState"  
+script_name = "wish-well-worker"

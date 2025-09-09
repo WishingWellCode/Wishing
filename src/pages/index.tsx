@@ -5,16 +5,23 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
-const MultiplayerSystem = dynamic(() => import('@/components/MultiplayerSystem'), { ssr: false })
+const MultiplayerManager = dynamic(() => import('@/components/MultiplayerManager'), { ssr: false })
+const MultiplayerOverlay = dynamic(() => import('@/components/MultiplayerOverlay'), { ssr: false })
 
 export default function Home() {
   const { publicKey, connected } = useWallet()
   const [isGameReady, setIsGameReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [players, setPlayers] = useState([])
+  const [currentPlayerId, setCurrentPlayerId] = useState(null)
 
   useEffect(() => {
     if (connected && publicKey) {
       setIsGameReady(true)
+    } else {
+      setIsGameReady(false)
+      setPlayers([])
+      setCurrentPlayerId(null)
     }
   }, [connected, publicKey])
 
@@ -88,8 +95,22 @@ export default function Home() {
               <GameCanvas isWalletConnected={connected} />
             </div>
 
-            {/* New Multiplayer System - only when wallet connected */}
-            <MultiplayerSystem isActive={connected} />
+            {/* Multiplayer Manager - handles connection and data */}
+            <MultiplayerManager 
+              isActive={connected} 
+              onPlayersUpdate={(players) => {
+                setPlayers(players)
+                // Find current player in the list
+                const currentPlayer = players.find(p => p.walletAddress === publicKey?.toString())
+                setCurrentPlayerId(currentPlayer?.id || null)
+              }}
+            />
+
+            {/* Multiplayer Overlay - shows player sprites */}
+            <MultiplayerOverlay 
+              players={players}
+              currentPlayerId={currentPlayerId}
+            />
           </>
         )}
 

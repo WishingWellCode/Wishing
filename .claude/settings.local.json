@@ -34,7 +34,10 @@
       "Bash(timeout 30 git push origin main)",
       "Bash(curl:*)",
       "Bash(wrangler pages deploy:*)",
-      "Bash(wrangler pages project:*)"
+      "Bash(wrangler pages project:*)",
+      "Read(//c/Users/Kimberly/Desktop/Ollie/ClaudeProjects/GoKarts/**)",
+      "Bash(timeout 10 wrangler tail wish-well-worker)",
+      "Bash(wrangler dev:*)"
     ],
     "deny": [],
     "ask": []
