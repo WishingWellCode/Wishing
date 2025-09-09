@@ -370,7 +370,7 @@ export default function Upgrades() {
           content: '';
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(0, 0, 0, 0.45);
           z-index: -1;
           pointer-events: none;
         }

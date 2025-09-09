@@ -79,16 +79,62 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
       boxShadow: '0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(255, 0, 255, 0.05)'
     }}>
       <div className="w-full">
-        <table className="w-full" style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '11px', tableLayout: 'fixed' }}>
+        <table className="results-table" style={{ 
+          width: '100%',
+          tableLayout: 'fixed',
+          borderCollapse: 'collapse',
+          fontFamily: '"Press Start 2P", monospace', 
+          fontSize: '11px'
+        }}>
           <thead>
             <tr style={{ 
               background: 'linear-gradient(90deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%)',
               borderBottom: '2px solid rgba(0, 255, 255, 0.5)'
             }}>
-              <th className="text-left p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)', width: '25%' }}>👤 WALLET</th>
-              <th className="text-center p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)', width: '20%' }}>💰 AMOUNT</th>
-              <th className="text-center p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)', width: '25%' }}>🔗 VERIFY</th>
-              <th className="text-right p-4 font-bold" style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0, 255, 255, 0.5)', width: '30%' }}>⏰ TIME</th>
+              <th style={{ 
+                width: '25%',
+                padding: '0.75rem',
+                textAlign: 'left',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                color: '#00ffff', 
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                fontWeight: 'bold'
+              }}>👤 WALLET</th>
+              <th style={{ 
+                width: '15%',
+                padding: '0.75rem',
+                textAlign: 'left',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                color: '#00ffff', 
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                fontWeight: 'bold'
+              }}>💰 AMOUNT</th>
+              <th style={{ 
+                width: '20%',
+                padding: '0.75rem',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                color: '#00ffff', 
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                fontWeight: 'bold'
+              }}>🔗 VERIFY</th>
+              <th style={{ 
+                width: '40%',
+                padding: '0.75rem',
+                textAlign: 'left',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                color: '#00ffff', 
+                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                fontWeight: 'bold'
+              }}>⏰ TIME</th>
             </tr>
           </thead>
           <tbody>
@@ -109,7 +155,14 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                <td className="p-4 text-left" style={{ width: '25%' }}>
+                <td style={{ 
+                  width: '25%',
+                  padding: '0.75rem',
+                  textAlign: 'left',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
                   <span 
                     className="cursor-help"
                     style={{ 
@@ -123,7 +176,14 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
                     {formatWallet(entry.winner)}
                   </span>
                 </td>
-                <td className="p-4 text-center" style={{ width: '20%' }}>
+                <td style={{ 
+                  width: '15%',
+                  padding: '0.75rem',
+                  textAlign: 'left',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
                   <span style={{ 
                     color: '#00ff00',
                     fontWeight: 'bold',
@@ -133,7 +193,14 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
                     {entry.amount || '0'}
                   </span>
                 </td>
-                <td className="p-4 text-center" style={{ width: '25%' }}>
+                <td style={{ 
+                  width: '20%',
+                  padding: '0.75rem',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
                   {isValidTx(entry.tx) ? (
                     <a
                       href={`https://solscan.io/tx/${entry.tx}`}
@@ -166,10 +233,15 @@ export default function StatsTable({ stats, loading, error, onRetry }: StatsTabl
                     <span style={{ color: '#666', fontSize: '12px' }}>-</span>
                   )}
                 </td>
-                <td className="p-4 text-right" style={{ 
+                <td style={{ 
+                  width: '40%',
+                  padding: '0.75rem',
+                  textAlign: 'left',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                   color: '#a0a0a0',
-                  fontSize: '11px',
-                  width: '30%'
+                  fontSize: '11px'
                 }}>
                   {formatDate(entry.ts)}
                 </td>
