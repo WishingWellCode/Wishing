@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
+import PreWalletOverlay from '@/components/PreWalletOverlay'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
 const MultiplayerManager = dynamic(() => import('@/components/MultiplayerManager'), { ssr: false })
@@ -51,9 +52,7 @@ export default function Home() {
       <div 
         className="min-h-screen w-full relative"
         style={{
-          backgroundImage: connected 
-            ? 'url(/assets/backgrounds/Realbackground.jpg)' 
-            : 'url(/assets/backgrounds/sixseven.png)',
+          backgroundImage: connected ? 'url(/assets/backgrounds/Realbackground.jpg)' : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -61,65 +60,18 @@ export default function Home() {
           width: '100vw'
         }}
       >
-        {/* Wallet button - positioned differently based on connection status */}
-        {connected ? (
+        {/* Connected state: show wallet button in top-right */}
+        {connected && (
           <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
             <WalletMultiButton 
               className="!bg-purple-600 hover:!bg-purple-700"
               style={{ fontSize: '14px' }}
             />
           </div>
-        ) : (
-          /* Pre-connection layout: Connect Wallet button above centered instructional box */
-          <div className="fixed inset-0 flex flex-col items-center justify-center z-50 space-y-8" style={{ zIndex: 10000 }}>
-            {/* Connect Wallet button centered above the box */}
-            <WalletMultiButton 
-              className="!bg-purple-600 hover:!bg-purple-700 !text-white !font-bold !py-3 !px-8 !rounded-lg !text-lg"
-              style={{ fontSize: '16px', fontFamily: '"Press Start 2P"' }}
-            >
-              Connect Wallet
-            </WalletMultiButton>
-            
-            {/* Centered instructional container box */}
-            <div 
-              className="bg-black/60 rounded-lg p-8 max-w-2xl mx-4 text-white leading-relaxed"
-              style={{ 
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                borderRadius: '12px',
-                fontFamily: '"Press Start 2P"',
-                fontSize: '12px',
-                lineHeight: '1.8'
-              }}
-            >
-              <p className="text-cyan-400 mb-6 text-center">Connect your Phantom wallet to enter the magical realm and play with other users!</p>
-              
-              <div className="space-y-6">
-                <div>
-                  <p className="text-green-400 font-bold mb-3">🎮 How to Play:</p>
-                  <div className="space-y-2 text-xs ml-4">
-                    <p>• Use WASD or arrow keys to move around</p>
-                    <p>• Click the fountain to throw WISH tokens</p>
-                    <p>• Win big or lose it all in the magical well!</p>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-purple-400 font-bold mb-3">🚪 Portals:</p>
-                  <div className="space-y-2 text-xs ml-4">
-                    <p>• Info - Learn about the game</p>
-                    <p>• House - Purchase and manage your property</p>
-                    <p>• Links - Join our community</p>
-                    <p>• Upgrades - Enhance your house</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-4 border-t border-white/20 text-center">
-                <p className="text-white/70 text-xs">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
-              </div>
-            </div>
-          </div>
         )}
+
+        {/* Pre-connection state: show PreWalletOverlay */}
+        {!connected && <PreWalletOverlay />}
 
         {/* Game Canvas - Only render when wallet is connected */}
         {connected && <GameCanvas isWalletConnected={connected} />}

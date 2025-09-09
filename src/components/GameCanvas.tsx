@@ -9,35 +9,60 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { gameState, updatePlayerPosition, throwCoins } = useGame()
+  const isHandshakingRef = useRef(false)
 
-  const handleSceneSwitching = (walletConnected: boolean) => {
-    if (!gameRef.current || !gameRef.current.scene) return
+  const handleSceneSwitching = async (walletConnected: boolean) => {
+    if (!gameRef.current || !gameRef.current.scene || isHandshakingRef.current) return
     
     const sceneManager = gameRef.current.scene
     
     console.log('🔍 DEBUG: Wallet connection changed:', walletConnected)
-    console.log('🔍 DEBUG: Available scenes:', sceneManager.scenes.map(s => s.scene.key))
-    console.log('🔍 DEBUG: Active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
     
     if (walletConnected) {
-      // Switch to TestScene when wallet connects
+      // Start handshaking process - prevent multiple rapid switches
+      isHandshakingRef.current = true
+      
       const landingScene = sceneManager.getScene('LandingScene')
       const testScene = sceneManager.getScene('TestScene')
       
-      console.log('🔍 DEBUG: LandingScene active?', landingScene?.scene.isActive())
-      console.log('🔍 DEBUG: TestScene active?', testScene?.scene.isActive())
+      // Pause physics during transition to prevent glitching
+      if (landingScene?.scene.isActive() && (landingScene as any).physics) {
+        console.log('🔍 DEBUG: Pausing LandingScene physics')
+        ;(landingScene as any).physics.world.pause()
+      }
       
+      // Clean shutdown of LandingScene
       if (landingScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Stopping LandingScene')
+        console.log('🔍 DEBUG: Stopping LandingScene cleanly')
+        // Clean up any tweens or timers before stopping
+        if ((landingScene as any).tweens) {
+          ;(landingScene as any).tweens.killAll()
+        }
         sceneManager.stop('LandingScene')
       }
+      
+      // Start TestScene with fade-in transition
       if (!testScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Starting TestScene')
+        console.log('🔍 DEBUG: Starting TestScene with transition')
         sceneManager.start('TestScene')
+        
+        // Add fade-in effect
+        setTimeout(() => {
+          const testSceneInstance = sceneManager.getScene('TestScene') as any
+          if (testSceneInstance && testSceneInstance.cameras && testSceneInstance.cameras.main) {
+            testSceneInstance.cameras.main.fadeIn(300)
+          }
+        }, 100)
       }
-      console.log('🎮 Switched to TestScene (with portals and gambling)')
+      
+      // Complete handshake after transition
+      setTimeout(() => {
+        isHandshakingRef.current = false
+        console.log('🎮 Handshake complete - switched to TestScene')
+      }, 500)
+      
     } else {
-      // Switch to LandingScene when wallet disconnects  
+      // Disconnection - simpler process
       const landingScene = sceneManager.getScene('LandingScene')
       const testScene = sceneManager.getScene('TestScene')
       
@@ -49,11 +74,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         console.log('🔍 DEBUG: Starting LandingScene')
         sceneManager.start('LandingScene')
       }
-      console.log('🎮 Switched to LandingScene (landing page)')
     }
-    
-    // Final state check
-    console.log('🔍 DEBUG: Final active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
   }
 
   useEffect(() => {
@@ -78,7 +99,9 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
           default: 'arcade',
           arcade: {
             gravity: { x: 0, y: 0 },
-            debug: false // Disable debug for better performance
+            debug: false,
+            fps: 60, // Fixed timestep for consistent physics
+            fixedStep: true
           }
         },
         scene: [LandingScene, TestScene],
@@ -151,12 +174,17 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     }
   }, [])
 
-  // Handle wallet connection changes
+  // Debounced wallet connection change handler to prevent rapid switches
   useEffect(() => {
     console.log('🔍 DEBUG: Wallet connection useEffect triggered, wallet:', isWalletConnected, 'gameRef exists:', !!gameRef.current)
-    if (gameRef.current && gameRef.current.scene) {
-      handleSceneSwitching(isWalletConnected)
-    }
+    
+    const debounceTimer = setTimeout(() => {
+      if (gameRef.current && gameRef.current.scene && !isHandshakingRef.current) {
+        handleSceneSwitching(isWalletConnected)
+      }
+    }, 150) // Debounce rapid connection changes
+
+    return () => clearTimeout(debounceTimer)
   }, [isWalletConnected])
 
   useEffect(() => {
