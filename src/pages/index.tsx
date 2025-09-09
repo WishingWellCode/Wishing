@@ -61,47 +61,61 @@ export default function Home() {
           width: '100vw'
         }}
       >
-        {/* Wallet button only */}
-        <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
-          <WalletMultiButton 
-            className="!bg-purple-600 hover:!bg-purple-700"
-            style={{ fontSize: '14px' }}
-          >
-            {!connected ? 'Connect Wallet' : undefined}
-          </WalletMultiButton>
-        </div>
-
-        {/* Centered welcome box before wallet connection - Info page style */}
-        {!connected && (
-          <div className="fixed inset-0 flex items-center justify-center z-50" style={{ zIndex: 10000 }}>
-            <div className="bg-black/80 backdrop-blur-md rounded-2xl border-2 border-purple-500/50 p-8 max-w-2xl mx-4 text-center transition-all duration-300 hover:scale-105 shadow-2xl">
-              <div className="text-white leading-relaxed space-y-6" style={{ fontFamily: '"Press Start 2P"', fontSize: '12px', lineHeight: '1.6' }}>
-                <p className="text-cyan-400 mb-6">Connect your Phantom wallet to enter the magical realm and play with other users!</p>
-                
-                <div className="text-left space-y-4">
-                  <div className="bg-black/60 p-4 rounded-lg border border-green-500/30">
-                    <p className="text-green-400 font-bold mb-3">🎮 How to Play:</p>
-                    <div className="space-y-2 text-xs">
-                      <p>• Use WASD or arrow keys to move around</p>
-                      <p>• Click the fountain to throw WISH tokens</p>
-                      <p>• Win big or lose it all in the magical well!</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-black/60 p-4 rounded-lg border border-purple-500/30">
-                    <p className="text-purple-400 font-bold mb-3">🚪 Portals:</p>
-                    <div className="space-y-2 text-xs">
-                      <p>• Info - Learn about the game</p>
-                      <p>• House - Purchase and manage your property</p>
-                      <p>• Links - Join our community</p>
-                      <p>• Upgrades - Enhance your house</p>
-                    </div>
+        {/* Wallet button - positioned differently based on connection status */}
+        {connected ? (
+          <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
+            <WalletMultiButton 
+              className="!bg-purple-600 hover:!bg-purple-700"
+              style={{ fontSize: '14px' }}
+            />
+          </div>
+        ) : (
+          /* Pre-connection layout: Connect Wallet button above centered instructional box */
+          <div className="fixed inset-0 flex flex-col items-center justify-center z-50 space-y-8" style={{ zIndex: 10000 }}>
+            {/* Connect Wallet button centered above the box */}
+            <WalletMultiButton 
+              className="!bg-purple-600 hover:!bg-purple-700 !text-white !font-bold !py-3 !px-8 !rounded-lg !text-lg"
+              style={{ fontSize: '16px', fontFamily: '"Press Start 2P"' }}
+            >
+              Connect Wallet
+            </WalletMultiButton>
+            
+            {/* Centered instructional container box */}
+            <div 
+              className="bg-black/60 rounded-lg p-8 max-w-2xl mx-4 text-white leading-relaxed"
+              style={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                borderRadius: '12px',
+                fontFamily: '"Press Start 2P"',
+                fontSize: '12px',
+                lineHeight: '1.8'
+              }}
+            >
+              <p className="text-cyan-400 mb-6 text-center">Connect your Phantom wallet to enter the magical realm and play with other users!</p>
+              
+              <div className="space-y-6">
+                <div>
+                  <p className="text-green-400 font-bold mb-3">🎮 How to Play:</p>
+                  <div className="space-y-2 text-xs ml-4">
+                    <p>• Use WASD or arrow keys to move around</p>
+                    <p>• Click the fountain to throw WISH tokens</p>
+                    <p>• Win big or lose it all in the magical well!</p>
                   </div>
                 </div>
                 
-                <div className="pt-4 border-t border-purple-500/30">
-                  <p className="text-white/80 text-center text-xs">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
+                <div>
+                  <p className="text-purple-400 font-bold mb-3">🚪 Portals:</p>
+                  <div className="space-y-2 text-xs ml-4">
+                    <p>• Info - Learn about the game</p>
+                    <p>• House - Purchase and manage your property</p>
+                    <p>• Links - Join our community</p>
+                    <p>• Upgrades - Enhance your house</p>
+                  </div>
                 </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-white/20 text-center">
+                <p className="text-white/70 text-xs">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
               </div>
             </div>
           </div>
