@@ -37,7 +37,9 @@
       "Bash(wrangler pages project:*)",
       "Read(//c/Users/Kimberly/Desktop/Ollie/ClaudeProjects/GoKarts/**)",
       "Bash(timeout 10 wrangler tail wish-well-worker)",
-      "Bash(wrangler dev:*)"
+      "Bash(wrangler dev:*)",
+      "Bash(timeout 10 curl -s \"wss://wish-well-worker.stealthbundlebot.workers.dev\" --http1.1 --upgrade WebSocket)",
+      "Bash(timeout 10 wrangler dev:*)"
     ],
     "deny": [],
     "ask": []

@@ -38,6 +38,18 @@ export class TestScene extends Phaser.Scene {
     keyHandler?: (event: KeyboardEvent) => void
   } | null = null
   
+  private portal2Warning: {
+    background: Phaser.GameObjects.Rectangle
+    title: Phaser.GameObjects.Text
+    message: Phaser.GameObjects.Text
+    continueButton: Phaser.GameObjects.Rectangle
+    continueText: Phaser.GameObjects.Text
+    cancelButton: Phaser.GameObjects.Rectangle
+    cancelText: Phaser.GameObjects.Text
+    elements: Phaser.GameObjects.GameObject[]
+    keyHandler?: (event: KeyboardEvent) => void
+  } | null = null
+  
   private portal4Warning: {
     background: Phaser.GameObjects.Rectangle
     title: Phaser.GameObjects.Text
@@ -292,6 +304,11 @@ export class TestScene extends Phaser.Scene {
     // Portal 1 - Housing/Upgrades warning modal
     if (portalName === 'Portal 1') {
       this.showPortal1Warning()
+    }
+    
+    // Portal 2 - Links page navigation
+    if (portalName === 'Portal 2') {
+      this.showPortal2Warning()
     }
     
     // Portal 3 - Winners overlay
@@ -787,6 +804,181 @@ export class TestScene extends Phaser.Scene {
     console.log('Portal 1 warning closed')
   }
 
+  showPortal2Warning() {
+    // Prevent multiple warning modals
+    if (this.portal2Warning) return
+
+    console.log('🔗 Showing Portal 2 links page warning...')
+
+    const screenWidth = this.cameras.main.width
+    const screenHeight = this.cameras.main.height
+    const modalWidth = Math.min(screenWidth * 0.6, 600)
+    const modalHeight = Math.min(screenHeight * 0.5, 400)
+
+    // Create modal background
+    const background = this.add.rectangle(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY,
+      modalWidth,
+      modalHeight,
+      0x000000,
+      0.95
+    )
+    background.setDepth(3000)
+    background.setStrokeStyle(3, 0x8b5cf6)
+
+    // Create title
+    const title = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - modalHeight/2 + 60,
+      'Portal 2: Community Links',
+      {
+        fontSize: '24px',
+        color: '#8b5cf6',
+        fontFamily: '"Press Start 2P"',
+        align: 'center'
+      }
+    )
+    title.setOrigin(0.5)
+    title.setDepth(3001)
+
+    // Create message
+    const message = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY - 20,
+      'Welcome to the Community Hub!\n\nConnect with the $WISH community\nthrough our social media channels.\n\nWould you like to visit our\nLinks page now?',
+      {
+        fontSize: '16px',
+        color: '#ffffff',
+        fontFamily: '"Press Start 2P"',
+        align: 'center',
+        lineSpacing: 8
+      }
+    )
+    message.setOrigin(0.5)
+    message.setDepth(3001)
+
+    // Continue button
+    const continueButton = this.add.rectangle(
+      this.cameras.main.centerX - 100,
+      this.cameras.main.centerY + modalHeight/2 - 60,
+      180,
+      40,
+      0x22c55e
+    )
+    continueButton.setDepth(3001)
+    continueButton.setStrokeStyle(2, 0x16a34a)
+
+    const continueText = this.add.text(
+      continueButton.x,
+      continueButton.y,
+      'CONTINUE',
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        fontFamily: '"Press Start 2P"'
+      }
+    )
+    continueText.setOrigin(0.5)
+    continueText.setDepth(3002)
+
+    // Cancel button
+    const cancelButton = this.add.rectangle(
+      this.cameras.main.centerX + 100,
+      this.cameras.main.centerY + modalHeight/2 - 60,
+      140,
+      40,
+      0xef4444
+    )
+    cancelButton.setDepth(3001)
+    cancelButton.setStrokeStyle(2, 0xdc2626)
+
+    const cancelText = this.add.text(
+      cancelButton.x,
+      cancelButton.y,
+      'CANCEL',
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        fontFamily: '"Press Start 2P"'
+      }
+    )
+    cancelText.setOrigin(0.5)
+    cancelText.setDepth(3002)
+
+    // Make buttons interactive
+    continueButton.setInteractive({ useHandCursor: true })
+    continueText.setInteractive({ useHandCursor: true })
+    
+    cancelButton.setInteractive({ useHandCursor: true })
+    cancelText.setInteractive({ useHandCursor: true })
+
+    // Store all elements for cleanup
+    const elements = [background, title, message, continueButton, continueText, cancelButton, cancelText]
+    
+    this.portal2Warning = {
+      background,
+      title,
+      message,
+      continueButton,
+      continueText,
+      cancelButton,
+      cancelText,
+      elements
+    }
+
+    // Handle continue button click
+    const handleContinue = () => {
+      console.log('🔗 Redirecting to /links...')
+      this.closePortal2Warning()
+      // Redirect to links page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/links'
+      }
+    }
+
+    // Handle cancel button click
+    const handleCancel = () => {
+      console.log('❌ Portal 2 access cancelled')
+      this.closePortal2Warning()
+    }
+
+    // Add click handlers
+    continueButton.on('pointerdown', handleContinue)
+    continueText.on('pointerdown', handleContinue)
+    cancelButton.on('pointerdown', handleCancel)
+    cancelText.on('pointerdown', handleCancel)
+
+    // Keyboard handling
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCancel()
+      }
+    }
+
+    this.input.keyboard?.on('keydown', handleEscKey)
+    this.portal2Warning.keyHandler = handleEscKey
+  }
+
+  closePortal2Warning() {
+    if (!this.portal2Warning) return
+
+    // Clean up all elements
+    this.portal2Warning.elements.forEach((element: Phaser.GameObjects.GameObject) => {
+      if (element && element.destroy) {
+        element.destroy()
+      }
+    })
+
+    // Remove keyboard handler
+    if (this.portal2Warning.keyHandler) {
+      this.input.keyboard?.off('keydown', this.portal2Warning.keyHandler)
+    }
+
+    this.portal2Warning = null
+    console.log('Portal 2 warning closed')
+  }
+
   showPortal4Warning() {
     // Prevent multiple warning modals
     if (this.portal4Warning) return
@@ -984,6 +1176,11 @@ export class TestScene extends Phaser.Scene {
     // Close Portal 1 warning when leaving Portal 1
     if (portalName === 'Portal 1' && this.portal1Warning) {
       this.closePortal1Warning()
+    }
+    
+    // Close Portal 2 warning when leaving Portal 2
+    if (portalName === 'Portal 2' && this.portal2Warning) {
+      this.closePortal2Warning()
     }
     
     // Close winners overlay when leaving Portal 3
