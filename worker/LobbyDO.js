@@ -8,8 +8,8 @@ export class LobbyDO {
     this.tickInterval = null
     this.broadcastInterval = null
     
-    // Start game loop when first player joins
-    this.startGameLoop()
+    // Disable game loop for now - just handle simple position updates
+    // this.startGameLoop()
   }
 
   async fetch(request) {
@@ -261,6 +261,9 @@ export class LobbyDO {
   }
 
   cleanupDisconnectedPlayers() {
+    // Disabled for now - only disconnect when WebSocket actually closes
+    return
+    
     const now = Date.now()
     const timeout = 1000 // 1 second timeout
 
