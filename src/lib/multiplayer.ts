@@ -258,31 +258,34 @@ export class MultiplayerClient {
 
   private startGameLoop() {
     const gameLoop = (currentTime: number) => {
+      if (!this.isConnected || !this.localPlayer) {
+        this.animationFrameId = requestAnimationFrame(gameLoop)
+        return
+      }
+
       const deltaTime = currentTime - this.lastUpdate
       this.lastUpdate = currentTime
       
-      if (this.isConnected && this.localPlayer) {
-        // Send input at ~20 Hz (throttled)
-        if (currentTime - this.inputSendTimer > 50) {
-          this.sendInput()
-          this.inputSendTimer = currentTime
-        }
-        
-        // Apply client-side prediction (smooth 60fps)
-        this.applyInput(this.localPlayer, this.currentInput, deltaTime / 1000)
-        
-        // Interpolate other players (throttled to 30fps for performance)
-        if (currentTime - this.renderTimer > 33) { // ~30 FPS
-          this.interpolateOtherPlayers()
-          this.renderTimer = currentTime
-          this.throttledUpdate = true
-        }
-        
-        // Only update callback when needed
-        if (this.throttledUpdate) {
-          this.updatePlayersCallback()
-          this.throttledUpdate = false
-        }
+      // Only run at 30fps to reduce performance load
+      if (deltaTime < 33) {
+        this.animationFrameId = requestAnimationFrame(gameLoop)
+        return
+      }
+      
+      // Send input at ~10 Hz (reduced for better performance)
+      if (currentTime - this.inputSendTimer > 100) {
+        this.sendInput()
+        this.inputSendTimer = currentTime
+      }
+      
+      // Apply client-side prediction with consistent deltaTime
+      this.applyInput(this.localPlayer, this.currentInput, 33 / 1000) // 33ms fixed step
+      
+      // Interpolate other players less frequently (15fps)
+      if (currentTime - this.renderTimer > 66) {
+        this.interpolateOtherPlayers()
+        this.renderTimer = currentTime
+        this.updatePlayersCallback()
       }
       
       this.animationFrameId = requestAnimationFrame(gameLoop)
@@ -314,9 +317,9 @@ export class MultiplayerClient {
     this.localPlayer.x += vx * deltaTime
     this.localPlayer.y += vy * deltaTime
     
-    // Keep within bounds
-    this.localPlayer.x = Math.max(24, Math.min(window.innerWidth - 24, this.localPlayer.x))
-    this.localPlayer.y = Math.max(24, Math.min(window.innerHeight - 24, this.localPlayer.y))
+    // Keep within bounds (fixed bounds for performance)
+    this.localPlayer.x = Math.max(50, Math.min(1150, this.localPlayer.x))
+    this.localPlayer.y = Math.max(50, Math.min(750, this.localPlayer.y))
     
     const inputMessage = {
       type: 'move',
@@ -343,7 +346,7 @@ export class MultiplayerClient {
   }
 
   private applyInput(player: Player, input: InputState, deltaTime: number) {
-    const speed = 300 // pixels per second (increased for smoother movement)
+    const speed = 200 // pixels per second (optimized for performance)
     let vx = 0, vy = 0
     
     if (input.left || input.a) vx -= speed
@@ -351,16 +354,13 @@ export class MultiplayerClient {
     if (input.up || input.w) vy -= speed
     if (input.down || input.s) vy += speed
     
-    // Use fixed deltaTime for consistent movement
-    const fixedDeltaTime = 1/60 // 60 FPS
+    // Apply movement with consistent deltaTime
+    player.x += vx * deltaTime
+    player.y += vy * deltaTime
     
-    // Apply movement
-    player.x += vx * fixedDeltaTime
-    player.y += vy * fixedDeltaTime
-    
-    // Keep within bounds (expand viewport bounds)
-    player.x = Math.max(24, Math.min(window.innerWidth - 24, player.x))
-    player.y = Math.max(24, Math.min(window.innerHeight - 24, player.y))
+    // Keep within bounds (fixed bounds for better performance)
+    player.x = Math.max(50, Math.min(1150, player.x))
+    player.y = Math.max(50, Math.min(750, player.y))
   }
 
   private interpolateOtherPlayers() {
