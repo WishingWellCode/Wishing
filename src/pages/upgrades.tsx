@@ -347,7 +347,9 @@ export default function Upgrades() {
       {/* Fallback CSS - Ensures page always renders correctly even if Tailwind fails */}
       <style jsx global>{`
         /* Override global body overflow hidden for upgrades page */
-        body {
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
           overflow: auto !important;
           overflow-x: hidden !important;
         }
