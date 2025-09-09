@@ -293,13 +293,7 @@ export default function Upgrades() {
             background: radial-gradient(circle, var(--tw-gradient-stops));
           }
         `}</style>
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
-          </div>
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center fallback-container">
           <div className="relative z-10 text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
             <div className="text-2xl font-bold text-white">Loading Housing District...</div>
@@ -324,13 +318,7 @@ export default function Upgrades() {
           }
         `}</style>
         
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
-          </div>
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center fallback-container">
           <div className="relative z-10 text-center bg-black/40 backdrop-blur-sm border border-purple-500/30 p-12 rounded-3xl shadow-2xl max-w-md">
             <div style={{ fontSize: '48px', marginBottom: '24px' }}>🏠</div>
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', background: 'linear-gradient(to right, #a855f7, #ec4899, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '16px' }}>
@@ -367,7 +355,25 @@ export default function Upgrades() {
       <style jsx>{`
         .fallback-container {
           min-height: 100vh;
-          background: linear-gradient(135deg, #0f172a, #581c87, #0f172a);
+          background: 
+            radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+            radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.8), transparent),
+            radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.6), transparent),
+            radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4), transparent),
+            radial-gradient(2px 2px at 80% 10%, rgba(255,255,255,0.7), transparent),
+            radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.5), transparent),
+            radial-gradient(1px 1px at 30% 20%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,0.6), transparent),
+            radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.4), transparent),
+            radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(2px 2px at 85% 60%, rgba(255,255,255,0.5), transparent),
+            radial-gradient(1px 1px at 15% 40%, rgba(255,255,255,0.4), transparent),
+            linear-gradient(135deg, #1a0b2e 0%, #16213e 20%, #0f3460 40%, #533b7d 60%, #7209b7 80%, #2d1b69 100%),
+            radial-gradient(ellipse at center, rgba(138, 43, 226, 0.15) 0%, transparent 50%);
+          background-size: 
+            400px 400px, 300px 300px, 200px 200px, 250px 250px, 350px 350px,
+            180px 180px, 220px 220px, 320px 320px, 280px 280px, 240px 240px,
+            360px 360px, 160px 160px, 100% 100%, 100% 100%;
           font-family: system-ui, -apple-system, sans-serif;
           color: white;
         }
@@ -582,15 +588,7 @@ export default function Upgrades() {
         }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 relative overflow-hidden fallback-container">
-        {/* Purple Galaxy Background Pattern */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute inset-0 bg-gradient-radial from-purple-500/20 via-transparent to-transparent"></div>
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-blue-500/10 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-radial from-violet-400/15 to-transparent rounded-full blur-2xl"></div>
-        </div>
-        <div className="relative z-10">
+      <div className="min-h-screen relative overflow-hidden fallback-container">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20 fallback-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 fallback-header-content">
@@ -761,7 +759,6 @@ export default function Upgrades() {
             </div>
           </div>
         </main>
-        </div>
       </div>
     </>
   )

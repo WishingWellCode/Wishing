@@ -123,18 +123,14 @@ export class TestScene extends Phaser.Scene {
     this.fountainArea = this.add.circle(950, 760, 100, 0x00ff00, 0) as Phaser.GameObjects.Arc
     this.fountainArea.setDepth(0)
 
-    // Only create player if wallet is connected
+    // Setup wallet connection listeners for efficient player creation
+    this.setupWalletListeners()
+    
+    // Only create player if wallet is already connected
     const wallet = (window as any).solana
     if (wallet?.isConnected) {
-      // Create a simple colored rectangle as test player
-      this.testPlayer = this.add.rectangle(
-        this.cameras.main.centerX, 
-        this.cameras.main.centerY + 100, // Start below fountain
-        32, 32, 0x00ff00
-      )
-      this.testPlayer.setDepth(1)
+      this.createPlayer()
     } else {
-      // Create placeholder for player (will be created when wallet connects)
       console.log('⏳ Waiting for wallet connection to spawn player...')
     }
     
@@ -1042,6 +1038,43 @@ export class TestScene extends Phaser.Scene {
     }
   }
 
+  setupWalletListeners() {
+    // Listen for wallet connection events
+    window.addEventListener('walletConnected', () => {
+      if (!this.testPlayer) {
+        this.createPlayer()
+      }
+    })
+    
+    // Listen for custom wallet connection events from React components
+    window.addEventListener('solanaWalletConnected', () => {
+      if (!this.testPlayer) {
+        this.createPlayer()
+      }
+    })
+    
+    // Set up polling with debounce for wallet connection (fallback)
+    let lastWalletCheck = false
+    const checkWallet = () => {
+      const wallet = (window as any).solana
+      const isConnected = wallet?.isConnected || false
+      
+      if (isConnected !== lastWalletCheck) {
+        lastWalletCheck = isConnected
+        if (isConnected && !this.testPlayer) {
+          this.createPlayer()
+        }
+      }
+    }
+    
+    // Check every 2 seconds instead of every frame (much more efficient)
+    this.time.addEvent({
+      delay: 2000,
+      callback: checkWallet,
+      loop: true
+    })
+  }
+
   createPlayer() {
     if (this.testPlayer) return // Already created
     
@@ -1325,13 +1358,8 @@ export class TestScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    // Check if player exists before updating
+    // Only proceed if player exists
     if (!this.testPlayer) {
-      // Check if wallet is now connected and create player
-      const wallet = (window as any).solana
-      if (wallet?.isConnected) {
-        this.createPlayer()
-      }
       return
     }
     
