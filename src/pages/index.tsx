@@ -35,7 +35,7 @@ export default function Home() {
 
 
   if (isLoading) {
-    return <div style={{ background: 'url(/assets/backgrounds/Realbackground.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
+    return <div style={{ background: 'url(/assets/backgrounds/sixseven.png)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
   }
 
   return (
@@ -51,7 +51,7 @@ export default function Home() {
       <div 
         className="min-h-screen w-full relative"
         style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
+          backgroundImage: 'url(/assets/backgrounds/sixseven.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -69,29 +69,37 @@ export default function Home() {
           </WalletMultiButton>
         </div>
 
-        {/* Centered welcome box before wallet connection */}
+        {/* Centered welcome box before wallet connection - Info page style */}
         {!connected && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-black/80 backdrop-blur-md border border-white/20 rounded-lg p-6 max-w-lg mx-4">
-              <div className="text-white/90 font-pixel text-sm leading-relaxed space-y-4">
-                <p>Connect your Phantom wallet to enter the magical realm and play with other users!</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 max-w-2xl mx-4 text-center transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl">
+              <div className="text-white leading-relaxed space-y-6" style={{ fontFamily: '"Press Start 2P"', fontSize: '12px', lineHeight: '1.6' }}>
+                <p className="text-cyan-400 mb-6">Connect your Phantom wallet to enter the magical realm and play with other users!</p>
                 
-                <div>
-                  <p className="text-white mb-2">🎮 How to Play:</p>
-                  <p>• Use WASD or arrow keys to move around</p>
-                  <p>• Click the fountain to throw WISH tokens</p>
-                  <p>• Win big or lose it all in the magical well!</p>
+                <div className="text-left space-y-4">
+                  <div className="bg-black/30 p-4 rounded-lg">
+                    <p className="text-green-400 font-bold mb-3">🎮 How to Play:</p>
+                    <div className="space-y-2 text-xs">
+                      <p>• Use WASD or arrow keys to move around</p>
+                      <p>• Click the fountain to throw WISH tokens</p>
+                      <p>• Win big or lose it all in the magical well!</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-black/30 p-4 rounded-lg">
+                    <p className="text-purple-400 font-bold mb-3">🚪 Portals:</p>
+                    <div className="space-y-2 text-xs">
+                      <p>• Info - Learn about the game</p>
+                      <p>• House - Purchase and manage your property</p>
+                      <p>• Links - Join our community</p>
+                      <p>• Upgrades - Enhance your house</p>
+                    </div>
+                  </div>
                 </div>
                 
-                <div>
-                  <p className="text-white mb-2">🚪 Portals:</p>
-                  <p>• Info - Learn about the game</p>
-                  <p>• House - Purchase and manage your property</p>
-                  <p>• Links - Join our community</p>
-                  <p>• Upgrades - Enhance your house</p>
+                <div className="pt-4 border-t border-purple-500/20">
+                  <p className="text-white/70 text-center text-xs">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
                 </div>
-                
-                <p className="text-white/60 text-center">🎮 Multiplayer Gaming • 💰 Crypto Rewards</p>
               </div>
             </div>
           </div>
