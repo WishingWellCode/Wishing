@@ -214,8 +214,9 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
               <img
                 src={getSpriteUrl(player.spriteName)}
                 alt={`Player ${player.username}`}
-                className="w-12 h-12 drop-shadow-lg"
                 style={{
+                  width: '48px',
+                  height: '48px',
                   imageRendering: 'pixelated',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
                 }}
