@@ -53,44 +53,12 @@ export class TestScene extends Phaser.Scene {
   }
 
   preload() {
-    // Prevent duplicate loading issues
-    if (this.textures.exists('vaporwave-background')) {
-      // If texture exists, remove it to force fresh load
-      this.textures.remove('vaporwave-background')
-    }
-    // Load the real vaporwave background
-    this.load.image('vaporwave-background', '/assets/backgrounds/Realbackground.jpg')
+    // No background loading needed - using CSS background
   }
 
   create() {
-    // Clean up any existing background to prevent duplication
-    const existingBg = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
-    if (existingBg) {
-      existingBg.destroy()
-    }
-    
-    // Set transparent background to show CSS background
+    // Set transparent background to show CSS background - no Phaser background needed
     this.cameras.main.transparent = true
-    
-    // Add the vaporwave background image with proper scaling
-    const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
-    background.setName('vaporwaveBackground') // Name for resize handling
-    background.setDepth(-1000)
-    
-    // Get original texture dimensions for proper scaling
-    const texture = this.textures.get('vaporwave-background')
-    if (texture && texture.source && texture.source.length > 0) {
-      const originalWidth = texture.source[0].width
-      const originalHeight = texture.source[0].height
-      
-      // Calculate scale to cover entire screen while maintaining aspect ratio
-      // No extra padding to avoid zoom issues
-      const scaleX = this.cameras.main.width / originalWidth
-      const scaleY = this.cameras.main.height / originalHeight
-      const scale = Math.max(scaleX, scaleY)
-      
-      background.setScale(scale)
-    }
     
     // Listen for resize events to update background
     this.scale.on('resize', this.handleResize, this)
@@ -150,25 +118,6 @@ export class TestScene extends Phaser.Scene {
   }
 
   handleResize(gameSize: any) {
-    // Update background position and scale on resize
-    const background = this.children.getByName('vaporwaveBackground') as Phaser.GameObjects.Image
-    if (background) {
-      background.setPosition(gameSize.width / 2, gameSize.height / 2)
-      
-      const texture = this.textures.get('vaporwave-background')
-      if (texture && texture.source && texture.source.length > 0) {
-        const originalWidth = texture.source[0].width
-        const originalHeight = texture.source[0].height
-        
-        // Ensure full coverage without extra zoom
-        const scaleX = gameSize.width / originalWidth
-        const scaleY = gameSize.height / originalHeight
-        const scale = Math.max(scaleX, scaleY)
-        
-        background.setScale(scale)
-      }
-    }
-    
     // Update camera
     this.cameras.main.setSize(gameSize.width, gameSize.height)
     
@@ -1078,14 +1027,15 @@ export class TestScene extends Phaser.Scene {
   createPlayer() {
     if (this.testPlayer) return // Already created
     
-    // Create a simple colored rectangle as test player
+    // Create an invisible player for position tracking - visible player handled by multiplayer system
     this.testPlayer = this.add.rectangle(
       this.cameras.main.centerX, 
       this.cameras.main.centerY + 100, // Start below fountain
       32, 32, 0x00ff00
     )
     this.testPlayer.setDepth(1)
-    console.log('✅ Player spawned after wallet connection')
+    this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
+    console.log('✅ Invisible player spawned for portal detection')
   }
 
   async startGambling() {
@@ -1413,6 +1363,11 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x += deltaX
     this.testPlayer.y += deltaY
     
+    // Update multiplayer position so visible sprite follows
+    if (deltaX !== 0 || deltaY !== 0) {
+      this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+    }
+    
     // Check fountain proximity using polygon detection
     const wasNearFountain = this.isNearFountain
     this.isNearFountain = this.isPointInPolygon(
@@ -1453,5 +1408,12 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
     
+  }
+  
+  private updateMultiplayerPosition(x: number, y: number) {
+    // Send position to multiplayer manager
+    if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
+      (window as any).multiplayerManager.updatePosition(x, y)
+    }
   }
 }
