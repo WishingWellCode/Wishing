@@ -80,25 +80,45 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     if (gameRef.current && gameRef.current.scene) {
       const sceneManager = gameRef.current.scene
       
+      console.log('🔍 DEBUG: Wallet connection changed:', isWalletConnected)
+      console.log('🔍 DEBUG: Available scenes:', sceneManager.scenes.map(s => s.scene.key))
+      console.log('🔍 DEBUG: Active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
+      
       if (isWalletConnected) {
         // Switch to TestScene when wallet connects
-        if (sceneManager.getScene('LandingScene')?.scene.isActive()) {
+        const landingScene = sceneManager.getScene('LandingScene')
+        const testScene = sceneManager.getScene('TestScene')
+        
+        console.log('🔍 DEBUG: LandingScene active?', landingScene?.scene.isActive())
+        console.log('🔍 DEBUG: TestScene active?', testScene?.scene.isActive())
+        
+        if (landingScene?.scene.isActive()) {
+          console.log('🔍 DEBUG: Stopping LandingScene')
           sceneManager.stop('LandingScene')
         }
-        if (!sceneManager.getScene('TestScene')?.scene.isActive()) {
+        if (!testScene?.scene.isActive()) {
+          console.log('🔍 DEBUG: Starting TestScene')
           sceneManager.start('TestScene')
         }
         console.log('🎮 Switched to TestScene (with portals and gambling)')
       } else {
         // Switch to LandingScene when wallet disconnects  
-        if (sceneManager.getScene('TestScene')?.scene.isActive()) {
+        const landingScene = sceneManager.getScene('LandingScene')
+        const testScene = sceneManager.getScene('TestScene')
+        
+        if (testScene?.scene.isActive()) {
+          console.log('🔍 DEBUG: Stopping TestScene')
           sceneManager.stop('TestScene')
         }
-        if (!sceneManager.getScene('LandingScene')?.scene.isActive()) {
+        if (!landingScene?.scene.isActive()) {
+          console.log('🔍 DEBUG: Starting LandingScene')
           sceneManager.start('LandingScene')
         }
         console.log('🎮 Switched to LandingScene (landing page)')
       }
+      
+      // Final state check
+      console.log('🔍 DEBUG: Final active scenes:', sceneManager.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key))
     }
   }, [isWalletConnected])
 

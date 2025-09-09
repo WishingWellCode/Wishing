@@ -16,6 +16,8 @@ export class TestScene extends Phaser.Scene {
   private fountainPolygon: { x: number, y: number }[] = []
   private portals: { [key: string]: { coords: { x: number, y: number }[], isActive: boolean } } = {}
   private currentPortal: string | null = null
+  private lastPortalDebug: number = 0
+  private lastUpdateDebug: number = 0
   private winnersOverlay: {
     background: Phaser.GameObjects.Rectangle
     title: Phaser.GameObjects.Text
@@ -57,6 +59,7 @@ export class TestScene extends Phaser.Scene {
   }
 
   create() {
+    console.log('🔍 DEBUG: TestScene create() called')
     // Set transparent background to show CSS background - no Phaser background needed
     this.cameras.main.transparent = true
     
@@ -248,8 +251,20 @@ export class TestScene extends Phaser.Scene {
   }
 
   checkPortalProximity() {
+    if (!this.testPlayer) {
+      console.log('🔍 DEBUG: No testPlayer found for portal detection')
+      return
+    }
+    
     const playerPos = { x: this.testPlayer.x, y: this.testPlayer.y }
     let foundPortal: string | null = null
+    
+    // Debug player position every few seconds
+    if (!this.lastPortalDebug || Date.now() - this.lastPortalDebug > 3000) {
+      console.log('🔍 DEBUG: Player position:', playerPos)
+      console.log('🔍 DEBUG: Checking', Object.keys(this.portals).length, 'portals')
+      this.lastPortalDebug = Date.now()
+    }
     
     // Check each portal
     for (const [portalName, portal] of Object.entries(this.portals)) {
@@ -260,7 +275,7 @@ export class TestScene extends Phaser.Scene {
         if (!portal.isActive) {
           // Entering portal
           portal.isActive = true
-          console.log(`🚪 Entered ${portalName}`)
+          console.log(`🚪 Entered ${portalName} at position:`, playerPos)
           this.onPortalEnter(portalName)
         }
         break
@@ -1310,7 +1325,14 @@ export class TestScene extends Phaser.Scene {
   update(time: number, delta: number) {
     // Only proceed if player exists
     if (!this.testPlayer) {
+      console.log('🔍 DEBUG: TestScene update called but no testPlayer')
       return
+    }
+    
+    // Debug update loop every 5 seconds
+    if (!this.lastUpdateDebug || time - this.lastUpdateDebug > 5000) {
+      console.log('🔍 DEBUG: TestScene update loop running, player at:', this.testPlayer.x, this.testPlayer.y)
+      this.lastUpdateDebug = time
     }
     
     // Smooth movement system with delta time normalization
