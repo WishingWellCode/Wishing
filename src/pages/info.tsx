@@ -175,25 +175,25 @@ export default function InfoPage() {
         }
         .fallback-container {
           min-height: 100vh;
+          background-image: url('/assets/backgrounds/sixseven.png');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+          position: relative;
+        }
+        .fallback-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           background: 
-            radial-gradient(2px 2px at 20% 30%, #fff, transparent),
-            radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.8), transparent),
-            radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.6), transparent),
-            radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4), transparent),
-            radial-gradient(2px 2px at 80% 10%, rgba(255,255,255,0.7), transparent),
-            radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.5), transparent),
-            radial-gradient(1px 1px at 30% 20%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,0.6), transparent),
-            radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.4), transparent),
-            radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,0.3), transparent),
-            radial-gradient(2px 2px at 85% 60%, rgba(255,255,255,0.5), transparent),
-            radial-gradient(1px 1px at 15% 40%, rgba(255,255,255,0.4), transparent),
-            linear-gradient(135deg, #1a0b2e 0%, #16213e 20%, #0f3460 40%, #533b7d 60%, #7209b7 80%, #2d1b69 100%),
-            radial-gradient(ellipse at center, rgba(138, 43, 226, 0.15) 0%, transparent 50%);
-          background-size: 
-            400px 400px, 300px 300px, 200px 200px, 250px 250px, 350px 350px,
-            180px 180px, 220px 220px, 320px 320px, 280px 280px, 240px 240px,
-            360px 360px, 160px 160px, 100% 100%, 100% 100%;
+            linear-gradient(45deg, rgba(0,255,255,0.1) 0%, transparent 50%, rgba(255,0,255,0.1) 100%),
+            radial-gradient(circle at 20% 50%, rgba(0,255,0,0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(138,43,226,0.2) 0%, transparent 50%),
+            linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%);
+          z-index: 1;
         }
         .fallback-header {
           background: rgba(0,0,0,0.2);
@@ -301,9 +301,150 @@ export default function InfoPage() {
           padding: 32px;
           margin-bottom: 48px;
         }
+        
+        /* Housing Cards */
+        .housing-section {
+          position: relative;
+          z-index: 2;
+        }
+        .housing-card {
+          background: rgba(0,0,0,0.7);
+          backdrop-filter: blur(10px);
+          border-radius: 16px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          padding: 24px;
+          text-align: center;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        .housing-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 16px;
+          padding: 2px;
+          background: linear-gradient(45deg, #00ff00, #ff00ff, #00ffff, #ff0080);
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: xor;
+          z-index: -1;
+        }
+        .housing-card:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0 30px rgba(0,255,255,0.4), 0 0 60px rgba(255,0,255,0.2);
+        }
+        .housing-card:hover::before {
+          background: linear-gradient(45deg, #00ff00, #ff00ff, #00ffff, #ff0080, #00ff00);
+          background-size: 400% 400%;
+          animation: neonFlow 2s ease-in-out infinite;
+        }
+        .housing-card-inner {
+          position: relative;
+          z-index: 1;
+        }
+        
+        /* Verification Section */
+        .verification-section {
+          position: relative;
+          z-index: 2;
+        }
+        .trust-card {
+          background: rgba(0,0,0,0.8);
+          backdrop-filter: blur(15px);
+          border-radius: 12px;
+          border: 1px solid rgba(0,255,255,0.3);
+          padding: 20px;
+          text-align: center;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .trust-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(0,255,255,0.6);
+          box-shadow: 0 8px 25px rgba(0,255,255,0.2);
+        }
+        .trust-icon {
+          font-size: 24px;
+          margin-bottom: 12px;
+          filter: drop-shadow(0 0 10px rgba(0,255,255,0.5));
+        }
+        .trust-title {
+          font-family: "Press Start 2P";
+          font-size: 10px;
+          color: #00ffff;
+          margin-bottom: 8px;
+          text-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+        .trust-desc {
+          color: #a0a0a0;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+        
+        .glass-table-container {
+          background: rgba(0,0,0,0.85);
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          border: 2px solid rgba(0,255,255,0.3);
+          padding: 32px;
+          box-shadow: 
+            0 0 50px rgba(0,255,255,0.2),
+            inset 0 0 50px rgba(255,0,255,0.1);
+        }
+        
+        .neon-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          background: linear-gradient(45deg, #7c3aed, #3b82f6, #06b6d4);
+          color: white;
+          padding: 16px 32px;
+          border-radius: 12px;
+          font-family: "Press Start 2P";
+          font-size: 12px;
+          font-weight: 600;
+          border: 2px solid transparent;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-decoration: none;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 0 20px rgba(124,58,237,0.4);
+        }
+        .neon-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+          transition: left 0.5s;
+        }
+        .neon-button:hover {
+          transform: scale(1.05);
+          box-shadow: 
+            0 0 30px rgba(124,58,237,0.6),
+            0 0 60px rgba(59,130,246,0.4),
+            0 0 90px rgba(6,182,212,0.3);
+          border-color: rgba(0,255,255,0.5);
+        }
+        .neon-button:hover::before {
+          left: 100%;
+        }
+        
+        @keyframes neonFlow {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 fallback-container">
+      <div className="min-h-screen fallback-container">
+        <div className="relative z-10 min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-sm border-b border-purple-500/20 fallback-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 fallback-header-content">
@@ -350,80 +491,140 @@ export default function InfoPage() {
             ))}
           </div>
 
-          {/* Housing System - Full Width */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 mb-16 fallback-verification-section">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🏠</div>
-              <h2 className="text-3xl font-bold text-purple-400 mb-4">Housing System</h2>
-              <p className="text-gray-300 max-w-3xl mx-auto">
-                Houses provide gameplay bonuses and can be purchased with burned $WISH tokens.
+          {/* Housing Options Section */}
+          <div className="housing-section relative mb-16">
+            <div className="text-center mb-12">
+              <div className="text-6xl mb-6 animate-pulse">🏠</div>
+              <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(0,255,255,0.8), 0 0 40px rgba(255,0,255,0.6)'}}>
+                HOUSING OPTIONS
+              </h2>
+              <p className="text-pink-300 mb-8" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>
+                Unlock gameplay bonuses with premium housing
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 1: Starter Shack</h3>
-                <p className="text-green-300">+0.5% Win Boost</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">🏚️</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>STARTER SHACK</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+0.5%</div>
+                  <p className="text-gray-300 text-sm mb-4">Basic shelter with minimal bonuses</p>
+                  <div className="text-yellow-400 text-sm">Entry Level</div>
+                </div>
               </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 2: Cozy Cottage</h3>
-                <p className="text-green-300">+1.5% Win Boost</p>
+              
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">🏠</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>COZY COTTAGE</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+1.5%</div>
+                  <p className="text-gray-300 text-sm mb-4">Comfortable living with decent returns</p>
+                  <div className="text-yellow-400 text-sm">Popular Choice</div>
+                </div>
               </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 3: Suburban Home</h3>
-                <p className="text-green-300">+4.0% Win Boost</p>
+              
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">🏡</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>SUBURBAN HOME</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+4.0%</div>
+                  <p className="text-gray-300 text-sm mb-4">Spacious family home with solid bonuses</p>
+                  <div className="text-blue-400 text-sm">Recommended</div>
+                </div>
               </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 4: Luxury Villa</h3>
-                <p className="text-green-300">+8.0% Win Boost</p>
+              
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">🏘️</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>LUXURY VILLA</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+8.0%</div>
+                  <p className="text-gray-300 text-sm mb-4">Premium lifestyle with high returns</p>
+                  <div className="text-purple-400 text-sm">Luxury Tier</div>
+                </div>
               </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 5: Grand Mansion</h3>
-                <p className="text-green-300">+15.0% Win Boost</p>
+              
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">🏰</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>GRAND MANSION</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+15.0%</div>
+                  <p className="text-gray-300 text-sm mb-4">Elite residence for serious players</p>
+                  <div className="text-pink-400 text-sm">Elite Status</div>
+                </div>
               </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center border border-green-500/30">
-                <h3 className="text-lg font-bold text-green-400 mb-2">Tier 6: Royal Palace</h3>
-                <p className="text-green-300">+25.0% Win Boost</p>
+              
+              <div className="housing-card group">
+                <div className="housing-card-inner">
+                  <div className="text-4xl mb-4">👑</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>ROYAL PALACE</h3>
+                  <div className="text-2xl text-green-300 font-bold mb-2">+25.0%</div>
+                  <p className="text-gray-300 text-sm mb-4">Ultimate prestige with maximum rewards</p>
+                  <div className="text-red-400 text-sm animate-pulse">Legendary</div>
+                </div>
               </div>
             </div>
             
             <div className="text-center">
-              <Link href="/upgrades" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-bold text-lg mr-4 transition-colors">
-                🏠 View Housing District
+              <Link href="/upgrades" className="neon-button">
+                <span>🏠 ENTER HOUSING DISTRICT</span>
               </Link>
             </div>
           </div>
 
-          {/* Gambling Verification - Full Width */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 mb-16 fallback-verification-section">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🔍</div>
-              <h2 className="text-3xl font-bold text-purple-400 mb-4">Gambling Verification</h2>
-              <p className="text-gray-300 max-w-3xl mx-auto">
-                Every gambling result is transparent and verifiable on the Solana blockchain
+          {/* Gambling Verification Section */}
+          <div className="verification-section relative mb-16">
+            <div className="text-center mb-12">
+              <div className="flex justify-center items-center gap-4 mb-6">
+                <div className="text-4xl animate-pulse">🔍</div>
+                <div className="text-2xl text-green-400 animate-pulse">✅</div>
+              </div>
+              <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,255,0.6)'}}>
+                GAMBLING VERIFICATION
+              </h2>
+              <p className="text-green-300 mb-4" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>
+                VERIFIED ON-CHAIN • 100% TRANSPARENT • PROVABLY FAIR
               </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-black/30 p-6 rounded-lg text-center">
-                <div className="text-2xl mb-3">📊</div>
-                <h3 className="text-lg font-bold text-cyan-400 mb-2">Transparent Results</h3>
-                <p className="text-gray-300 text-sm">Every win recorded with wallet, amount, transaction, and timestamp</p>
-              </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center">
-                <div className="text-2xl mb-3">🔗</div>
-                <h3 className="text-lg font-bold text-cyan-400 mb-2">Blockchain Verified</h3>
-                <p className="text-gray-300 text-sm">Verify each result on Solana explorers like Solscan</p>
-              </div>
-              <div className="bg-black/30 p-6 rounded-lg text-center">
-                <div className="text-2xl mb-3">⏱️</div>
-                <h3 className="text-lg font-bold text-cyan-400 mb-2">Real-Time Updates</h3>
-                <p className="text-gray-300 text-sm">Live table of recent gambling outcomes</p>
+              <div className="flex justify-center items-center gap-2 mb-8">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm" style={{fontFamily: '"Press Start 2P"'}}>BLOCKCHAIN VERIFIED</span>
               </div>
             </div>
             
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold text-cyan-400 mb-6 text-center">Recent Gambling Results</h3>
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+              <div className="trust-card">
+                <div className="trust-icon">👤</div>
+                <h4 className="trust-title">WALLET</h4>
+                <p className="trust-desc">Anonymous wallet addresses with full transaction history</p>
+              </div>
+              
+              <div className="trust-card">
+                <div className="trust-icon">💰</div>
+                <h4 className="trust-title">AMOUNT</h4>
+                <p className="trust-desc">Exact $WISH amounts won, verified on-chain</p>
+              </div>
+              
+              <div className="trust-card">
+                <div className="trust-icon">🔗</div>
+                <h4 className="trust-title">TRANSACTION</h4>
+                <p className="trust-desc">Direct links to Solana blockchain explorers</p>
+              </div>
+              
+              <div className="trust-card">
+                <div className="trust-icon">⏰</div>
+                <h4 className="trust-title">TIMESTAMP</h4>
+                <p className="trust-desc">Exact time of each verified gambling result</p>
+              </div>
+            </div>
+            
+            {/* Results Table */}
+            <div className="glass-table-container">
+              <div className="flex justify-center items-center gap-3 mb-6">
+                <h3 className="text-2xl font-bold text-cyan-400" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>RECENT RESULTS</h3>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+              
               <StatsTable 
                 stats={stats} 
                 loading={loading} 
@@ -443,6 +644,7 @@ export default function InfoPage() {
             </button>
           </div>
         </main>
+        </div>
       </div>
     </>
   )
