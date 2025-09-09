@@ -69,7 +69,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             left: `${player.x}px`,
             top: `${player.y}px`,
             transform: 'translate(-50%, -50%)',
-            transition: 'left 0.1s ease-out, top 0.1s ease-out',
+            transition: 'left 0.05s linear, top 0.05s linear',
             zIndex: 2147483647,
             pointerEvents: 'none' // Ensure sprite doesn't block portal interactions
           }}

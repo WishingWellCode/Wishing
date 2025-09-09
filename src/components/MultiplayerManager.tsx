@@ -228,7 +228,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       return updated
     })
     
-    // More aggressive throttling for better performance
+    // Send position updates immediately for smooth real-time movement
+    // Use a much shorter throttle (16ms = ~60fps) for fluid movement
     if (positionUpdateTimeout.current) {
       clearTimeout(positionUpdateTimeout.current)
     }
@@ -246,7 +247,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           setIsConnected(false)
         }
       }
-    }, 100) // Update every 100ms at most (reduced from 50ms)
+    }, 16) // Update at ~60fps for smooth movement
   }
 
   const sendGamblingUpdate = (result: any) => {
