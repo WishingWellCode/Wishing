@@ -8,6 +8,8 @@ export class LobbyDO {
     this.tickInterval = null
     this.broadcastInterval = null
     
+    console.log('🎮 LobbyDO constructor called - instance created')
+    
     // Disable game loop for now - just handle simple position updates
     // this.startGameLoop()
   }
@@ -93,6 +95,9 @@ export class LobbyDO {
 
   async handleJoin(playerId, message) {
     const { walletAddress } = message
+    
+    console.log(`🎮 handleJoin called for ${playerId}, current players: ${this.players.size}`)
+    console.log(`🎮 Existing players:`, Array.from(this.players.keys()))
     
     // Generate username from wallet (first 3 + last 2 chars)
     const username = walletAddress.length >= 5 ? 
