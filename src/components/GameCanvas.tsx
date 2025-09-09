@@ -22,7 +22,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         width: window.innerWidth,
         height: window.innerHeight,
         parent: containerRef.current,
-        backgroundColor: 'transparent',
+        backgroundColor: '#000000',
         scene: [LandingScene],
         physics: {
           default: 'arcade',
@@ -82,12 +82,12 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       ref={containerRef}
       className="w-full h-full absolute inset-0"
       style={{ 
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 1
+        zIndex: 10
       }}
     />
   )

@@ -60,7 +60,7 @@ export default function Home() {
         }}
       >
         {/* Wallet button only */}
-        <div className="absolute top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
           <WalletMultiButton 
             className="!bg-purple-600 hover:!bg-purple-700"
             style={{ fontSize: '14px' }}

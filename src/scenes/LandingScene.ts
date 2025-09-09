@@ -26,30 +26,13 @@ export class LandingScene extends Phaser.Scene {
   }
 
   create() {
-    // Set transparent background to show CSS background
-    this.cameras.main.transparent = true
-    
-    // Add the vaporwave background image
+    // Add the vaporwave background image directly
     const background = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'vaporwave-background')
     background.setDisplaySize(this.cameras.main.width, this.cameras.main.height)
     background.setDepth(-1000)
     
-    // Add overlay text (hidden initially - only show if wallet not connected)
-    this.instructions = this.add.text(
-      this.cameras.main.centerX, 
-      100, 
-      'Move around with WASD keys and see other players!', {
-      fontSize: '16px',
-      fontFamily: '"Press Start 2P"',
-      color: '#ffffff',
-      backgroundColor: 'rgba(0,0,0,0.7)',
-      padding: { x: 15, y: 10 },
-      align: 'center'
-    })
-    this.instructions.setOrigin(0.5)
-    this.instructions.setDepth(1000) // High depth to show above everything
-    this.instructions.setScrollFactor(0)
-    this.instructions.setVisible(true) // Always visible now since wallet is connected
+    // Remove instruction text as requested by user
+    // this.instructions = this.add.text(...)
     
     // Create invisible player for position tracking (visible player shown via overlay)
     this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
