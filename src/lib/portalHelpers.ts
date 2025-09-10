@@ -27,7 +27,7 @@ export const PORTAL_CONFIGS: Record<string, PortalConfig> = {
   'Portal 4': {
     name: 'Portal 4',
     title: 'Leaving the Hub',
-    body: "You're about to open the Info page to learn how everything works. Continue?",
+    body: "Open the Info page to learn how everything works?",
     confirmLabel: 'Go to Info',
     cancelLabel: 'Stay Here',
     onConfirm: () => {

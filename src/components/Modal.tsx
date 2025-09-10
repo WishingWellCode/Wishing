@@ -53,15 +53,26 @@ export default function Modal({
       aria-labelledby="modal-title"
       ref={modalRef}
     >
-      <div className="bg-black/95 border-3 border-purple-500 rounded-lg p-6 max-w-md w-full mx-4 font-pixel">
+      <div 
+        className="bg-black/95 border-3 border-purple-500 rounded-lg p-6 max-w-md w-full mx-4"
+        style={{ fontFamily: '"Times New Roman", serif' }}
+      >
         <h2 
           id="modal-title"
-          className="text-2xl text-purple-400 mb-4 text-center"
+          className="text-2xl text-purple-400 mb-4 text-center font-bold"
+          style={{ fontFamily: '"Times New Roman", serif' }}
         >
           {title}
         </h2>
         
-        <p className="text-white text-sm leading-relaxed mb-6 text-center">
+        <p 
+          className="text-white text-sm leading-relaxed mb-6 text-center"
+          style={{ 
+            fontFamily: '"Times New Roman", serif',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word'
+          }}
+        >
           {body}
         </p>
         
@@ -69,7 +80,8 @@ export default function Modal({
           <button
             ref={confirmButtonRef}
             onClick={onConfirm}
-            className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded font-pixel text-sm transition-colors"
+            className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded text-sm transition-colors font-bold"
+            style={{ fontFamily: '"Times New Roman", serif' }}
             aria-label={confirmLabel}
           >
             {confirmLabel}
@@ -77,7 +89,8 @@ export default function Modal({
           
           <button
             onClick={onCancel}
-            className="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded font-pixel text-sm transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded text-sm transition-colors font-bold"
+            style={{ fontFamily: '"Times New Roman", serif' }}
             aria-label={cancelLabel}
           >
             {cancelLabel}
