@@ -676,86 +676,50 @@ export default function InfoPage() {
               
               <div className="fallback-section-desc">
                 <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
-                  {/* Realistic Pie Chart */}
-                  <div className="flex justify-center mb-6">
-                    <svg width="300" height="300" viewBox="0 0 300 300">
-                      {/* Ecosystem 30% - Green */}
-                      <path d="M 150 150 L 150 50 A 100 100 0 0 1 236.60 113.40 Z" fill="#22c55e" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Airdrop 25% - Orange */}
-                      <path d="M 150 150 L 236.60 113.40 A 100 100 0 0 1 236.60 186.60 Z" fill="#f97316" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Contributors 17% - Cyan */}
-                      <path d="M 150 150 L 236.60 186.60 A 100 100 0 0 1 195.71 226.18 Z" fill="#06b6d4" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Private Sale 12% - Red */}
-                      <path d="M 150 150 L 195.71 226.18 A 100 100 0 0 1 134.73 243.30 Z" fill="#ef4444" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Community Presale 11% - Pink */}
-                      <path d="M 150 150 L 134.73 243.30 A 100 100 0 0 1 79.29 214.64 Z" fill="#ec4899" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Advisory 3% - Purple */}
-                      <path d="M 150 150 L 79.29 214.64 A 100 100 0 0 1 68.30 201.92 Z" fill="#8b5cf6" stroke="#1f2937" strokeWidth="3"/>
-                      {/* Binance Launchpool 2% - Gray */}
-                      <path d="M 150 150 L 68.30 201.92 A 100 100 0 0 1 150 50 Z" fill="#6b7280" stroke="#1f2937" strokeWidth="3"/>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    {/* Pie Chart */}
+                    <div className="flex justify-center">
+                      <svg width="200" height="200" viewBox="0 0 200 200">
+                        {/* Community 90% - Green slice */}
+                        <path d="M 100 100 L 100 20 A 80 80 0 1 1 48.64 148.64 Z" fill="#22c55e" stroke="#1f2937" strokeWidth="2"/>
+                        {/* Development 10% - Purple slice */}
+                        <path d="M 100 100 L 48.64 148.64 A 80 80 0 0 1 100 20 Z" fill="#a855f7" stroke="#1f2937" strokeWidth="2"/>
+                        {/* Center circle for depth */}
+                        <circle cx="100" cy="100" r="25" fill="#1f2937"/>
+                      </svg>
+                    </div>
+
+                    {/* Legend and Details */}
+                    <div className="space-y-3 text-left">
+                      <div className="p-3 bg-green-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                          <span className="font-bold" style={{color: '#ffffff'}}>Community (90%)</span>
+                        </div>
+                        <div className="text-xs" style={{color: '#ffffff'}}>
+                          Distributed to community through fair gameplay mechanics
+                        </div>
+                      </div>
                       
-                      {/* Center circle for depth */}
-                      <circle cx="150" cy="150" r="35" fill="#1f2937"/>
-                    </svg>
+                      <div className="p-3 bg-purple-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                          <span className="font-bold" style={{color: '#ffffff'}}>Development (10%)</span>
+                        </div>
+                        <div className="text-xs space-y-1" style={{color: '#ffffff'}}>
+                          <div>• 5% Pool Wallet for ongoing liquidity</div>
+                          <div>• 5% Locked for future Gambling pool</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Legend */}
-                  <div className="space-y-2 text-left max-w-md mx-auto text-sm">
-                    <div className="flex items-center justify-between p-2 bg-green-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>ECOSYSTEM (30%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>30% STASHED AWAY TO GIVE BACK TO OUR COMMUNITY AND BUILD THE ECOSYSTEM.</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-orange-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>AIRDROP (25%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>25% TO THANK OUR FAM THROUGH MULTIPLE AIRDROPS 🤝</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-cyan-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>CONTRIBUTORS (17%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>17% FOR THE PARTNERS THAT BUILD WITH US AND SOLD US THEIR LAMBOS</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-red-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>PRIVATE SALE (12%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>12% OF MEME DISTRIBUTED TO EXTERNAL INVESTORS AND SUPER CREW HOLDERS VIA PRIVATE PRESALE</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-pink-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>COMMUNITY PRESALE (11%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>11% OF MEME WILL BE DISTRIBUTED TO THE GREATER MEMELAND COMMUNITY VIA A FIRE SALE 🔥</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-purple-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>ADVISORY (3%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>3% FOR THE COUNSELING WE NEED TO PULL THROUGH</div>
-                    
-                    <div className="flex items-center justify-between p-2 bg-gray-500/20 rounded">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                        <span style={{color: '#ffffff'}}>BINANCE LAUNCHPOOL (2%)</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-300 pl-5 mb-2" style={{color: '#ffffff'}}>2% FOR THE INITIAL LIQUIDITY ON EXCHANGE</div>
+                  <div className="mt-4 p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                    <h4 className="font-bold text-yellow-400 mb-2">💡 Fair Distribution</h4>
+                    <p className="text-sm" style={{color: '#ffffff'}}>
+                      90% goes directly to the community through transparent gameplay mechanics, 
+                      ensuring the largest portion benefits players.
+                    </p>
                   </div>
                 </div>
               </div>
