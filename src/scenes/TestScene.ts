@@ -347,7 +347,7 @@ export class TestScene extends Phaser.Scene {
       'RECENT WINNERS',
       {
         fontSize: '24px',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         color: '#ff00ff',
         align: 'center'
       }
@@ -362,7 +362,7 @@ export class TestScene extends Phaser.Scene {
       'Loading winners data...',
       {
         fontSize: '16px',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         color: '#ffffff',
         align: 'center'
       }
@@ -377,7 +377,7 @@ export class TestScene extends Phaser.Scene {
       'Press ESC to close',
       {
         fontSize: '12px',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         color: '#888888',
         align: 'center'
       }
@@ -419,7 +419,7 @@ export class TestScene extends Phaser.Scene {
             : 'No winners yet! Be the first to try your luck.\nYour winning transactions will appear here.',
           {
             fontSize: '14px',
-            fontFamily: '"Press Start 2P"',
+            fontFamily: '"Times New Roman", serif',
             color: '#888888',
             align: 'center'
           }
@@ -489,7 +489,7 @@ export class TestScene extends Phaser.Scene {
         header,
         {
           fontSize: '12px',
-          fontFamily: '"Press Start 2P"',
+          fontFamily: '"Times New Roman", serif',
           color: '#ff00ff',
           align: 'center'
         }
@@ -599,7 +599,7 @@ export class TestScene extends Phaser.Scene {
         `Showing ${Math.min(maxVisibleRows, filteredWinners.length)} of ${filteredWinners.length} winners`,
         {
           fontSize: '10px',
-          fontFamily: '"Press Start 2P"',
+          fontFamily: '"Times New Roman", serif',
           color: '#888888',
           align: 'center'
         }
@@ -656,11 +656,11 @@ export class TestScene extends Phaser.Scene {
     const title = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY - modalHeight/2 + 60,
-      'Portal 1: Housing District',
+      'Housing District',
       {
-        fontSize: '24px',
+        fontSize: '20px',
         color: '#8b5cf6',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center'
       }
     )
@@ -673,9 +673,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - 20,
       'Welcome to the Housing District!\n\nTo access this portal, you need to visit\nthe Upgrades page first to purchase\nyour housing upgrades.\n\nWould you like to go there now?',
       {
-        fontSize: '16px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center',
         lineSpacing: 8
       }
@@ -699,9 +699,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       'CONTINUE',
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -723,9 +723,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       'CANCEL',
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
@@ -831,11 +831,11 @@ export class TestScene extends Phaser.Scene {
     const title = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY - modalHeight/2 + 60,
-      'Portal 2: Community Links',
+      'Community Links',
       {
-        fontSize: '24px',
+        fontSize: '20px',
         color: '#8b5cf6',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center'
       }
     )
@@ -848,9 +848,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - 20,
       'Welcome to the Community Hub!\n\nConnect with the $WISH community\nthrough our social media channels.\n\nWould you like to visit our\nLinks page now?',
       {
-        fontSize: '16px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center',
         lineSpacing: 8
       }
@@ -874,9 +874,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       'CONTINUE',
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -898,9 +898,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       'CANCEL',
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
@@ -1018,7 +1018,7 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '24px',
         color: '#8b5cf6',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center'
       }
     )
@@ -1033,7 +1033,7 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '16px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"',
+        fontFamily: '"Times New Roman", serif',
         align: 'center',
         lineSpacing: 8
       }
@@ -1057,9 +1057,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       portal4Config.confirmLabel,
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -1081,9 +1081,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       portal4Config.cancelLabel,
       {
-        fontSize: '14px',
+        fontSize: '12px',
         color: '#ffffff',
-        fontFamily: '"Press Start 2P"'
+        fontFamily: '"Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
