@@ -41,9 +41,13 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         console.log('🎮 MultiplayerManager: Connecting/Reconnecting to multiplayer')
         connectMultiplayer()
       }
-    } else if ((!isActive || !connected) && wsRef.current) {
-      console.log('🎮 MultiplayerManager: Disconnecting from multiplayer')
-      disconnectMultiplayer()
+    } else if ((!isActive || !connected)) {
+      console.log('🎮 MultiplayerManager: Disconnecting from multiplayer (wallet disconnected or inactive)')
+      // Immediately clear players when wallet disconnects
+      setPlayers([])
+      if (wsRef.current) {
+        disconnectMultiplayer()
+      }
     }
     
     return () => {
@@ -53,6 +57,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       }
     }
   }, [isActive, connected, publicKey])
+
+  // Handle wallet address changes specifically (wallet switching)
+  useEffect(() => {
+    // If publicKey changes and we had a previous connection, disconnect immediately
+    if (playerIdRef.current && wsRef.current) {
+      console.log('🎮 🔄 Wallet address changed, forcing immediate disconnect...')
+      disconnectMultiplayer()
+      // Clear players immediately to remove old wallet's sprite
+      setPlayers([])
+    }
+  }, [publicKey?.toString()])
 
   const connectMultiplayer = () => {
     if (!publicKey) return
@@ -153,6 +168,22 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const disconnectMultiplayer = () => {
+    console.log('🎮 🔌 Disconnecting from multiplayer...')
+    
+    // Send leave message before closing connection if still connected
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && playerIdRef.current) {
+      try {
+        const leaveMessage = {
+          type: 'leave',
+          playerId: playerIdRef.current
+        }
+        console.log('🎮 📤 Sending leave message:', leaveMessage)
+        wsRef.current.send(JSON.stringify(leaveMessage))
+      } catch (error) {
+        console.error('🎮 ❌ Error sending leave message:', error)
+      }
+    }
+    
     if (wsRef.current) {
       wsRef.current.close()
       wsRef.current = null
@@ -163,9 +194,12 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       pingIntervalRef.current = null
     }
     
+    // Clear all state immediately
     setIsConnected(false)
     setPlayers([])
     playerIdRef.current = null
+    
+    console.log('🎮 ✅ Disconnected from multiplayer and cleared all player data')
   }
 
   const handleMultiplayerMessage = (message: any) => {

@@ -205,7 +205,7 @@ export class TestScene extends Phaser.Scene {
     // Title text
     const title = this.add.text(0, -15, '🪙 Wishing Fountain', {
       fontSize: '18px',
-      fontFamily: '"Press Start 2P"',
+      fontFamily: '"Times New Roman", serif',
       color: '#ffd700'
     })
     title.setOrigin(0.5)
@@ -217,7 +217,7 @@ export class TestScene extends Phaser.Scene {
     
     const gambText = this.add.text(0, 15, 'Throw 1,000 $WISH', {
       fontSize: '12px',
-      fontFamily: '"Press Start 2P"',
+      fontFamily: '"Times New Roman", serif',
       color: '#000000'
     })
     gambText.setOrigin(0.5)
@@ -1468,50 +1468,53 @@ export class TestScene extends Phaser.Scene {
     resultPopup.setScrollFactor(0)
     resultPopup.setDepth(20)
     
-    // Background
-    const bg = this.add.rectangle(0, 0, 500, 200, 0x000000, 0.9)
+    // Background - made wider to contain text properly
+    const bg = this.add.rectangle(0, 0, 600, 220, 0x000000, 0.9)
     bg.setStrokeStyle(4, result.tier === 'JACKPOT' ? 0xffd700 : 0xffffff)
     
-    // Result text with tier-specific colors
+    // Result text with tier-specific colors (updated for new tier names)
     let tierColor = '#ffffff' // Default white
-    if (result.tier === 'LOSE') tierColor = '#ff4444' // Red
+    if (result.tier === 'BUST' || result.tier === 'LOSE') tierColor = '#ff4444' // Red
     else if (result.tier === 'BREAK EVEN') tierColor = '#888888' // Gray  
-    else if (result.tier.includes('SMALL WIN')) tierColor = '#44ff44' // Green
-    else if (result.tier === 'MEDIUM WIN') tierColor = '#00ffff' // Cyan
-    else if (result.tier === 'LARGE WIN') tierColor = '#ff00ff' // Magenta
-    else if (result.tier === 'MAJOR WIN') tierColor = '#ff8800' // Orange
+    else if (result.tier === 'WIN') tierColor = '#44ff44' // Green
+    else if (result.tier === 'BIG WIN') tierColor = '#00ffff' // Cyan
+    else if (result.tier === 'MEGA WIN') tierColor = '#ff00ff' // Magenta
     else if (result.tier === 'JACKPOT') tierColor = '#ffd700' // Gold
     
-    const tierText = this.add.text(0, -40, result.tier.toUpperCase(), {
+    const tierText = this.add.text(0, -50, result.tier.toUpperCase(), {
       fontSize: '24px',
-      fontFamily: '"Press Start 2P"',
-      color: tierColor
+      fontFamily: '"Times New Roman", serif',
+      color: tierColor,
+      fontStyle: 'bold'
     })
     tierText.setOrigin(0.5)
     
-    const messageText = this.add.text(0, -5, result.message, {
+    const messageText = this.add.text(0, -10, result.message, {
       fontSize: '14px',
-      fontFamily: '"Press Start 2P"',
-      color: '#ffffff'
+      fontFamily: '"Times New Roman", serif',
+      color: '#ffffff',
+      align: 'center',
+      wordWrap: { width: 550, useAdvancedWrap: true }
     })
     messageText.setOrigin(0.5)
     
-    const payoutText = this.add.text(0, 25, 
+    const payoutText = this.add.text(0, 35, 
       result.multiplier > 0 ? `Won: ${Math.floor(1000 * result.multiplier)} $WISH` : 'Lost: 1,000 $WISH', {
       fontSize: '16px',
-      fontFamily: '"Press Start 2P"',
-      color: tierColor
+      fontFamily: '"Times New Roman", serif',
+      color: tierColor,
+      fontStyle: 'bold'
     })
     payoutText.setOrigin(0.5)
     
     // Close button
-    const closeBtn = this.add.rectangle(0, 65, 100, 30, 0x6b7280)
+    const closeBtn = this.add.rectangle(0, 75, 100, 30, 0x6b7280)
     closeBtn.setStrokeStyle(2, 0xffffff)
     closeBtn.setInteractive()
     
-    const closeTxt = this.add.text(0, 65, 'Close', {
+    const closeTxt = this.add.text(0, 75, 'Close', {
       fontSize: '12px',
-      fontFamily: '"Press Start 2P"',
+      fontFamily: '"Times New Roman", serif',
       color: '#ffffff'
     })
     closeTxt.setOrigin(0.5)
