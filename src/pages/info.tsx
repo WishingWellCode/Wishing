@@ -619,8 +619,6 @@ export default function InfoPage() {
           <div className="verification-section relative mb-16">
             <div className="text-center mb-12">
               <div className="flex justify-center items-center gap-4 mb-6">
-                <div className="text-4xl animate-pulse">🔍</div>
-                <div className="text-2xl text-green-400 animate-pulse">✅</div>
               </div>
               <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,255,0.6)'}}>
                 GAMBLING VERIFICATION
@@ -680,10 +678,10 @@ export default function InfoPage() {
                     {/* Pie Chart */}
                     <div className="flex justify-center">
                       <svg width="200" height="200" viewBox="0 0 200 200">
-                        {/* Community 90% - Green donut segment */}
-                        <path d="M 100 30 A 70 70 0 1 1 75.28 171.26 L 85.56 156.51 A 50 50 0 1 0 100 50 Z" fill="#22c55e" stroke="none"/>
-                        {/* Development 10% - Purple donut segment */}
-                        <path d="M 75.28 171.26 A 70 70 0 0 1 100 30 L 100 50 A 50 50 0 0 0 85.56 156.51 Z" fill="#a855f7" stroke="none"/>
+                        {/* Community 90% - Green donut segment (324 degrees) */}
+                        <path d="M 100 30 A 70 70 0 1 1 42.07 158.78 L 55.76 147.73 A 50 50 0 1 0 100 50 Z" fill="#22c55e"/>
+                        {/* Development 10% - Purple donut segment (36 degrees) */}
+                        <path d="M 42.07 158.78 A 70 70 0 0 1 100 30 L 100 50 A 50 50 0 0 0 55.76 147.73 Z" fill="#a855f7"/>
                       </svg>
                     </div>
 
