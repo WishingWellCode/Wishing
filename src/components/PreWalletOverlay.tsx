@@ -25,11 +25,11 @@ export default function PreWalletOverlay() {
         style={{ zIndex: 10000 }}
       >
       {/* Centered layout container */}
-      <div className="flex items-center justify-center min-h-screen p-8">
+      <div className="flex items-center justify-center h-screen">
         
         {/* Main Box Container with Connect Button at Top */}
         <div 
-          className="relative max-w-2xl w-full"
+          className="relative max-w-2xl w-full mx-4"
           style={{
             background: 'rgba(20, 10, 30, 0.95)',
             border: '3px solid rgba(147, 51, 234, 0.8)',
@@ -37,8 +37,7 @@ export default function PreWalletOverlay() {
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
             fontFamily: '"Press Start 2P"',
             color: '#fff',
-            padding: '60px 30px 30px 30px',
-            marginTop: '40px'
+            padding: '60px 30px 30px 30px'
           }}
         >
           {/* Connect Wallet Button - positioned at top center of the box */}
@@ -64,12 +63,11 @@ export default function PreWalletOverlay() {
               }}
             >
               <img 
-                src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
+                src="/assets/logos/phantom.svg"
                 alt="Phantom"
                 style={{
-                  width: '20px',
-                  height: '20px',
-                  filter: 'brightness(0) invert(1)'
+                  width: '24px',
+                  height: '24px'
                 }}
               />
               Connect Wallet
