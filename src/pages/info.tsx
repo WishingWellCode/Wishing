@@ -680,10 +680,10 @@ export default function InfoPage() {
                     {/* Pie Chart */}
                     <div className="flex justify-center">
                       <svg width="200" height="200" viewBox="0 0 200 200">
-                        {/* Community 90% - Green slice */}
-                        <path d="M 100 100 L 100 20 A 80 80 0 1 1 48.64 148.64 Z" fill="#22c55e" stroke="#1f2937" strokeWidth="2"/>
-                        {/* Development 10% - Purple slice */}
-                        <path d="M 100 100 L 48.64 148.64 A 80 80 0 0 1 100 20 Z" fill="#a855f7" stroke="#1f2937" strokeWidth="2"/>
+                        {/* Community 90% - Green slice (324 degrees) */}
+                        <path d="M 100 100 L 100 20 A 80 80 0 1 1 164.16 136.8 Z" fill="#22c55e" stroke="#1f2937" strokeWidth="2"/>
+                        {/* Development 10% - Purple slice (36 degrees) */}
+                        <path d="M 100 100 L 164.16 136.8 A 80 80 0 0 1 100 20 Z" fill="#a855f7" stroke="#1f2937" strokeWidth="2"/>
                         {/* Center circle for depth */}
                         <circle cx="100" cy="100" r="25" fill="#1f2937"/>
                       </svg>
