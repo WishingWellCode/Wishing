@@ -102,4 +102,13 @@ export class LandingScene extends Phaser.Scene {
       (window as any).multiplayerManager.updatePosition(x, y)
     }
   }
+  
+  shutdown() {
+    console.log('🔍 DEBUG: LandingScene shutdown - cleaning up player sprite')
+    // Properly destroy the player sprite to prevent duplicate sprites
+    if (this.player) {
+      this.player.destroy()
+      this.player = null as any
+    }
+  }
 }

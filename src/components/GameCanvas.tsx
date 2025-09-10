@@ -38,6 +38,12 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
         if ((landingScene as any).tweens) {
           ;(landingScene as any).tweens.killAll()
         }
+        // Force cleanup of sprites before stopping scene
+        if ((landingScene as any).player) {
+          console.log('🔍 DEBUG: Destroying LandingScene player sprite')
+          ;(landingScene as any).player.destroy()
+          ;(landingScene as any).player = null
+        }
         sceneManager.stop('LandingScene')
       }
       
