@@ -54,7 +54,7 @@ export default function Modal({
       ref={modalRef}
     >
       <div 
-        className="bg-black/95 border-3 border-purple-500 rounded-lg p-6 max-w-md w-full mx-4"
+        className="bg-black/95 border-3 border-purple-500 rounded-lg p-6 max-w-lg w-full mx-4"
         style={{ fontFamily: '"Times New Roman", serif' }}
       >
         <h2 
@@ -65,16 +65,18 @@ export default function Modal({
           {title}
         </h2>
         
-        <p 
-          className="text-white text-sm leading-relaxed mb-6 text-center"
+        <div 
+          className="text-white text-sm leading-relaxed mb-6 text-center px-2"
           style={{ 
             fontFamily: '"Times New Roman", serif',
             wordBreak: 'break-word',
-            overflowWrap: 'break-word'
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            maxWidth: '100%'
           }}
         >
           {body}
-        </p>
+        </div>
         
         <div className="flex gap-4 justify-center">
           <button
