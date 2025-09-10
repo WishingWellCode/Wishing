@@ -70,13 +70,32 @@ export default function Home() {
         </div>
         
         <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 9999 }}>
-          <div 
+          <button
             onClick={() => setShowHelp(true)}
-            className="wallet-adapter-button-trigger wallet-adapter-button !bg-purple-600 hover:!bg-purple-700"
-            style={{ fontSize: '14px', cursor: 'pointer' }}
+            style={{
+              backgroundColor: '#9333ea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 16px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              minWidth: 'auto',
+              width: 'auto',
+              display: 'inline-block'
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
+            }}
           >
             Help
-          </div>
+          </button>
         </div>
 
         {/* Help overlay */}
