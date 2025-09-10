@@ -616,10 +616,30 @@ export class TestScene extends Phaser.Scene {
   closeWinnersOverlay() {
     if (!this.winnersOverlay) return
 
-    // Clean up all elements
-    this.winnersOverlay.elements.forEach((element: Phaser.GameObjects.GameObject) => {
-      if (element && element.destroy) {
-        element.destroy()
+    console.log('🧹 Cleaning up winners overlay...')
+
+    // Clean up all elements in the elements array
+    if (this.winnersOverlay.elements && Array.isArray(this.winnersOverlay.elements)) {
+      this.winnersOverlay.elements.forEach((element: Phaser.GameObjects.GameObject) => {
+        if (element && element.destroy) {
+          try {
+            element.destroy()
+          } catch (e) {
+            console.warn('Failed to destroy overlay element:', e)
+          }
+        }
+      })
+    }
+
+    // Clean up individual properties that might not be in the elements array
+    const individualElements = ['background', 'title', 'closeText', 'loadingText']
+    individualElements.forEach(prop => {
+      if (this.winnersOverlay[prop] && this.winnersOverlay[prop].destroy) {
+        try {
+          this.winnersOverlay[prop].destroy()
+        } catch (e) {
+          console.warn(`Failed to destroy ${prop}:`, e)
+        }
       }
     })
 
@@ -629,7 +649,23 @@ export class TestScene extends Phaser.Scene {
     }
 
     this.winnersOverlay = null
-    console.log('Winners overlay closed')
+    
+    // Safety cleanup: search for any lingering text objects with "No winners yet" and destroy them
+    this.children.list.forEach((child: Phaser.GameObjects.GameObject) => {
+      if (child.type === 'Text') {
+        const textObj = child as Phaser.GameObjects.Text
+        if (textObj.text.includes('No winners yet') || textObj.text.includes('Your winning transactions will appear here')) {
+          console.log('🗑️ Found and destroying lingering winners text')
+          try {
+            textObj.destroy()
+          } catch (e) {
+            console.warn('Failed to destroy lingering text:', e)
+          }
+        }
+      }
+    })
+    
+    console.log('✅ Winners overlay fully cleaned up')
   }
 
   showPortal1Warning() {
