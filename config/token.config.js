@@ -4,11 +4,11 @@
 const TOKEN_CONFIG = {
   // IMPORTANT: Update these values for production launch
   PRODUCTION: {
-    // Your real token contract address (CA) - UPDATE THIS WHEN TOKEN IS DEPLOYED
-    WISH_TOKEN_MINT: "YOUR_REAL_TOKEN_CA_HERE",
+    // Your real token contract address (CA)
+    WISH_TOKEN_MINT: "DgSwxG6JdFn8CZWqkJpRbmeaHZ11UUg2KmJ4btanpump",
     
-    // Your real dev wallet public key - UPDATE THIS
-    POOL_WALLET_PUBLIC: "YOUR_REAL_DEV_WALLET_PUBLIC_KEY_HERE",
+    // Your real dev wallet public key
+    POOL_WALLET_PUBLIC: "3A16eieUnz9tSjCwS528MLdoE6uuqJMqL7hQaQs5qYDu",
     
     // Solana RPC (keep current or update if needed)
     SOLANA_RPC_URL: "https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki",
@@ -27,7 +27,7 @@ const TOKEN_CONFIG = {
 }
 
 // Export current config (change to PRODUCTION when ready to launch)
-const CURRENT_CONFIG = TOKEN_CONFIG.TESTING // Change to TOKEN_CONFIG.PRODUCTION for launch
+const CURRENT_CONFIG = TOKEN_CONFIG.PRODUCTION // Switched to PRODUCTION for launch
 
 module.exports = {
   TOKEN_CONFIG,

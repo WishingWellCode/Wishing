@@ -1378,7 +1378,7 @@ export class TestScene extends Phaser.Scene {
       
       // Create burn transaction
       text.setText('Preparing burn...')
-      const tokenMintAddress = '4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjtzVpump'
+      const tokenMintAddress = 'DgSwxG6JdFn8CZWqkJpRbmeaHZ11UUg2KmJ4btanpump'
       const tokenMint = new PublicKey(tokenMintAddress)
       
       // Real burn transaction
