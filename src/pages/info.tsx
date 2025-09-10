@@ -664,7 +664,7 @@ export default function InfoPage() {
           </div>
           
           {/* Tokenomics Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16 fallback-grid">
+          <div className="max-w-5xl mx-auto mb-16">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
               <div className="mb-6">
                 <div className="text-6xl mb-6 fallback-section-icon">💰</div>
