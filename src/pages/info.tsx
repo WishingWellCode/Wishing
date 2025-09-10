@@ -132,22 +132,22 @@ export default function InfoPage() {
       icon: '❓',
       content: (
         <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
-          <div className="bg-black/30 p-4 rounded-lg">
+          <div className="bg-black/30 p-4">
             <h4 className="text-cyan-400 font-bold mb-2">What wallets are supported?</h4>
             <p className="font-bold">We support all Solana wallets, with Phantom being the recommended choice for the best experience.</p>
           </div>
           
-          <div className="bg-black/30 p-4 rounded-lg">
+          <div className="bg-black/30 p-4">
             <h4 className="text-cyan-400 font-bold mb-2">What if I encounter errors?</h4>
             <p className="font-bold">Most errors are related to wallet connection or insufficient token balance. Ensure your wallet is connected and you have enough $WISH tokens for transactions.</p>
           </div>
           
-          <div className="bg-black/30 p-4 rounded-lg">
+          <div className="bg-black/30 p-4">
             <h4 className="text-cyan-400 font-bold mb-2">Is my data private and secure?</h4>
             <p className="font-bold">We only use your wallet address for on-chain transactions. No personal information is collected or stored. All gameplay data is public on the Solana blockchain.</p>
           </div>
           
-          <div className="bg-black/30 p-4 rounded-lg">
+          <div className="bg-black/30 p-4">
             <h4 className="text-cyan-400 font-bold mb-2">How can I verify transactions?</h4>
             <p className="font-bold">Every transaction has a unique signature that can be viewed on Solscan.io. Click any "VIEW TX" link in the results table above.</p>
           </div>
@@ -218,7 +218,6 @@ export default function InfoPage() {
           background: linear-gradient(to right, #7c3aed, #3b82f6);
           color: white;
           padding: 12px 24px;
-          border-radius: 8px;
           font-weight: 600;
           border: none;
           cursor: pointer;
@@ -267,7 +266,6 @@ export default function InfoPage() {
           background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border-radius: 16px;
           border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
           text-align: center;
@@ -302,7 +300,6 @@ export default function InfoPage() {
           background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border-radius: 16px;
           border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
           margin-bottom: 48px;
@@ -327,7 +324,6 @@ export default function InfoPage() {
           background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border-radius: 16px;
           border: 2px solid transparent;
           background-clip: padding-box;
           padding: 24px;
@@ -344,7 +340,6 @@ export default function InfoPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          border-radius: 16px;
           padding: 2px;
           background: linear-gradient(45deg, #00ff00, #ff00ff, #00ffff, #ff0080);
           mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -374,7 +369,6 @@ export default function InfoPage() {
           background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border-radius: 12px;
           border: 1px solid rgba(255,255,255,0.10);
           padding: 20px;
           text-align: center;
@@ -416,7 +410,6 @@ export default function InfoPage() {
           background: rgba(15, 15, 25, 0.72);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border-radius: 20px;
           border: 1px solid rgba(255,255,255,0.10);
           padding: 32px;
           box-shadow: 0 10px 30px rgba(0,0,0,0.45);
@@ -430,7 +423,6 @@ export default function InfoPage() {
           background: linear-gradient(45deg, #7c3aed, #3b82f6, #06b6d4);
           color: white;
           padding: 16px 32px;
-          border-radius: 12px;
           font-family: "Press Start 2P";
           font-size: 12px;
           font-weight: 600;
@@ -475,11 +467,9 @@ export default function InfoPage() {
         }
         .stats-scroll::-webkit-scrollbar-track {
           background: rgba(0, 0, 0, 0.3);
-          border-radius: 4px;
         }
         .stats-scroll::-webkit-scrollbar-thumb {
           background: linear-gradient(45deg, rgba(0, 255, 255, 0.6), rgba(255, 0, 255, 0.4));
-          border-radius: 4px;
         }
         .stats-scroll::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(45deg, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.6));
@@ -493,7 +483,7 @@ export default function InfoPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 fallback-header-content">
             <button 
               onClick={() => router.push('/')}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl fallback-btn"
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl fallback-btn"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -518,7 +508,7 @@ export default function InfoPage() {
           {/* 2x2 Grid of Info Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16 fallback-grid">
             {infoSections.map((section) => (
-              <div key={section.id} className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
+              <div key={section.id} className="bg-white/10 backdrop-blur-sm  border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
                 <div className="mb-6">
                   <div className="text-6xl mb-6 fallback-section-icon">{section.icon}</div>
                 </div>
@@ -627,7 +617,7 @@ export default function InfoPage() {
                 VERIFIED ON-CHAIN • 100% TRANSPARENT • PROVABLY FAIR
               </p>
               <div className="flex justify-center items-center gap-2 mb-8">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-green-500  animate-pulse"></div>
                 <span className="text-white text-sm" style={{fontFamily: '"Press Start 2P"', color: '#ffffff'}}>BLOCKCHAIN VERIFIED</span>
               </div>
             </div>
@@ -663,7 +653,7 @@ export default function InfoPage() {
           
           {/* Tokenomics Section */}
           <div className="max-w-5xl mx-auto mb-16">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
+            <div className="bg-white/10 backdrop-blur-sm  border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
               <div className="mb-6">
                 <div className="text-6xl mb-6 fallback-section-icon">💰</div>
               </div>
@@ -682,15 +672,15 @@ export default function InfoPage() {
                         alt="Tokenomics Distribution Chart" 
                         width="200" 
                         height="200"
-                        className="rounded-lg"
+                        className=""
                       />
                     </div>
 
                     {/* Legend and Details */}
                     <div className="space-y-3 text-left">
-                      <div className="p-3 bg-green-500/20 rounded-lg">
+                      <div className="p-3 bg-green-500/20 ">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                          <div className="w-4 h-4 bg-green-500 "></div>
                           <span className="font-bold" style={{color: '#ffffff'}}>Community (90%)</span>
                         </div>
                         <div className="text-xs" style={{color: '#ffffff'}}>
@@ -698,9 +688,9 @@ export default function InfoPage() {
                         </div>
                       </div>
                       
-                      <div className="p-3 bg-purple-500/20 rounded-lg">
+                      <div className="p-3 bg-purple-500/20 ">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                          <div className="w-4 h-4 bg-purple-500 "></div>
                           <span className="font-bold" style={{color: '#ffffff'}}>Development (10%)</span>
                         </div>
                         <div className="text-xs space-y-1" style={{color: '#ffffff'}}>
@@ -711,7 +701,7 @@ export default function InfoPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                  <div className="mt-4 p-4 bg-yellow-500/20  border border-yellow-500/30">
                     <h4 className="font-bold text-yellow-400 mb-2">💡 Fair Distribution</h4>
                     <p className="text-sm" style={{color: '#ffffff'}}>
                       90% goes directly to the community through transparent gameplay mechanics, 
@@ -728,7 +718,7 @@ export default function InfoPage() {
             <div className="glass-table-container max-w-4xl mx-auto">
               <div className="flex justify-center items-center gap-3 mb-6">
                 <h3 className="text-2xl font-bold text-cyan-400" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>RECENT RESULTS</h3>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-500  animate-pulse"></div>
               </div>
               
               <StatsTable 
@@ -744,7 +734,7 @@ export default function InfoPage() {
           <div className="text-center">
             <button
               onClick={() => router.push('/')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-16 py-6 rounded-2xl font-bold text-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-16 py-6  font-bold text-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               🎮 Return to Game
             </button>
