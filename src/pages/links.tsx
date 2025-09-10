@@ -35,10 +35,9 @@ export default function Links() {
     },
     {
       name: 'Telegram',
-      url: null,
+      url: 'https://t.me/wishdotgl',
       icon: '✈️',
       color: '#0088cc',
-      status: 'TBD',
       description: 'Join our community chat for real-time discussions and support'
     },
     {
