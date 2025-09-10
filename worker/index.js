@@ -360,6 +360,11 @@ export default {
       }
     }
     
+    // Admin data clearing endpoint
+    if (url.pathname === '/api/admin/clear-winners' && request.method === 'POST') {
+      return handleClearWinners(request, env)
+    }
+    
     // Multiplayer API routes
     if (url.pathname === '/api/multiplayer/players') {
       return handleGetMultiplayerPlayers(request, env)
@@ -1753,6 +1758,97 @@ async function handleGetMultiplayerPlayers(request, env) {
       players: [],
       count: 0,
       error: 'Failed to fetch players'
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+}
+
+async function handleClearWinners(request, env) {
+  try {
+    console.log('🧹 Starting Recent Winners data clearing...')
+    
+    let deletedCount = 0
+    
+    // Clear all gamble logs
+    console.log('🧹 Clearing gamble logs...')
+    const gambleList = await env.GAMBLE_LOGS.list({
+      prefix: 'gamble:',
+      limit: 1000
+    })
+    
+    for (const key of gambleList.keys) {
+      await env.GAMBLE_LOGS.delete(key.name)
+      deletedCount++
+    }
+    console.log(`🧹 Deleted ${gambleList.keys.length} gamble log entries`)
+    
+    // Clear all payout logs  
+    console.log('🧹 Clearing payout logs...')
+    const payoutList = await env.GAMBLE_LOGS.list({
+      prefix: 'payout:',
+      limit: 1000
+    })
+    
+    for (const key of payoutList.keys) {
+      await env.GAMBLE_LOGS.delete(key.name)
+      deletedCount++
+    }
+    console.log(`🧹 Deleted ${payoutList.keys.length} payout log entries`)
+    
+    // Clear any other gambling-related data (check for additional prefixes)
+    console.log('🧹 Checking for additional gambling data...')
+    const allList = await env.GAMBLE_LOGS.list({
+      limit: 1000
+    })
+    
+    // Delete any remaining gambling-related entries
+    const additionalDeletes = []
+    for (const key of allList.keys) {
+      if (key.name.startsWith('result:') || 
+          key.name.startsWith('session:') ||
+          key.name.startsWith('tx:') ||
+          key.name.includes('gambling') ||
+          key.name.includes('winner')) {
+        additionalDeletes.push(key.name)
+      }
+    }
+    
+    for (const keyName of additionalDeletes) {
+      await env.GAMBLE_LOGS.delete(keyName)
+      deletedCount++
+    }
+    
+    if (additionalDeletes.length > 0) {
+      console.log(`🧹 Deleted ${additionalDeletes.length} additional gambling-related entries`)
+    }
+    
+    console.log(`🧹 ✅ Successfully cleared Recent Winners data! Total deleted: ${deletedCount}`)
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Recent Winners data cleared successfully',
+      deletedCount: deletedCount,
+      timestamp: Date.now()
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    })
+    
+  } catch (error) {
+    console.error('❌ Error clearing Recent Winners data:', error)
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Failed to clear Recent Winners data',
+      details: error.message
     }), {
       status: 500,
       headers: {
