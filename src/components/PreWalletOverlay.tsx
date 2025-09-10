@@ -25,12 +25,23 @@ export default function PreWalletOverlay() {
         style={{ zIndex: 10000 }}
       >
       {/* Centered layout container */}
-      <div className="flex items-center justify-center h-screen">
+      <div 
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100vh',
+          position: 'relative'
+        }}
+      >
         
         {/* Main Box Container with Connect Button at Top */}
         <div 
-          className="relative max-w-2xl w-full mx-4"
           style={{
+            position: 'relative',
+            maxWidth: '650px',
+            width: '90%',
             background: 'rgba(20, 10, 30, 0.95)',
             border: '3px solid rgba(147, 51, 234, 0.8)',
             borderRadius: '20px',
