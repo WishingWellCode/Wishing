@@ -25,7 +25,7 @@ export default function PreWalletOverlay() {
         style={{ zIndex: 10000 }}
       >
       {/* Centered layout container */}
-      <div className="flex items-center justify-center min-h-screen p-4">
+      <div className="flex items-center justify-center min-h-screen p-8">
         
         {/* Main Box Container with Connect Button at Top */}
         <div 
@@ -37,14 +37,15 @@ export default function PreWalletOverlay() {
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
             fontFamily: '"Press Start 2P"',
             color: '#fff',
-            padding: '40px 30px 30px 30px'
+            padding: '60px 30px 30px 30px',
+            marginTop: '40px'
           }}
         >
           {/* Connect Wallet Button - positioned at top center of the box */}
           <div 
             style={{
               position: 'absolute',
-              top: '-25px',
+              top: '-22px',
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 10
@@ -56,9 +57,21 @@ export default function PreWalletOverlay() {
                 fontSize: '14px', 
                 fontFamily: '"Press Start 2P"',
                 boxShadow: '0 8px 25px rgba(147, 51, 234, 0.8)',
-                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)'
+                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
               }}
             >
+              <img 
+                src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
+                alt="Phantom"
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  filter: 'brightness(0) invert(1)'
+                }}
+              />
               Connect Wallet
             </WalletMultiButton>
           </div>
