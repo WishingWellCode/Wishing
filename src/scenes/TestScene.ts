@@ -658,9 +658,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - modalHeight/2 + 60,
       'Housing District',
       {
-        fontSize: '20px',
+        fontSize: '24px',
         color: '#8b5cf6',
-        fontFamily: '"Times New Roman", serif',
+        fontFamily: 'bold "Times New Roman", serif',
         align: 'center'
       }
     )
@@ -673,9 +673,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - 20,
       'Welcome to the Housing District!\n\nTo access this portal, you need to visit\nthe Upgrades page first to purchase\nyour housing upgrades.\n\nWould you like to go there now?',
       {
-        fontSize: '12px',
+        fontSize: '16px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif',
+        fontFamily: 'bold "Times New Roman", serif',
         align: 'center',
         lineSpacing: 8
       }
@@ -699,9 +699,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       'CONTINUE',
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -723,9 +723,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       'CANCEL',
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
@@ -833,9 +833,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - modalHeight/2 + 60,
       'Community Links',
       {
-        fontSize: '20px',
+        fontSize: '24px',
         color: '#8b5cf6',
-        fontFamily: '"Times New Roman", serif',
+        fontFamily: 'bold "Times New Roman", serif',
         align: 'center'
       }
     )
@@ -848,9 +848,9 @@ export class TestScene extends Phaser.Scene {
       this.cameras.main.centerY - 20,
       'Welcome to the Community Hub!\n\nConnect with the $WISH community\nthrough our social media channels.\n\nWould you like to visit our\nLinks page now?',
       {
-        fontSize: '14px',
+        fontSize: '16px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif',
+        fontFamily: 'bold "Times New Roman", serif',
         align: 'center',
         lineSpacing: 8
       }
@@ -874,9 +874,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       'CONTINUE',
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -898,9 +898,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       'CANCEL',
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
@@ -1057,9 +1057,9 @@ export class TestScene extends Phaser.Scene {
       continueButton.y,
       portal4Config.confirmLabel,
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     continueText.setOrigin(0.5)
@@ -1081,9 +1081,9 @@ export class TestScene extends Phaser.Scene {
       cancelButton.y,
       portal4Config.cancelLabel,
       {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff',
-        fontFamily: '"Times New Roman", serif'
+        fontFamily: 'bold "Times New Roman", serif'
       }
     )
     cancelText.setOrigin(0.5)
