@@ -1250,10 +1250,15 @@ export class TestScene extends Phaser.Scene {
     )
     this.testPlayer.setDepth(1)
     this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
-    console.log('✅ Invisible player spawned for portal detection')
+    console.log('✅ Invisible player spawned for portal detection at', this.testPlayer.x, this.testPlayer.y)
     
-    // Update multiplayer position immediately so visible sprite appears
-    this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+    // Wait a short moment for multiplayer system to be ready, then update position
+    this.time.delayedCall(100, () => {
+      if (this.testPlayer) {
+        this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+        console.log('📍 Sent initial position to multiplayer system:', this.testPlayer.x, this.testPlayer.y)
+      }
+    })
   }
 
   async startGambling() {
@@ -1586,6 +1591,7 @@ export class TestScene extends Phaser.Scene {
     
     // Update multiplayer position so visible sprite follows
     if (deltaX !== 0 || deltaY !== 0) {
+      console.log('🏃 Player moved to:', this.testPlayer.x, this.testPlayer.y)
       this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
     }
     
@@ -1635,11 +1641,14 @@ export class TestScene extends Phaser.Scene {
     // Send position to multiplayer manager
     if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
       (window as any).multiplayerManager.updatePosition(x, y)
+      console.log('📡 Sent position to multiplayer manager:', x, y)
     } else {
+      console.log('⏳ Multiplayer manager not ready, retrying in 1 second...')
       // Retry after 1 second if multiplayerManager isn't ready yet
       setTimeout(() => {
         if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
           (window as any).multiplayerManager.updatePosition(x, y)
+          console.log('📡 Sent position to multiplayer manager (retry):', x, y)
         }
       }, 1000)
     }

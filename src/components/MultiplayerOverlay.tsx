@@ -16,12 +16,13 @@ interface MultiplayerOverlayProps {
 
 export default function MultiplayerOverlay({ players, currentPlayerId }: MultiplayerOverlayProps) {
   const [visiblePlayers, setVisiblePlayers] = useState<Player[]>([])
+  const [loadedSprites, setLoadedSprites] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     // Show ALL players including current player (don't filter out current player)
-    // and ensure players are within reasonable bounds
+    // and ensure players are within reasonable bounds and have valid sprite data
     const filtered = players.filter(player => {
-      const hasValidData = player.x !== undefined && player.y !== undefined && player.username
+      const hasValidData = player.x !== undefined && player.y !== undefined && player.username && player.sprite
       const isInBounds = player.x >= -100 && player.x <= window.innerWidth + 100 &&
                         player.y >= -100 && player.y <= window.innerHeight + 100
       
@@ -84,10 +85,19 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
                 width: '45px',
                 height: '45px',
                 imageRendering: 'pixelated',
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                opacity: loadedSprites.has(player.id) ? 1 : 0,
+                transition: 'opacity 0.1s ease-in'
               }}
-              onLoad={() => {/* Sprite loaded successfully */}}
-              onError={(e) => console.error('Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite))}
+              onLoad={() => {
+                setLoadedSprites(prev => new Set(prev).add(player.id))
+                console.log('✅ Sprite loaded for player:', player.username)
+              }}
+              onError={(e) => {
+                console.error('❌ Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite))
+                // Still show the sprite even if it fails to load, but log the error
+                setLoadedSprites(prev => new Set(prev).add(player.id))
+              }}
             />
             
             {/* Username label - black banner with white text */}
