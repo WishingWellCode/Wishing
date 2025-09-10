@@ -821,42 +821,46 @@ async function calculateGamblingResult(serverSeed, clientSeed, blockHash, houseB
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(combined))
   const hashArray = new Uint8Array(hashBuffer)
   
-  // Convert first 8 bytes to float in [0,1)
-  let roll = 0
-  for (let i = 0; i < 8; i++) {
-    roll += hashArray[i] / Math.pow(256, i + 1)
+  // Convert to integer in range [0, 9999] for clean bucket system
+  let rngValue = 0
+  for (let i = 0; i < 4; i++) { // Use 4 bytes for better distribution
+    rngValue = (rngValue * 256 + hashArray[i]) % 10000
   }
   
-  console.log(`🎲 Original roll: ${roll}, House boost: +${houseBoost}%`)
+  console.log(`🎲 Original RNG: ${rngValue}/9999, House boost: +${houseBoost}%`)
   
-  // Apply house boost by reducing the roll value (better odds)
-  // House boost reduces the loss chance, so we subtract from the roll
+  // Apply house boost by shifting RNG value toward winning buckets
   if (houseBoost > 0) {
-    // Convert boost percentage to a roll reduction
-    const boostReduction = (houseBoost / 100) * 0.6 // Scale boost to affect the loss zone
-    roll = Math.max(0, roll - boostReduction)
-    console.log(`🏠 Boosted roll: ${roll} (reduced by ${boostReduction})`)
+    // Boost reduces the loss chance by shifting the RNG value down
+    // Each 1% boost reduces RNG by ~40 (since bust is 4000/10000)
+    const boostReduction = Math.floor((houseBoost / 100) * 400)
+    rngValue = Math.max(0, rngValue - boostReduction)
+    console.log(`🏠 Boosted RNG: ${rngValue} (reduced by ${boostReduction})`)
   }
   
-  // Apply probability tiers with house boost applied
-  if (roll < 0.0000001) {
-    return { tier: 'JACKPOT', multiplier: 15000 }
-  } else if (roll < 0.0014999) {
-    return { tier: 'MAJOR WIN', multiplier: 180 }
-  } else if (roll < 0.0049999) {
-    return { tier: 'LARGE WIN', multiplier: 25 }
-  } else if (roll < 0.0099999) {
-    return { tier: 'MEDIUM WIN', multiplier: 9 }
-  } else if (roll < 0.0119999) {
-    return { tier: 'SMALL WIN C', multiplier: 1.65 }
-  } else if (roll < 0.0199999) {
-    return { tier: 'SMALL WIN B', multiplier: 1.28 }
-  } else if (roll < 0.0999999) {
-    return { tier: 'SMALL WIN A', multiplier: 1.1 }
-  } else if (roll < 0.3999999) {
-    return { tier: 'BREAK EVEN', multiplier: 1.0 }
+  // New payout structure with clean RNG buckets (0-9999)
+  // RTP ≈ 91.36%, House edge ≈ 8.64%
+  if (rngValue <= 3999) {
+    // Bust: 40.00% (0000-3999) - 4000 buckets
+    return { tier: 'BUST', multiplier: 0 }
+  } else if (rngValue <= 9385) {
+    // Break even: 53.86% (4000-9385) - 5386 buckets  
+    return { tier: 'BREAK EVEN', multiplier: 1 }
+  } else if (rngValue <= 9735) {
+    // Win 3×: 3.50% (9386-9735) - 350 buckets
+    return { tier: 'WIN', multiplier: 3 }
+  } else if (rngValue <= 9885) {
+    // Win 5×: 1.50% (9736-9885) - 150 buckets
+    return { tier: 'WIN', multiplier: 5 }
+  } else if (rngValue <= 9965) {
+    // Big win 10×: 0.80% (9886-9965) - 80 buckets
+    return { tier: 'BIG WIN', multiplier: 10 }
+  } else if (rngValue <= 9995) {
+    // Mega 25×: 0.30% (9966-9995) - 30 buckets
+    return { tier: 'MEGA WIN', multiplier: 25 }
   } else {
-    return { tier: 'LOSE', multiplier: 0 }
+    // Jackpot 100×: 0.04% (9996-9999) - 4 buckets
+    return { tier: 'JACKPOT', multiplier: 100 }
   }
 }
 
@@ -1405,14 +1409,15 @@ async function updateGamblingLogWithTx(env, sessionId, walletAddress, realTxId) 
 
 function getResultMessage(tier) {
   const messages = {
-    jackpot: "🌟 LEGENDARY JACKPOT!!! The fountain grants your ultimate wish! 🌟",
-    major: "💎 MAJOR WIN! The spirits favor you greatly! 💎",
-    large: "🎉 LARGE WIN! Your wish echoes through the realm! 🎉",
-    medium: "✨ MEDIUM WIN! The fountain smiles upon you! ✨",
-    small: "🪙 Your coins return with friends! 🪙",
-    lose: "The fountain keeps your wishes for now..."
+    'JACKPOT': "🌟 LEGENDARY JACKPOT!!! 100× MULTIPLIER! The fountain grants your ultimate wish! 🌟",
+    'MEGA WIN': "💎 MEGA WIN! 25× MULTIPLIER! The spirits favor you greatly! 💎",
+    'BIG WIN': "🎉 BIG WIN! 10× MULTIPLIER! Your wish echoes through the realm! 🎉",
+    'WIN': "✨ WIN! The fountain rewards your faith! ✨",
+    'BREAK EVEN': "🪙 Your coins return to you safely! 🪙",
+    'BUST': "💸 The fountain keeps your offering this time...",
+    'LOSE': "💸 The fountain keeps your offering this time..."
   }
-  return messages[tier] || "Unknown result"
+  return messages[tier] || messages[tier?.toUpperCase()] || "Unknown result"
 }
 
 // Housing system constants and functions
