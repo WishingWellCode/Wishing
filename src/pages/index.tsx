@@ -69,11 +69,16 @@ export default function Home() {
           />
         </div>
         
-        <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
+        <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 9999 }}>
           <button
             onClick={() => setShowHelp(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-            style={{ fontSize: '14px' }}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-purple-400"
+            style={{ 
+              fontSize: '16px',
+              fontFamily: '"Times New Roman", serif',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+              boxShadow: '0 8px 25px rgba(147, 51, 234, 0.6)'
+            }}
           >
             Help
           </button>
