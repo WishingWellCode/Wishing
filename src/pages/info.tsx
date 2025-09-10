@@ -60,7 +60,7 @@ export default function InfoPage() {
       title: 'What is Wishing?',
       icon: '🎮',
       content: (
-        <div className="text-gray-300 leading-relaxed space-y-4">
+        <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
           <p>
             Wishing is a Solana-based interactive experience where players can explore a virtual world, 
             participate in on-chain gambling mechanics, and build their housing portfolio.
@@ -77,12 +77,12 @@ export default function InfoPage() {
       title: 'How to Play',
       icon: '🕹️',
       content: (
-        <div className="text-gray-300 leading-relaxed space-y-4">
+        <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
           <ol className="list-decimal list-inside space-y-3">
             <li>Connect your Solana wallet (Phantom recommended)</li>
             <li>Use WASD or arrow keys to move your character around</li>
             <li>Interact with different portals to access various features:
-              <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-sm">
+              <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-sm font-bold">
                 <li>Portal 1: Housing District & Upgrades</li>
                 <li>Portal 3: Recent Winners & Statistics</li>
                 <li>Portal 4: Information & Help (this page)</li>
@@ -100,27 +100,27 @@ export default function InfoPage() {
       title: 'Fairness & Limits',
       icon: '⚖️',
       content: (
-        <div className="text-gray-300 leading-relaxed space-y-4">
+        <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span>All gambling mechanics use provably fair randomization</span>
+              <span className="font-bold">All gambling mechanics use provably fair randomization</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span>Minimum bet: 1,000 $WISH tokens</span>
+              <span className="font-bold">Minimum bet: 1,000 $WISH tokens</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span>All transactions are processed on the Solana blockchain</span>
+              <span className="font-bold">All transactions are processed on the Solana blockchain</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span>Win rates are transparent and verifiable through transaction history</span>
+              <span className="font-bold">Win rates are transparent and verifiable through transaction history</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span>Housing bonuses stack additively with base win rates</span>
+              <span className="font-bold">Housing bonuses stack additively with base win rates</span>
             </div>
           </div>
         </div>
@@ -131,25 +131,25 @@ export default function InfoPage() {
       title: 'FAQ',
       icon: '❓',
       content: (
-        <div className="text-gray-300 leading-relaxed space-y-4">
+        <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
           <div className="bg-black/30 p-4 rounded-lg">
             <h4 className="text-cyan-400 font-bold mb-2">What wallets are supported?</h4>
-            <p>We support all Solana wallets, with Phantom being the recommended choice for the best experience.</p>
+            <p className="font-bold">We support all Solana wallets, with Phantom being the recommended choice for the best experience.</p>
           </div>
           
           <div className="bg-black/30 p-4 rounded-lg">
             <h4 className="text-cyan-400 font-bold mb-2">What if I encounter errors?</h4>
-            <p>Most errors are related to wallet connection or insufficient token balance. Ensure your wallet is connected and you have enough $WISH tokens for transactions.</p>
+            <p className="font-bold">Most errors are related to wallet connection or insufficient token balance. Ensure your wallet is connected and you have enough $WISH tokens for transactions.</p>
           </div>
           
           <div className="bg-black/30 p-4 rounded-lg">
             <h4 className="text-cyan-400 font-bold mb-2">Is my data private and secure?</h4>
-            <p>We only use your wallet address for on-chain transactions. No personal information is collected or stored. All gameplay data is public on the Solana blockchain.</p>
+            <p className="font-bold">We only use your wallet address for on-chain transactions. No personal information is collected or stored. All gameplay data is public on the Solana blockchain.</p>
           </div>
           
           <div className="bg-black/30 p-4 rounded-lg">
             <h4 className="text-cyan-400 font-bold mb-2">How can I verify transactions?</h4>
-            <p>Every transaction has a unique signature that can be viewed on Solscan.io. Click any "VIEW TX" link in the results table above.</p>
+            <p className="font-bold">Every transaction has a unique signature that can be viewed on Solscan.io. Click any "VIEW TX" link in the results table above.</p>
           </div>
         </div>
       )
@@ -510,7 +510,7 @@ export default function InfoPage() {
             <h1 className="text-5xl font-bold text-white mb-4 fallback-title">
               Information Center
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto fallback-subtitle">
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto fallback-subtitle font-bold">
               Learn everything about how Wishing works: gameplay, housing, and verifiable gambling mechanics.
             </p>
           </div>
@@ -552,7 +552,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">🏚️</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>STARTER SHACK</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+0.5%</div>
-                  <p className="text-gray-300 text-sm mb-4">Basic shelter with minimal bonuses</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Basic shelter with minimal bonuses</p>
                   <div className="text-yellow-400 text-sm">Entry Level</div>
                 </div>
               </div>
@@ -562,7 +562,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">🏠</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>COZY COTTAGE</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+1.5%</div>
-                  <p className="text-gray-300 text-sm mb-4">Comfortable living with decent returns</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Comfortable living with decent returns</p>
                   <div className="text-yellow-400 text-sm">Popular Choice</div>
                 </div>
               </div>
@@ -572,7 +572,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">🏡</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>SUBURBAN HOME</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+4.0%</div>
-                  <p className="text-gray-300 text-sm mb-4">Spacious family home with solid bonuses</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Spacious family home with solid bonuses</p>
                   <div className="text-blue-400 text-sm">Recommended</div>
                 </div>
               </div>
@@ -582,7 +582,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">🏘️</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>LUXURY VILLA</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+8.0%</div>
-                  <p className="text-gray-300 text-sm mb-4">Premium lifestyle with high returns</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Premium lifestyle with high returns</p>
                   <div className="text-purple-400 text-sm">Luxury Tier</div>
                 </div>
               </div>
@@ -592,7 +592,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">🏰</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>GRAND MANSION</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+15.0%</div>
-                  <p className="text-gray-300 text-sm mb-4">Elite residence for serious players</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Elite residence for serious players</p>
                   <div className="text-pink-400 text-sm">Elite Status</div>
                 </div>
               </div>
@@ -602,7 +602,7 @@ export default function InfoPage() {
                   <div className="text-4xl mb-4">👑</div>
                   <h3 className="text-lg font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>ROYAL PALACE</h3>
                   <div className="text-2xl text-green-300 font-bold mb-2">+25.0%</div>
-                  <p className="text-gray-300 text-sm mb-4">Ultimate prestige with maximum rewards</p>
+                  <p className="text-gray-300 text-sm mb-4 font-bold">Ultimate prestige with maximum rewards</p>
                   <div className="text-red-400 text-sm animate-pulse">Legendary</div>
                 </div>
               </div>
@@ -680,28 +680,28 @@ export default function InfoPage() {
                 <div className="text-4xl mb-4">🌐</div>
                 <h3 className="text-xl font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>COMMUNITY</h3>
                 <div className="text-3xl text-green-300 font-bold mb-2">90%</div>
-                <p className="text-gray-300 text-sm">Distributed to community through fair gameplay</p>
+                <p className="text-gray-300 text-sm font-bold">Distributed to community through fair gameplay</p>
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-purple-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
                 <div className="text-4xl mb-4">👨‍💻</div>
                 <h3 className="text-xl font-bold text-purple-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>DEVELOPMENT</h3>
                 <div className="text-3xl text-purple-300 font-bold mb-2">10%</div>
-                <p className="text-gray-300 text-sm">Developer allocation for ongoing support</p>
+                <p className="text-gray-300 text-sm font-bold">Developer allocation for ongoing support</p>
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
                 <div className="text-4xl mb-4">💧</div>
                 <h3 className="text-xl font-bold text-blue-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LIQUIDITY POOL</h3>
                 <div className="text-3xl text-blue-300 font-bold mb-2">5%</div>
-                <p className="text-gray-300 text-sm">Open liquidity for trading and accessibility</p>
+                <p className="text-gray-300 text-sm font-bold">Open liquidity for trading and accessibility</p>
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-orange-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
                 <div className="text-4xl mb-4">🔒</div>
                 <h3 className="text-xl font-bold text-orange-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LOCKED RESERVES</h3>
                 <div className="text-3xl text-orange-300 font-bold mb-2">5%</div>
-                <p className="text-gray-300 text-sm">Locked for 5 days for stability</p>
+                <p className="text-gray-300 text-sm font-bold">Locked for 5 days for stability</p>
               </div>
             </div>
 
@@ -709,7 +709,7 @@ export default function InfoPage() {
               <h4 className="text-xl font-bold text-yellow-400 mb-4 text-center" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>
                 📈 BUYBACK MECHANISM
               </h4>
-              <p className="text-gray-300 text-center leading-relaxed">
+              <p className="text-gray-300 text-center leading-relaxed font-bold">
                 When the liquidity pool runs low on tokens, automatic dev buybacks will be executed to refund the pool 
                 with fresh tokens, ensuring continuous gameplay and liquidity for all players.
               </p>
