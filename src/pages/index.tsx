@@ -15,6 +15,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [players, setPlayers] = useState([])
   const [currentPlayerId, setCurrentPlayerId] = useState(null)
+  const [showHelp, setShowHelp] = useState(false)
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -52,7 +53,7 @@ export default function Home() {
       <div 
         className="min-h-screen w-full relative"
         style={{
-          backgroundImage: connected ? 'url(/assets/backgrounds/Realbackground.jpg)' : 'none',
+          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -60,21 +61,29 @@ export default function Home() {
           width: '100vw'
         }}
       >
-        {/* Connected state: show wallet button in top-right */}
-        {connected && (
-          <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
-            <WalletMultiButton 
-              className="!bg-purple-600 hover:!bg-purple-700"
-              style={{ fontSize: '14px' }}
-            />
-          </div>
-        )}
+        {/* Always show wallet button and help button */}
+        <div className="fixed top-4 left-4 z-50" style={{ zIndex: 9999 }}>
+          <WalletMultiButton 
+            className="!bg-purple-600 hover:!bg-purple-700"
+            style={{ fontSize: '14px' }}
+          />
+        </div>
+        
+        <div className="fixed top-4 right-4 z-50" style={{ zIndex: 9999 }}>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            style={{ fontSize: '14px' }}
+          >
+            Help
+          </button>
+        </div>
 
-        {/* Pre-connection state: show PreWalletOverlay */}
-        {!connected && <PreWalletOverlay />}
+        {/* Help overlay */}
+        {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
 
-        {/* Game Canvas - Only render when wallet is connected */}
-        {connected && <GameCanvas isWalletConnected={connected} />}
+        {/* Game Canvas - Always render for background, but disable interaction when not connected */}
+        <GameCanvas isWalletConnected={connected} />
 
         {/* Multiplayer Manager - handles connection and data */}
         {connected && (

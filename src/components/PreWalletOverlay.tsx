@@ -1,6 +1,10 @@
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
-export default function PreWalletOverlay() {
+interface PreWalletOverlayProps {
+  onClose?: () => void
+}
+
+export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
   return (
     <>
       <style jsx>{`
@@ -8,7 +12,7 @@ export default function PreWalletOverlay() {
           content: '';
           position: fixed;
           inset: 0;
-          background: url('/assets/backgrounds/sixseven.png') center/cover no-repeat fixed;
+          background: url('/assets/backgrounds/Realbackground.jpg') center/cover no-repeat fixed;
           z-index: -1;
         }
         .pre-wallet-bg::after {
@@ -118,6 +122,23 @@ export default function PreWalletOverlay() {
               </div>
               
             </div>
+            
+            {/* Return to Game button - only show if onClose is provided */}
+            {onClose && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={onClose}
+                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  style={{ 
+                    fontSize: '16px', 
+                    fontFamily: '"Times New Roman", serif',
+                    boxShadow: '0 8px 25px rgba(239, 68, 68, 0.6)'
+                  }}
+                >
+                  ← Return to Game
+                </button>
+              </div>
+            )}
             
           </div>
         </div>
