@@ -677,12 +677,13 @@ export default function InfoPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     {/* Pie Chart */}
                     <div className="flex justify-center">
-                      <svg width="200" height="200" viewBox="0 0 200 200">
-                        {/* Community 90% - Green (324 degrees) */}
-                        <path d="M 100,20 A 80,80 0 1,1 57.2,167.2 L 71.4,153.4 A 60,60 0 1,0 100,40 Z" fill="#22c55e"/>
-                        {/* Development 10% - Purple (36 degrees) */}
-                        <path d="M 57.2,167.2 A 80,80 0 0,1 100,20 L 100,40 A 60,60 0 0,0 71.4,153.4 Z" fill="#a855f7"/>
-                      </svg>
+                      <img 
+                        src="/assets/ui/tokenomics.png" 
+                        alt="Tokenomics Distribution Chart" 
+                        width="200" 
+                        height="200"
+                        className="rounded-lg"
+                      />
                     </div>
 
                     {/* Legend and Details */}
