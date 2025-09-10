@@ -39,7 +39,8 @@
       "Bash(timeout 10 wrangler tail wish-well-worker)",
       "Bash(wrangler dev:*)",
       "Bash(timeout 10 curl -s \"wss://wish-well-worker.stealthbundlebot.workers.dev\" --http1.1 --upgrade WebSocket)",
-      "Bash(timeout 10 wrangler dev:*)"
+      "Bash(timeout 10 wrangler dev:*)",
+      "Bash(timeout 30 wrangler pages deploy out --project-name=\"wishing-well\")"
     ],
     "deny": [],
     "ask": []
