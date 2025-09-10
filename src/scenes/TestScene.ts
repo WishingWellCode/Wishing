@@ -1023,6 +1023,7 @@ export class TestScene extends Phaser.Scene {
         fontSize: '24px',
         color: '#8b5cf6',
         fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center'
       }
     )
@@ -1038,6 +1039,7 @@ export class TestScene extends Phaser.Scene {
         fontSize: '16px',
         color: '#ffffff',
         fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center',
         lineSpacing: 8
       }
@@ -1063,7 +1065,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '14px',
         color: '#ffffff',
-        fontFamily: 'bold "Times New Roman", serif'
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold'
       }
     )
     continueText.setOrigin(0.5)
@@ -1087,7 +1090,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '14px',
         color: '#ffffff',
-        fontFamily: 'bold "Times New Roman", serif'
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold'
       }
     )
     cancelText.setOrigin(0.5)
