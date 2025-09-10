@@ -74,7 +74,7 @@ export default function PreWalletOverlay() {
               }}
             >
               <img 
-                src="/assets/logos/phantom-white.svg"
+                src="/assets/ui/phantomtrans.png"
                 alt="Phantom"
                 style={{
                   width: '24px',
