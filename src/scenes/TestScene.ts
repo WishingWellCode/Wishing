@@ -637,8 +637,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.8, 800)
-    const modalHeight = Math.min(screenHeight * 0.7, 550)
+    const modalWidth = Math.min(screenWidth * 0.6, 600)
+    const modalHeight = Math.min(screenHeight * 0.5, 400)
 
     // Create modal background
     const background = this.add.rectangle(
@@ -660,7 +660,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '24px',
         color: '#8b5cf6',
-        fontFamily: 'bold "Times New Roman", serif',
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center'
       }
     )
@@ -675,7 +676,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '16px',
         color: '#ffffff',
-        fontFamily: 'bold "Times New Roman", serif',
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center',
         lineSpacing: 8
       }
@@ -812,8 +814,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.8, 800)
-    const modalHeight = Math.min(screenHeight * 0.7, 550)
+    const modalWidth = Math.min(screenWidth * 0.6, 600)
+    const modalHeight = Math.min(screenHeight * 0.5, 400)
 
     // Create modal background
     const background = this.add.rectangle(
@@ -835,7 +837,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '24px',
         color: '#8b5cf6',
-        fontFamily: 'bold "Times New Roman", serif',
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center'
       }
     )
@@ -850,7 +853,8 @@ export class TestScene extends Phaser.Scene {
       {
         fontSize: '16px',
         color: '#ffffff',
-        fontFamily: 'bold "Times New Roman", serif',
+        fontFamily: '"Times New Roman", serif',
+        fontStyle: 'bold',
         align: 'center',
         lineSpacing: 8
       }
@@ -995,8 +999,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.8, 800)
-    const modalHeight = Math.min(screenHeight * 0.7, 550)
+    const modalWidth = Math.min(screenWidth * 0.6, 600)
+    const modalHeight = Math.min(screenHeight * 0.5, 400)
 
     // Create modal background
     const background = this.add.rectangle(
