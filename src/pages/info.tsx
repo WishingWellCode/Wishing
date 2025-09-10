@@ -730,15 +730,6 @@ export default function InfoPage() {
             </div>
           </div>
 
-          {/* Return to Game */}
-          <div className="text-center">
-            <button
-              onClick={() => router.push('/')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-16 py-6  font-bold text-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              🎮 Return to Game
-            </button>
-          </div>
         </main>
         </div>
       </div>

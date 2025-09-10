@@ -312,50 +312,7 @@ export default function Links() {
             ))}
           </div>
 
-          {/* Community Info Section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center max-w-4xl mx-auto mb-16">
-            <div className="text-6xl mb-6">🚀</div>
-            <h2 className="text-3xl font-bold text-purple-400 mb-6" style={{fontFamily: '"Press Start 2P"', fontSize: '20px'}}>
-              JOIN THE COMMUNITY
-            </h2>
-            <div className="space-y-4 text-gray-300 leading-relaxed">
-              <p>
-                Stay connected with fellow $WISH players and be the first to know about:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">📢</div>
-                  <h4 className="text-cyan-400 font-bold mb-2">Updates & News</h4>
-                  <p className="text-sm">Game updates, new features, and important announcements</p>
-                </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">🎉</div>
-                  <h4 className="text-cyan-400 font-bold mb-2">Events & Contests</h4>
-                  <p className="text-sm">Community events, competitions, and special rewards</p>
-                </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">💡</div>
-                  <h4 className="text-cyan-400 font-bold mb-2">Tips & Strategies</h4>
-                  <p className="text-sm">Player strategies, gameplay tips, and winning advice</p>
-                </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-2xl mb-2">🤝</div>
-                  <h4 className="text-cyan-400 font-bold mb-2">Community Support</h4>
-                  <p className="text-sm">Get help from other players and share your experiences</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Return to Game */}
-          <div className="text-center">
-            <button
-              onClick={() => router.push('/')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-16 py-6 rounded-2xl font-bold text-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              🎮 Return to Game
-            </button>
-          </div>
         </main>
         </div>
       </div>
