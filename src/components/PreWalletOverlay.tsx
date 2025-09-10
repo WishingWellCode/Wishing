@@ -44,7 +44,6 @@ export default function PreWalletOverlay() {
             width: '90%',
             background: 'rgba(20, 10, 30, 0.95)',
             border: '3px solid rgba(147, 51, 234, 0.8)',
-            borderRadius: '20px',
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
             fontFamily: '"Times New Roman", serif',
             color: '#fff',
