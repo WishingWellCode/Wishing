@@ -70,18 +70,13 @@ export default function Home() {
         </div>
         
         <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 9999 }}>
-          <button
+          <div 
             onClick={() => setShowHelp(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-purple-400"
-            style={{ 
-              fontSize: '16px',
-              fontFamily: '"Times New Roman", serif',
-              background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-              boxShadow: '0 8px 25px rgba(147, 51, 234, 0.6)'
-            }}
+            className="wallet-adapter-button-trigger wallet-adapter-button !bg-purple-600 hover:!bg-purple-700"
+            style={{ fontSize: '14px', cursor: 'pointer' }}
           >
             Help
-          </button>
+          </div>
         </div>
 
         {/* Help overlay */}
