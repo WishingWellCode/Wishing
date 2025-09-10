@@ -637,8 +637,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.6, 600)
-    const modalHeight = Math.min(screenHeight * 0.5, 400)
+    const modalWidth = Math.min(screenWidth * 0.8, 800)
+    const modalHeight = Math.min(screenHeight * 0.7, 550)
 
     // Create modal background
     const background = this.add.rectangle(
@@ -812,8 +812,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.6, 600)
-    const modalHeight = Math.min(screenHeight * 0.5, 400)
+    const modalWidth = Math.min(screenWidth * 0.8, 800)
+    const modalHeight = Math.min(screenHeight * 0.7, 550)
 
     // Create modal background
     const background = this.add.rectangle(
@@ -995,8 +995,8 @@ export class TestScene extends Phaser.Scene {
 
     const screenWidth = this.cameras.main.width
     const screenHeight = this.cameras.main.height
-    const modalWidth = Math.min(screenWidth * 0.6, 600)
-    const modalHeight = Math.min(screenHeight * 0.5, 400)
+    const modalWidth = Math.min(screenWidth * 0.8, 800)
+    const modalHeight = Math.min(screenHeight * 0.7, 550)
 
     // Create modal background
     const background = this.add.rectangle(
