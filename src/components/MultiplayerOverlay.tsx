@@ -86,8 +86,8 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
                 height: '45px',
                 imageRendering: 'pixelated',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                opacity: loadedSprites.has(player.id) ? 1 : 0,
-                transition: 'opacity 0.1s ease-in'
+                opacity: 1,  // Always visible - no fade in needed
+                transition: 'none'  // Remove transition for immediate display
               }}
               onLoad={() => {
                 setLoadedSprites(prev => new Set(prev).add(player.id))
@@ -95,8 +95,9 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
               }}
               onError={(e) => {
                 console.error('❌ Sprite failed to load for', player.username, 'src:', getSpriteUrl(player.sprite))
-                // Still show the sprite even if it fails to load, but log the error
-                setLoadedSprites(prev => new Set(prev).add(player.id))
+                // Force a fallback sprite on error
+                const img = e.target as HTMLImageElement
+                img.src = '/assets/sprites/Multiplayer-sprites/default.png'
               }}
             />
             

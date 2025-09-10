@@ -335,7 +335,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         sendGamblingUpdate,
         players,
         isConnected,
-        playerId: playerIdRef.current
+        playerId: playerIdRef.current,
+        reconnect: connectMultiplayer  // Add reconnect method
+      }
+      
+      // Log when multiplayer manager is ready
+      if (isConnected && playerIdRef.current) {
+        console.log('🎮 ✅ MultiplayerManager exposed to window:', {
+          isConnected,
+          playerId: playerIdRef.current,
+          playerCount: players.length
+        })
       }
     }
   }, [players, isConnected])

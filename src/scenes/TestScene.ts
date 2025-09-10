@@ -126,6 +126,9 @@ export class TestScene extends Phaser.Scene {
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys()
       this.wasd = this.input.keyboard.addKeys('W,A,S,D')
+      console.log('✅ Keyboard controls initialized (Arrow keys + WASD)')
+    } else {
+      console.error('❌ Keyboard input not available!')
     }
     
     // Camera setup
@@ -1239,8 +1242,22 @@ export class TestScene extends Phaser.Scene {
     })
   }
 
+  private playerCreating: boolean = false
+  private controlsErrorLogged: boolean = false
+  
   createPlayer() {
-    if (this.testPlayer) return // Already created
+    if (this.testPlayer) {
+      console.log('⚠️ Player already exists, skipping creation')
+      return // Already created
+    }
+    
+    if (this.playerCreating) {
+      console.log('⚠️ Player creation already in progress, skipping')
+      return // Prevent multiple simultaneous creations
+    }
+    
+    this.playerCreating = true
+    console.log('🎮 Creating invisible player for movement tracking...')
     
     // Create an invisible player for position tracking - visible player handled by multiplayer system
     this.testPlayer = this.add.rectangle(
@@ -1251,13 +1268,22 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.setDepth(1)
     this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
     console.log('✅ Invisible player spawned for portal detection at', this.testPlayer.x, this.testPlayer.y)
+    this.playerCreating = false
     
-    // Wait a short moment for multiplayer system to be ready, then update position
-    this.time.delayedCall(100, () => {
-      if (this.testPlayer) {
-        this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
-        console.log('📍 Sent initial position to multiplayer system:', this.testPlayer.x, this.testPlayer.y)
-      }
+    // Try to sync with multiplayer system multiple times with increasing delays
+    const syncAttempts = [100, 500, 1000, 2000]
+    syncAttempts.forEach((delay) => {
+      this.time.delayedCall(delay, () => {
+        if (this.testPlayer && typeof window !== 'undefined') {
+          const mm = (window as any).multiplayerManager
+          if (mm && mm.isConnected) {
+            this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+            console.log(`📍 [${delay}ms] Successfully synced position with multiplayer:`, this.testPlayer.x, this.testPlayer.y)
+          } else {
+            console.log(`⏳ [${delay}ms] Multiplayer not ready yet, will retry...`)
+          }
+        }
+      })
     })
   }
 
@@ -1536,7 +1562,20 @@ export class TestScene extends Phaser.Scene {
   update(time: number, delta: number) {
     // Only proceed if player exists
     if (!this.testPlayer) {
-      console.log('🔍 DEBUG: TestScene update called but no testPlayer')
+      // Try to create player if wallet is connected but player doesn't exist
+      if (typeof window !== 'undefined' && (window as any).solana?.isConnected) {
+        console.log('🔄 Wallet connected but no player, attempting to create...')
+        this.createPlayer()
+      }
+      return
+    }
+    
+    // Check if controls are available
+    if (!this.cursors || !this.wasd) {
+      if (!this.controlsErrorLogged) {
+        console.error('❌ Controls not initialized - cannot move!')
+        this.controlsErrorLogged = true
+      }
       return
     }
     
@@ -1594,7 +1633,10 @@ export class TestScene extends Phaser.Scene {
     
     // Update multiplayer position so visible sprite follows
     if (deltaX !== 0 || deltaY !== 0) {
-      console.log('🏃 Player moved to:', this.testPlayer.x, this.testPlayer.y)
+      // Only log occasionally to reduce spam
+      if (Math.random() < 0.1) {
+        console.log('🏃 Movement detected - Position:', Math.round(this.testPlayer.x), Math.round(this.testPlayer.y))
+      }
       this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
     }
     
@@ -1640,20 +1682,30 @@ export class TestScene extends Phaser.Scene {
     
   }
   
+  private multiplayerRetryTimer: any = null
+  
   private updateMultiplayerPosition(x: number, y: number) {
     // Send position to multiplayer manager
-    if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
-      (window as any).multiplayerManager.updatePosition(x, y)
-      console.log('📡 Sent position to multiplayer manager:', x, y)
-    } else {
-      console.log('⏳ Multiplayer manager not ready, retrying in 1 second...')
-      // Retry after 1 second if multiplayerManager isn't ready yet
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
-          (window as any).multiplayerManager.updatePosition(x, y)
-          console.log('📡 Sent position to multiplayer manager (retry):', x, y)
+    if (typeof window !== 'undefined') {
+      const mm = (window as any).multiplayerManager
+      if (mm && mm.updatePosition && mm.isConnected) {
+        mm.updatePosition(x, y)
+        // Only log movement occasionally to reduce spam
+        if (Math.random() < 0.05) {
+          console.log('📡 Position synced with multiplayer')
         }
-      }, 1000)
+      } else if (!mm || !mm.isConnected) {
+        // Multiplayer not ready - try to reinitialize player position when it connects
+        if (!this.multiplayerRetryTimer) {
+          console.log('⏳ Multiplayer not ready, scheduling retry...')
+          this.multiplayerRetryTimer = this.time.delayedCall(500, () => {
+            this.multiplayerRetryTimer = null
+            if (this.testPlayer) {
+              this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+            }
+          })
+        }
+      }
     }
   }
 }
