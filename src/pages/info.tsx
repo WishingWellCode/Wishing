@@ -541,7 +541,7 @@ export default function InfoPage() {
               <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(0,255,255,0.8), 0 0 40px rgba(255,0,255,0.6)'}}>
                 HOUSING OPTIONS
               </h2>
-              <p className="text-pink-300 mb-8" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>
+              <p className="text-white mb-8" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>
                 Unlock gameplay bonuses with premium housing
               </p>
             </div>
@@ -625,12 +625,12 @@ export default function InfoPage() {
               <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,255,0.6)'}}>
                 GAMBLING VERIFICATION
               </h2>
-              <p className="text-green-300 mb-4" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>
+              <p className="text-white mb-4" style={{fontFamily: '"Press Start 2P"', fontSize: '12px'}}>
                 VERIFIED ON-CHAIN • 100% TRANSPARENT • PROVABLY FAIR
               </p>
               <div className="flex justify-center items-center gap-2 mb-8">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-green-400 text-sm" style={{fontFamily: '"Press Start 2P"'}}>BLOCKCHAIN VERIFIED</span>
+                <span className="text-white text-sm" style={{fontFamily: '"Press Start 2P"'}}>BLOCKCHAIN VERIFIED</span>
               </div>
             </div>
             
@@ -664,55 +664,56 @@ export default function InfoPage() {
           </div>
           
           {/* Tokenomics Section */}
-          <div className="mb-16">
-            <div className="text-center mb-12">
-              <div className="text-6xl mb-6">💰</div>
-              <h2 className="text-4xl font-bold text-white mb-4" style={{fontFamily: '"Press Start 2P"', textShadow: '0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,165,0,0.6)'}}>
-                TOKENOMICS
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16 fallback-grid">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-8 text-center transition-all duration-300 hover:scale-105 fallback-card">
+              <div className="mb-6">
+                <div className="text-6xl mb-6 fallback-section-icon">💰</div>
+              </div>
+              
+              <h2 className="text-3xl font-bold text-purple-400 mb-6 fallback-section-title">
+                Tokenomics
               </h2>
-              <p className="text-orange-300 mb-8" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>
-                Fair Distribution & Transparent Economics
-              </p>
-            </div>
+              
+              <div className="fallback-section-desc">
+                <div className="text-gray-300 leading-relaxed space-y-4 font-bold">
+                  {/* Pie Chart Container */}
+                  <div className="flex justify-center mb-6">
+                    <svg width="280" height="280" viewBox="0 0 280 280" className="transform -rotate-90">
+                      {/* Community 90% - Green slice */}
+                      <path d="M 140 140 L 140 20 A 120 120 0 1 1 73.07 226.93 Z" fill="#22c55e" stroke="#000" strokeWidth="2"/>
+                      {/* Development 10% - Purple slice */}
+                      <path d="M 140 140 L 73.07 226.93 A 120 120 0 0 1 140 20 Z" fill="#a855f7" stroke="#000" strokeWidth="2"/>
+                    </svg>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-green-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
-                <div className="text-4xl mb-4">🌐</div>
-                <h3 className="text-xl font-bold text-green-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>COMMUNITY</h3>
-                <div className="text-3xl text-green-300 font-bold mb-2">90%</div>
-                <p className="text-gray-300 text-sm font-bold">Distributed to community through fair gameplay</p>
+                  {/* Legend */}
+                  <div className="space-y-3 text-left max-w-md mx-auto">
+                    <div className="flex items-center gap-3 p-3 bg-green-500/20 rounded-lg">
+                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <div>
+                        <div className="font-bold text-white">Community (90%)</div>
+                        <div className="text-sm text-gray-300">Distributed through fair gameplay</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-purple-500/20 rounded-lg">
+                      <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                      <div>
+                        <div className="font-bold text-white">Development (10%)</div>
+                        <div className="text-sm text-gray-300">For ongoing support and development</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                    <h4 className="font-bold text-yellow-400 mb-2">💡 Fair Distribution</h4>
+                    <p className="text-sm text-gray-300">
+                      90% goes directly to the community through transparent gameplay mechanics, 
+                      ensuring the largest portion benefits players.
+                    </p>
+                  </div>
+                </div>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-purple-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
-                <div className="text-4xl mb-4">👨‍💻</div>
-                <h3 className="text-xl font-bold text-purple-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>DEVELOPMENT</h3>
-                <div className="text-3xl text-purple-300 font-bold mb-2">10%</div>
-                <p className="text-gray-300 text-sm font-bold">Developer allocation for ongoing support</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
-                <div className="text-4xl mb-4">💧</div>
-                <h3 className="text-xl font-bold text-blue-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LIQUIDITY POOL</h3>
-                <div className="text-3xl text-blue-300 font-bold mb-2">5%</div>
-                <p className="text-gray-300 text-sm font-bold">Open liquidity for trading and accessibility</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-orange-500/30 p-6 text-center hover:scale-105 transition-all duration-300">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="text-xl font-bold text-orange-400 mb-2" style={{fontFamily: '"Press Start 2P"', fontSize: '14px'}}>LOCKED RESERVES</h3>
-                <div className="text-3xl text-orange-300 font-bold mb-2">5%</div>
-                <p className="text-gray-300 text-sm font-bold">Locked for 5 days for stability</p>
-              </div>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl border-2 border-yellow-500/30 p-6 max-w-3xl mx-auto">
-              <h4 className="text-xl font-bold text-yellow-400 mb-4 text-center" style={{fontFamily: '"Press Start 2P"', fontSize: '16px'}}>
-                📈 BUYBACK MECHANISM
-              </h4>
-              <p className="text-gray-300 text-center leading-relaxed font-bold">
-                When the liquidity pool runs low on tokens, automatic dev buybacks will be executed to refund the pool 
-                with fresh tokens, ensuring continuous gameplay and liquidity for all players.
-              </p>
             </div>
           </div>
 
