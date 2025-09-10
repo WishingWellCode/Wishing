@@ -13,7 +13,7 @@ export interface PortalConfig {
 export const PORTAL_CONFIGS: Record<string, PortalConfig> = {
   'Portal 1': {
     name: 'Portal 1',
-    title: 'Portal 1: Housing District',
+    title: 'Housing District',
     body: 'Welcome to the Housing District!\n\nTo access this portal, you need to visit\nthe Upgrades page first to purchase\nyour housing upgrades.\n\nWould you like to go there now?',
     confirmLabel: 'CONTINUE',
     cancelLabel: 'CANCEL',
