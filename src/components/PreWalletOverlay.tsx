@@ -46,7 +46,7 @@ export default function PreWalletOverlay() {
             border: '3px solid rgba(147, 51, 234, 0.8)',
             borderRadius: '20px',
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
-            fontFamily: '"Press Start 2P"',
+            fontFamily: '"Times New Roman", serif',
             color: '#fff',
             padding: '60px 30px 30px 30px'
           }}
@@ -64,8 +64,8 @@ export default function PreWalletOverlay() {
             <WalletMultiButton 
               className="!bg-purple-600 hover:!bg-purple-700 !text-white !font-bold !py-3 !px-8 !rounded-lg !text-base !shadow-2xl !border-2 !border-purple-400"
               style={{ 
-                fontSize: '14px', 
-                fontFamily: '"Press Start 2P"',
+                fontSize: '16px', 
+                fontFamily: '"Times New Roman", serif',
                 boxShadow: '0 8px 25px rgba(147, 51, 234, 0.8)',
                 background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
                 display: 'flex',
@@ -89,7 +89,7 @@ export default function PreWalletOverlay() {
           <div>
             
             {/* Welcome message */}
-            <p className="text-cyan-400 mb-6 text-center" style={{ fontSize: '12px', lineHeight: '1.6' }}>
+            <p className="text-cyan-400 mb-6 text-center" style={{ fontSize: '16px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif' }}>
               Connect your Phantom wallet to enter the magical realm and play with other users!
             </p>
             
@@ -97,8 +97,8 @@ export default function PreWalletOverlay() {
             <div className="space-y-4">
               
               {/* How to Play section */}
-              <div style={{ fontSize: '11px', lineHeight: '1.8' }}>
-                <h3 className="text-green-400 font-bold mb-2">🎮 How to Play!</h3>
+              <div style={{ fontSize: '15px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif' }}>
+                <h3 className="text-green-400 font-bold mb-2" style={{ fontSize: '17px' }}>🎮 How to Play!</h3>
                 <div className="text-gray-300 ml-4">
                   <p>• Use WASD or arrow keys to move around</p>
                   <p>• Click the fountain to throw WISH tokens</p>
@@ -107,8 +107,8 @@ export default function PreWalletOverlay() {
               </div>
               
               {/* Portals section */}
-              <div style={{ fontSize: '11px', lineHeight: '1.8' }}>
-                <h3 className="text-purple-400 font-bold mb-2">🚪 Portals!</h3>
+              <div style={{ fontSize: '15px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif' }}>
+                <h3 className="text-purple-400 font-bold mb-2" style={{ fontSize: '17px' }}>🚪 Portals!</h3>
                 <div className="text-gray-300 ml-4">
                   <p>• Info - Learn about the game</p>
                   <p>• House - Purchase and manage your property</p>
