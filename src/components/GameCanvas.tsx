@@ -180,7 +180,11 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       className="w-full h-full"
       style={{ 
         background: 'transparent',
-        position: 'relative',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
         zIndex: 1
       }}
     />
