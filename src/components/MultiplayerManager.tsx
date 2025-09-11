@@ -223,8 +223,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const handleMultiplayerMessage = (message: any) => {
-    // Always log spectator messages and important events, skip movement spam
-    if (message.type !== 'playerMoved') {
+    // Log all messages for spectators (when not connected), skip movement spam for players
+    if (message.type !== 'playerMoved' || !connected) {
       console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
     }
     
@@ -236,12 +236,13 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         
       case 'currentPlayers':
         // Spectator mode - received current players
-        if (message.players) {
-          console.log(`👁️ SPECTATOR: Received ${message.players.length} players:`, message.players)
+        console.log(`👁️ SPECTATOR: Received currentPlayers message`, message)
+        if (message.players && Array.isArray(message.players)) {
+          console.log(`👁️ SPECTATOR: Setting ${message.players.length} players:`, message.players)
           setPlayers(message.players)
           onPlayersUpdate?.(message.players)
         } else {
-          console.log('👁️ SPECTATOR: Received currentPlayers but no players array')
+          console.log('👁️ SPECTATOR: Invalid players array in currentPlayers message:', message.players)
         }
         break
         

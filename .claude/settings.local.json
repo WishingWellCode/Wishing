@@ -44,7 +44,8 @@
       "Read(//c/Users/Kimberly/Downloads/**)",
       "Bash(wrangler kv namespace:*)",
       "Bash(wrangler secret:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(timeout 15 wrangler tail wish-well-worker)"
     ],
     "deny": [],
     "ask": []
