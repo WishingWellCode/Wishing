@@ -76,14 +76,6 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
                 gap: '10px'
               }}
             >
-              <img 
-                src="/assets/ui/phantomtrans.png"
-                alt="Phantom"
-                style={{
-                  width: '24px',
-                  height: '24px'
-                }}
-              />
               Connect Wallet
             </WalletMultiButton>
           </div>
@@ -92,32 +84,112 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
           <div>
             
             {/* Welcome message */}
-            <p className="text-cyan-400 mb-6 text-center font-bold" style={{ fontSize: '16px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif', fontWeight: 'bold' }}>
-              Connect your Phantom wallet to enter the magical realm and play with other users!
-            </p>
+            <div className="mb-8 text-center">
+              <p className="text-cyan-400 font-bold" style={{ 
+                fontSize: '18px', 
+                lineHeight: '1.6', 
+                fontFamily: '"Times New Roman", serif', 
+                fontWeight: 'bold',
+                textShadow: '0 0 20px rgba(34, 211, 238, 0.5)',
+                letterSpacing: '0.5px'
+              }}>
+                Connect your Phantom wallet to enter the magical realm and play with other users!
+              </p>
+            </div>
             
             {/* Content sections */}
             <div className="space-y-4">
               
               {/* How to Play section */}
-              <div style={{ fontSize: '15px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif', fontWeight: 'bold' }}>
-                <h3 className="text-green-400 font-bold mb-2" style={{ fontSize: '17px', fontWeight: 'bold' }}>🎮 How to Play!</h3>
-                <div className="text-gray-300 ml-4" style={{ fontWeight: 'bold' }}>
-                  <p>• Use WASD or arrow keys to move around</p>
-                  <p>• Click the fountain to throw WISH tokens</p>
-                  <p>• Win big or lose it all in the magical well!</p>
+              <div className="mb-6" style={{ 
+                padding: '16px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '8px'
+              }}>
+                <h3 className="text-green-400 font-bold mb-3 flex items-center gap-2" style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 'bold',
+                  fontFamily: '"Times New Roman", serif',
+                  textShadow: '0 0 15px rgba(16, 185, 129, 0.5)'
+                }}>
+                  🎮 How to Play!
+                </h3>
+                <div className="text-gray-200 space-y-2" style={{ 
+                  fontSize: '16px',
+                  lineHeight: '1.8',
+                  fontFamily: '"Times New Roman", serif',
+                  paddingLeft: '20px'
+                }}>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#10b981' }}>▸</span>
+                    Use <kbd style={{
+                      background: 'rgba(147, 51, 234, 0.3)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(147, 51, 234, 0.5)',
+                      fontSize: '14px'
+                    }}>WASD</kbd> or arrow keys to move around
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#10b981' }}>▸</span>
+                    Click the fountain to throw <span style={{ color: '#a855f7', fontWeight: 'bold' }}>WISH</span> tokens
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#10b981' }}>▸</span>
+                    Win big or lose it all in the magical well!
+                  </p>
                 </div>
               </div>
               
               {/* Portals section */}
-              <div style={{ fontSize: '15px', lineHeight: '1.8', fontFamily: '"Times New Roman", serif', fontWeight: 'bold' }}>
-                <h3 className="text-purple-400 font-bold mb-2" style={{ fontSize: '17px', fontWeight: 'bold' }}>🚪 Portals!</h3>
-                <div className="text-gray-300 ml-4" style={{ fontWeight: 'bold' }}>
-                  <p>• Info - Learn about the game</p>
-                  <p>• House - Purchase and manage your property</p>
-                  <p>• Links - Join our community</p>
-                  <p>• Upgrades - Enhance your house</p>
-                  <p>• Multiplayer Gaming • 💰 Crypto Rewards</p>
+              <div className="mb-6" style={{ 
+                padding: '16px',
+                background: 'rgba(147, 51, 234, 0.1)',
+                border: '1px solid rgba(147, 51, 234, 0.3)',
+                borderRadius: '8px'
+              }}>
+                <h3 className="text-purple-400 font-bold mb-3 flex items-center gap-2" style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 'bold',
+                  fontFamily: '"Times New Roman", serif',
+                  textShadow: '0 0 15px rgba(147, 51, 234, 0.5)'
+                }}>
+                  🚪 Portals!
+                </h3>
+                <div className="text-gray-200 space-y-2" style={{ 
+                  fontSize: '16px',
+                  lineHeight: '1.8',
+                  fontFamily: '"Times New Roman", serif',
+                  paddingLeft: '20px'
+                }}>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#a855f7' }}>▸</span>
+                    <span style={{ color: '#60a5fa', fontWeight: 'bold' }}>Info</span> - Learn about the game
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#a855f7' }}>▸</span>
+                    <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>House</span> - Purchase and manage your property
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#a855f7' }}>▸</span>
+                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>Links</span> - Join our community
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span style={{ color: '#a855f7' }}>▸</span>
+                    <span style={{ color: '#ef4444', fontWeight: 'bold' }}>Upgrades</span> - Enhance your house
+                  </p>
+                  <div className="mt-3 pt-3 border-t border-purple-800/30 flex items-center justify-center gap-4">
+                    <span className="flex items-center gap-2">
+                      <span>🎮</span>
+                      <span style={{ color: '#a855f7', fontWeight: 'bold' }}>Multiplayer Gaming</span>
+                    </span>
+                    <span style={{ color: '#4b5563' }}>•</span>
+                    <span className="flex items-center gap-2">
+                      <span>💰</span>
+                      <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>Crypto Rewards</span>
+                    </span>
+                  </div>
                 </div>
               </div>
               
@@ -125,17 +197,72 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
             
             {/* Return to Game button - only show if onClose is provided */}
             {onClose && (
-              <div className="text-center mt-6">
+              <div className="text-center mt-8">
                 <button
                   onClick={onClose}
-                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="relative group"
                   style={{ 
-                    fontSize: '16px', 
+                    fontSize: '18px', 
                     fontFamily: '"Times New Roman", serif',
-                    boxShadow: '0 8px 25px rgba(239, 68, 68, 0.6)'
+                    fontWeight: 'bold',
+                    background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%)',
+                    color: '#ffffff',
+                    padding: '14px 32px',
+                    border: '2px solid rgba(248, 113, 113, 0.5)',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    const btn = e.currentTarget;
+                    btn.style.transform = 'translateY(-2px)';
+                    btn.style.boxShadow = '0 15px 40px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const btn = e.currentTarget;
+                    btn.style.transform = 'translateY(0)';
+                    btn.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
                   }}
                 >
-                  ← Return to Game
+                  <span style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <svg 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ transform: 'rotate(180deg)' }}
+                    >
+                      <path 
+                        d="M9 18l6-6-6-6" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Return to Game
+                  </span>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                    transition: 'left 0.5s ease',
+                  }} className="group-hover:!left-full" />
                 </button>
               </div>
             )}
