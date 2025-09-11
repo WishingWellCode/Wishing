@@ -25,9 +25,15 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
       `}</style>
       
       <div 
-        className="pre-wallet-bg fixed inset-0 z-50"
+        className="pre-wallet-bg fixed inset-0"
         style={{ 
-          zIndex: 50000
+          zIndex: 9999,
+          pointerEvents: 'auto',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
         }}
       >
       {/* Centered layout container */}
@@ -38,7 +44,8 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
           justifyContent: 'center',
           width: '100%',
           height: '100vh',
-          position: 'relative'
+          position: 'relative',
+          paddingBottom: '60px'
         }}
       >
         
@@ -206,20 +213,20 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
             
             {/* Return to Game button - only show if onClose is provided */}
             {onClose && (
-              <div className="text-center mt-6">
+              <div className="text-center mt-8">
                 <button
                   onClick={onClose}
                   className="relative group"
                   style={{ 
-                    fontSize: '16px', 
+                    fontSize: '14px', 
                     fontFamily: '"Times New Roman", serif',
                     fontWeight: 'bold',
                     background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%)',
                     color: '#ffffff',
-                    padding: '12px 28px',
+                    padding: '10px 24px',
                     border: '2px solid rgba(248, 113, 113, 0.5)',
-                    borderRadius: '10px',
-                    boxShadow: '0 8px 25px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     textTransform: 'uppercase',
@@ -230,12 +237,12 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
                   onMouseEnter={(e) => {
                     const btn = e.currentTarget;
                     btn.style.transform = 'translateY(-2px)';
-                    btn.style.boxShadow = '0 15px 40px rgba(239, 68, 68, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3)';
+                    btn.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)';
                   }}
                   onMouseLeave={(e) => {
                     const btn = e.currentTarget;
                     btn.style.transform = 'translateY(0)';
-                    btn.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                    btn.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
                   }}
                 >
                   <span style={{
@@ -246,8 +253,8 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
                     gap: '8px'
                   }}>
                     <svg 
-                      width="20" 
-                      height="20" 
+                      width="16" 
+                      height="16" 
                       viewBox="0 0 24 24" 
                       fill="none" 
                       xmlns="http://www.w3.org/2000/svg"
