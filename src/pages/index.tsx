@@ -5,7 +5,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import Head from 'next/head'
 import PreWalletOverlay from '@/components/PreWalletOverlay'
 
-const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
+const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false, loading: () => null })
 const MultiplayerManager = dynamic(() => import('@/components/MultiplayerManager'), { ssr: false })
 const MultiplayerOverlay = dynamic(() => import('@/components/MultiplayerOverlay'), { ssr: false })
 
@@ -25,68 +25,11 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen w-full relative" style={{ backgroundColor: '#000' }}>
-        {/* Game Canvas */}
+      {/* Full screen container */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: '#000' }}>
+        {/* Game Canvas - Background */}
         <GameCanvas isWalletConnected={connected} />
-
-        {/* UI Buttons - Always visible on top */}
-        <div 
-          className="absolute top-4 left-4" 
-          style={{ 
-            zIndex: 10000,
-            position: 'absolute',
-            pointerEvents: 'auto'
-          }}
-        >
-          <WalletMultiButton 
-            className="!bg-purple-600 hover:!bg-purple-700"
-            style={{ 
-              fontSize: '14px',
-              position: 'relative',
-              zIndex: 10001
-            }}
-          />
-        </div>
         
-        <div 
-          className="absolute bottom-4 right-4"
-          style={{ 
-            zIndex: 10000,
-            position: 'absolute',
-            pointerEvents: 'auto'
-          }}
-        >
-          <button
-            onClick={() => setShowHelp(true)}
-            style={{
-              backgroundColor: '#9333ea',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              position: 'relative',
-              zIndex: 10001,
-              pointerEvents: 'auto'
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
-            }}
-          >
-            Help
-          </button>
-        </div>
-
-        {/* Help overlay */}
-        {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
-
         {/* Multiplayer Manager - handles connection and data */}
         {connected && (
           <MultiplayerManager 
@@ -107,6 +50,66 @@ export default function Home() {
             currentPlayerId={currentPlayerId}
           />
         )}
+
+        {/* Help overlay */}
+        {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
+      </div>
+
+      {/* BUTTONS - Completely separate from game container */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 99999,
+          pointerEvents: 'auto'
+        }}
+      >
+        <WalletMultiButton 
+          className="!bg-purple-600 hover:!bg-purple-700"
+          style={{ 
+            fontSize: '14px',
+            position: 'relative',
+            zIndex: 99999
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          right: '16px',
+          zIndex: 99999,
+          pointerEvents: 'auto'
+        }}
+      >
+        <button
+          onClick={() => setShowHelp(true)}
+          style={{
+            backgroundColor: '#9333ea',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+            position: 'relative',
+            zIndex: 99999,
+            pointerEvents: 'auto'
+          }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
+          }}
+        >
+          Help
+        </button>
       </div>
     </>
   )
