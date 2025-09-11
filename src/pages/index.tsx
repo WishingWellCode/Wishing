@@ -58,7 +58,12 @@ export default function Home() {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           height: '100vh',
-          width: '100vw'
+          width: '100vw',
+          margin: 0,
+          padding: 0,
+          position: 'absolute',
+          top: 0,
+          left: 0
         }}
       >
         {/* Always show wallet button and help button */}
