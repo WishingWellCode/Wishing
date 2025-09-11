@@ -72,6 +72,11 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       const landingScene = sceneManager.getScene('LandingScene')
       const testScene = sceneManager.getScene('TestScene')
       
+      // Notify LandingScene about wallet disconnection
+      if (landingScene && (landingScene as any).setWalletConnection) {
+        ;(landingScene as any).setWalletConnection(false)
+      }
+      
       if (testScene?.scene.isActive()) {
         console.log('🔍 DEBUG: Stopping TestScene')
         sceneManager.stop('TestScene')

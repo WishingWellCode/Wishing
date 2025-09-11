@@ -53,17 +53,14 @@ export default function Home() {
       <div 
         className="min-h-screen w-full relative"
         style={{
-          backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
           height: '100vh',
           width: '100vw',
           margin: 0,
           padding: 0,
           position: 'absolute',
           top: 0,
-          left: 0
+          left: 0,
+          backgroundColor: '#000'
         }}
       >
         {/* Always show wallet button and help button */}

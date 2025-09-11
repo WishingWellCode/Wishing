@@ -7,6 +7,7 @@ export class LandingScene extends Phaser.Scene {
   private wasd!: any
   private lastPosition = { x: 0, y: 0 }
   private positionUpdateTimer = 0
+  private isWalletConnected = false
   
   constructor() {
     super({ key: 'LandingScene' })
@@ -34,22 +35,42 @@ export class LandingScene extends Phaser.Scene {
     // Remove instruction text as requested by user
     // this.instructions = this.add.text(...)
     
+    // Only create player sprite if wallet is connected
+    // This will be set by GameCanvas when wallet connects
+    if (this.isWalletConnected) {
+      this.createPlayer()
+    }
+    
+    // Set up controls (but they won't work without a player sprite)
+    this.cursors = this.input.keyboard!.createCursorKeys()
+    this.wasd = this.input.keyboard!.addKeys('W,S,A,D')
+    
+    // Camera setup
+    this.cameras.main.setZoom(1)
+  }
+  
+  private createPlayer() {
+    if (this.player) return // Don't create if already exists
+    
     // Create visible player sprite
     this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
     this.player.setVisible(true) // Make player visible
     this.player.setDepth(100) // High depth to show above background
     this.player.setScale(0.13) // Small size like the green placeholder
     
-    // Set up controls
-    this.cursors = this.input.keyboard!.createCursorKeys()
-    this.wasd = this.input.keyboard!.addKeys('W,S,A,D')
-    
-    // Camera setup
-    this.cameras.main.setZoom(1)
-    
     // Store initial position
     this.lastPosition.x = this.player.x
     this.lastPosition.y = this.player.y
+  }
+  
+  public setWalletConnection(connected: boolean) {
+    this.isWalletConnected = connected
+    if (connected && !this.player) {
+      this.createPlayer()
+    } else if (!connected && this.player) {
+      this.player.destroy()
+      this.player = null as any
+    }
   }
   
   update(time: number, delta: number) {
