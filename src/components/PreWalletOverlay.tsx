@@ -7,28 +7,27 @@ interface PreWalletOverlayProps {
 export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
   return (
     <>
-      <div className="overlay-backdrop" />
       <style jsx>{`
-        .overlay-backdrop {
+        .pre-wallet-bg::before {
+          content: '';
           position: fixed;
           inset: 0;
           background: url('/assets/backgrounds/Realbackground.jpg') center/cover no-repeat fixed;
-          z-index: 2147483645;
+          z-index: -1;
         }
-        .overlay-backdrop::after {
+        .pre-wallet-bg::after {
           content: '';
-          position: absolute;
+          position: fixed;
           inset: 0;
           background: rgba(0, 0, 0, 0.45);
+          z-index: -1;
         }
       `}</style>
       
       <div 
-        className="fixed inset-0"
+        className="pre-wallet-bg fixed inset-0 z-50"
         style={{ 
-          zIndex: 2147483647,
-          pointerEvents: 'auto',
-          isolation: 'isolate'
+          zIndex: 50000
         }}
       >
       {/* Centered layout container */}
@@ -67,7 +66,7 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
               top: '15px',
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 2147483648
+              zIndex: 10
             }}
           >
             <WalletMultiButton 
