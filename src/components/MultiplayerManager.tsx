@@ -33,17 +33,17 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
   }, [])
   
-  // Connect to multiplayer when wallet is connected and component is active
+  // Connect to multiplayer - now supports spectator mode without wallet
   useEffect(() => {
-    if (isActive && connected && publicKey) {
-      // Always attempt to connect if we should be connected but aren't
+    if (isActive) {
+      // Always attempt to connect if active (spectator or player mode)
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        console.log('🎮 MultiplayerManager: Connecting/Reconnecting to multiplayer')
+        console.log('🎮 MultiplayerManager: Connecting to multiplayer', connected ? 'as player' : 'as spectator')
         connectMultiplayer()
       }
-    } else if ((!isActive || !connected)) {
-      console.log('🎮 MultiplayerManager: Disconnecting from multiplayer (wallet disconnected or inactive)')
-      // Immediately clear players when wallet disconnects
+    } else {
+      console.log('🎮 MultiplayerManager: Disconnecting from multiplayer (inactive)')
+      // Clear players when disconnecting
       setPlayers([])
       if (wsRef.current) {
         disconnectMultiplayer()
@@ -52,7 +52,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     
     return () => {
       // Don't disconnect on unmount if we should stay connected
-      if (!isActive || !connected) {
+      if (!isActive) {
         disconnectMultiplayer()
       }
     }
@@ -70,8 +70,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }, [publicKey?.toString()])
 
   const connectMultiplayer = () => {
-    if (!publicKey) return
-
+    // Allow connection even without publicKey (spectator mode)
+    
     // Clean up existing connection first
     if (wsRef.current) {
       console.log('🎮 Cleaning up existing connection')
@@ -92,7 +92,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         hostname: window.location.hostname,
         isLocal,
         workerUrl,
-        publicKey: publicKey.toString()
+        publicKey: publicKey?.toString() || 'spectator',
+        mode: publicKey ? 'player' : 'spectator'
       })
       
       const ws = new WebSocket(workerUrl)
@@ -101,16 +102,26 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         console.log('🎮 ✅ CONNECTED to multiplayer server at:', workerUrl)
         setIsConnected(true)
         
-        // Join the game
+        // Join the game (as player or spectator)
         try {
-          const joinMessage = {
-            type: 'join',
-            walletAddress: publicKey.toString()
+          if (publicKey) {
+            // Join as player with wallet
+            const joinMessage = {
+              type: 'join',
+              walletAddress: publicKey.toString()
+            }
+            console.log('🎮 📤 SENDING JOIN MESSAGE (player):', joinMessage)
+            ws.send(JSON.stringify(joinMessage))
+          } else {
+            // Join as spectator without wallet
+            const spectatorMessage = {
+              type: 'spectate'
+            }
+            console.log('🎮 📤 SENDING SPECTATE MESSAGE:', spectatorMessage)
+            ws.send(JSON.stringify(spectatorMessage))
           }
-          console.log('🎮 📤 SENDING JOIN MESSAGE:', joinMessage)
-          ws.send(JSON.stringify(joinMessage))
         } catch (error) {
-          console.error('🎮 ❌ ERROR sending join message:', error)
+          console.error('🎮 ❌ ERROR sending join/spectate message:', error)
         }
         
         // Start keepalive ping every 30 seconds to prevent disconnection

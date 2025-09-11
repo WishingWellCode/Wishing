@@ -41,26 +41,24 @@ export default function Home() {
         {/* Game Canvas - Background */}
         <GameCanvas isWalletConnected={connected} />
         
-        {/* Multiplayer Manager - handles connection and data */}
-        {connected && (
-          <MultiplayerManager 
-            isActive={connected} 
-            onPlayersUpdate={(players) => {
-              setPlayers(players)
-              // Find current player in the list
+        {/* Multiplayer Manager - Always active to see other players */}
+        <MultiplayerManager 
+          isActive={true}  // Always connect to see other players
+          onPlayersUpdate={(players) => {
+            setPlayers(players)
+            // Find current player in the list only if wallet connected
+            if (connected && publicKey) {
               const currentPlayer = players.find(p => p.walletAddress === publicKey?.toString())
               setCurrentPlayerId(currentPlayer?.id || null)
-            }}
-          />
-        )}
+            }
+          }}
+        />
 
-        {/* Multiplayer Overlay */}
-        {connected && (
-          <MultiplayerOverlay 
-            players={players}
-            currentPlayerId={currentPlayerId}
-          />
-        )}
+        {/* Multiplayer Overlay - Always show to see other players */}
+        <MultiplayerOverlay 
+          players={players}
+          currentPlayerId={currentPlayerId}
+        />
 
         {/* Help overlay */}
         {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}

@@ -145,33 +145,6 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
         </div>
       ))}
       
-      {/* Player count indicator - moved to bottom-right with white text */}
-      <div 
-        className="pointer-events-none"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '16px',
-          zIndex: 100
-        }}
-      >
-        <div 
-          className="px-3 py-2 text-white font-pixel"
-          style={{
-            backgroundColor: 'black',
-            border: '1px solid white',
-            borderRadius: '4px',
-            fontSize: '10px'
-          }}
-        >
-          <div style={{ color: 'white', fontWeight: 'bold' }}>
-            {visiblePlayers.length} players visible
-          </div>
-          <div style={{ color: 'white', fontSize: '9px', marginTop: '2px' }}>
-            Total: {players.length} | Current: {currentPlayerId ? 'Yes' : 'No'}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
