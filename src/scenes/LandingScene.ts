@@ -35,11 +35,8 @@ export class LandingScene extends Phaser.Scene {
     // Remove instruction text as requested by user
     // this.instructions = this.add.text(...)
     
-    // Only create player sprite if wallet is connected
-    // This will be set by GameCanvas when wallet connects
-    if (this.isWalletConnected) {
-      this.createPlayer()
-    }
+    // NEVER auto-create player sprite - only create when explicitly told to via setWalletConnection
+    console.log('🔍 DEBUG: LandingScene created - NO player sprite auto-created')
     
     // Set up controls (but they won't work without a player sprite)
     this.cursors = this.input.keyboard!.createCursorKeys()

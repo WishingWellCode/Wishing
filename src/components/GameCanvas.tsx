@@ -16,47 +16,45 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     
     const sceneManager = gameRef.current.scene
     
-    console.log('🔍 DEBUG: Wallet connection changed:', walletConnected)
+    console.log('🔍 DEBUG: Scene switching - wallet connected:', walletConnected)
     
-    if (walletConnected) {
-      // Start handshaking process - prevent multiple rapid switches
-      isHandshakingRef.current = true
-      
-      const landingScene = sceneManager.getScene('LandingScene')
-      const testScene = sceneManager.getScene('TestScene')
-      
-      // Pause physics during transition to prevent glitching
-      if (landingScene?.scene.isActive() && (landingScene as any).physics) {
-        console.log('🔍 DEBUG: Pausing LandingScene physics')
-        ;(landingScene as any).physics.world.pause()
+    // Start handshaking process - prevent multiple rapid switches
+    isHandshakingRef.current = true
+    
+    const landingScene = sceneManager.getScene('LandingScene')
+    const testScene = sceneManager.getScene('TestScene')
+    
+    // FORCE STOP ALL SCENES FIRST to prevent dual scenes
+    console.log('🔍 DEBUG: Force stopping all scenes to prevent dual loading')
+    if (landingScene?.scene.isActive()) {
+      console.log('🔍 DEBUG: Stopping LandingScene')
+      // Clean up any sprites before stopping scene
+      if ((landingScene as any).player) {
+        console.log('🔍 DEBUG: Destroying LandingScene player sprite')
+        ;(landingScene as any).player.destroy()
+        ;(landingScene as any).player = null
       }
-      
-      // Clean shutdown of LandingScene
-      if (landingScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Stopping LandingScene cleanly')
-        // Clean up any tweens or timers before stopping
-        if ((landingScene as any).tweens) {
-          ;(landingScene as any).tweens.killAll()
-        }
-        // Force cleanup of sprites before stopping scene
-        if ((landingScene as any).player) {
-          console.log('🔍 DEBUG: Destroying LandingScene player sprite')
-          ;(landingScene as any).player.destroy()
-          ;(landingScene as any).player = null
-        }
-        sceneManager.stop('LandingScene')
-      }
-      
-      // Start TestScene with fade-in transition
-      if (!testScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Starting TestScene with transition')
+      sceneManager.stop('LandingScene')
+    }
+    
+    if (testScene?.scene.isActive()) {
+      console.log('🔍 DEBUG: Stopping TestScene')
+      sceneManager.stop('TestScene')
+    }
+    
+    // Wait a moment for scenes to fully stop
+    setTimeout(() => {
+      if (walletConnected) {
+        console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
         sceneManager.start('TestScene')
-        
-        // Add fade-in effect
+      } else {
+        console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
+        sceneManager.start('LandingScene')
+        // Ensure LandingScene knows wallet is disconnected
         setTimeout(() => {
-          const testSceneInstance = sceneManager.getScene('TestScene') as any
-          if (testSceneInstance && testSceneInstance.cameras && testSceneInstance.cameras.main) {
-            testSceneInstance.cameras.main.fadeIn(300)
+          const newLandingScene = sceneManager.getScene('LandingScene')
+          if (newLandingScene && (newLandingScene as any).setWalletConnection) {
+            ;(newLandingScene as any).setWalletConnection(false)
           }
         }, 100)
       }
@@ -64,28 +62,9 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       // Complete handshake after transition
       setTimeout(() => {
         isHandshakingRef.current = false
-        console.log('🎮 Handshake complete - switched to TestScene')
-      }, 500)
-      
-    } else {
-      // Disconnection - simpler process
-      const landingScene = sceneManager.getScene('LandingScene')
-      const testScene = sceneManager.getScene('TestScene')
-      
-      // Notify LandingScene about wallet disconnection
-      if (landingScene && (landingScene as any).setWalletConnection) {
-        ;(landingScene as any).setWalletConnection(false)
-      }
-      
-      if (testScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Stopping TestScene')
-        sceneManager.stop('TestScene')
-      }
-      if (!landingScene?.scene.isActive()) {
-        console.log('🔍 DEBUG: Starting LandingScene')
-        sceneManager.start('LandingScene')
-      }
-    }
+        console.log('🎮 Scene switch complete - only one scene active')
+      }, 200)
+    }, 100)
   }
 
   useEffect(() => {
@@ -144,35 +123,22 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
 
       console.log('🎮 Phaser game initialized with both scenes')
       
-      // Start with appropriate initial scene
+      // Start with appropriate initial scene - ONLY ONE AT A TIME
       const sceneManager = gameRef.current.scene
+      
+      // Force stop all scenes first to ensure clean state
+      sceneManager.stop('LandingScene')
+      sceneManager.stop('TestScene')
+      
+      console.log('🔍 DEBUG: All scenes stopped. Starting single scene based on wallet state.')
+      
       if (isWalletConnected) {
-        console.log('🔍 DEBUG: Starting with TestScene (wallet connected)')
+        console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
         sceneManager.start('TestScene')
       } else {
-        console.log('🔍 DEBUG: Starting with LandingScene (no wallet)')
+        console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
         sceneManager.start('LandingScene')
       }
-      
-      // Trigger scene switching check after game is ready - check wallet state multiple ways
-      setTimeout(() => {
-        const wallet = (window as any).solana
-        const isActuallyConnected = wallet?.isConnected || false
-        const hasPublicKey = !!wallet?.publicKey
-        console.log('🔍 DEBUG: Game ready, checking wallet states:')
-        console.log('  - React prop isWalletConnected:', isWalletConnected)
-        console.log('  - window.solana.isConnected:', isActuallyConnected)
-        console.log('  - window.solana.publicKey exists:', hasPublicKey)
-        console.log('  - Multiplayer connection active:', !!(window as any).multiplayerManager)
-        
-        // Use the most reliable indicator - if multiplayer is connected, wallet is connected
-        const shouldUseTestScene = isActuallyConnected || hasPublicKey || !!(window as any).multiplayerManager
-        console.log('  - Final decision: Use TestScene?', shouldUseTestScene)
-        
-        if (gameRef.current && gameRef.current.scene) {
-          handleSceneSwitching(shouldUseTestScene)
-        }
-      }, 1000) // Increase delay to 1000ms to ensure everything has time to initialize
     }
 
     initializeGame()
