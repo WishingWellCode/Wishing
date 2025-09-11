@@ -42,21 +42,26 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
-      {/* Game Canvas - Background layer */}
-      <div 
-        className="min-h-screen w-full relative"
-        style={{
-          height: '100vh',
-          width: '100vw',
-          margin: 0,
-          padding: 0,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          backgroundColor: '#000'
-        }}
-      >
+      <div className="min-h-screen w-full relative" style={{ backgroundColor: '#000' }}>
+        {/* Game Canvas */}
         <GameCanvas isWalletConnected={connected} />
+
+        {/* UI Buttons - Overlaid on top */}
+        <div className="absolute top-4 left-4 z-50">
+          <WalletMultiButton 
+            className="!bg-purple-600 hover:!bg-purple-700"
+            style={{ fontSize: '14px' }}
+          />
+        </div>
+        
+        <div className="absolute bottom-4 right-4 z-50">
+          <button
+            onClick={() => setShowHelp(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white border-none rounded px-4 py-2 text-sm font-semibold cursor-pointer transition-all shadow"
+          >
+            Help
+          </button>
+        </div>
 
         {/* Help overlay */}
         {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
@@ -73,54 +78,15 @@ export default function Home() {
             }}
           />
         )}
-      </div>
 
-      {/* UI Buttons - COMPLETELY OUTSIDE main container with maximum z-index */}
-      <div className="fixed top-4 left-4" style={{ zIndex: 999999, position: 'fixed' }}>
-        <WalletMultiButton 
-          className="!bg-purple-600 hover:!bg-purple-700"
-          style={{ fontSize: '14px', position: 'relative', zIndex: 999999 }}
-        />
+        {/* Multiplayer Overlay */}
+        {connected && (
+          <MultiplayerOverlay 
+            players={players}
+            currentPlayerId={currentPlayerId}
+          />
+        )}
       </div>
-      
-      <div className="fixed bottom-4 right-4" style={{ zIndex: 999999, position: 'fixed' }}>
-        <button
-          onClick={() => setShowHelp(true)}
-          style={{
-            backgroundColor: '#9333ea',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 16px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-            minWidth: 'auto',
-            width: 'auto',
-            display: 'inline-block',
-            position: 'relative',
-            zIndex: 999999
-          }}
-          onMouseEnter={(e) => {
-            (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
-          }}
-          onMouseLeave={(e) => {
-            (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
-          }}
-        >
-          Help
-        </button>
-      </div>
-
-      {/* Multiplayer Overlay - OUTSIDE main container to be above everything */}
-      {connected && (
-        <MultiplayerOverlay 
-          players={players}
-          currentPlayerId={currentPlayerId}
-        />
-      )}
     </>
   )
 }
