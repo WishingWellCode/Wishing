@@ -27,18 +27,10 @@ export default function Home() {
     }
   }, [connected, publicKey])
 
-  // Stop loading after component mounts to prevent flash
+  // Remove loading delay completely
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 100)
-    return () => clearTimeout(timer)
+    setIsLoading(false)
   }, [])
-
-
-  if (isLoading) {
-    return <div style={{ background: 'url(/assets/backgrounds/sixseven.png)', backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh' }} />
-  }
 
   return (
     <>
@@ -63,15 +55,15 @@ export default function Home() {
           backgroundColor: '#000'
         }}
       >
-        {/* Always show wallet button and help button */}
-        <div className="fixed top-4 left-4 z-50" style={{ zIndex: 9999 }}>
+        {/* Always show wallet button and help button - ABOVE game canvas */}
+        <div className="fixed top-4 left-4" style={{ zIndex: 10000 }}>
           <WalletMultiButton 
             className="!bg-purple-600 hover:!bg-purple-700"
             style={{ fontSize: '14px' }}
           />
         </div>
         
-        <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 9999 }}>
+        <div className="fixed bottom-4 right-4" style={{ zIndex: 10000 }}>
           <button
             onClick={() => setShowHelp(true)}
             style={{
