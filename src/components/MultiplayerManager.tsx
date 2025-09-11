@@ -237,9 +237,11 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       case 'currentPlayers':
         // Spectator mode - received current players
         if (message.players) {
-          console.log(`👁️ SPECTATOR: Received ${message.players.length} players`)
+          console.log(`👁️ SPECTATOR: Received ${message.players.length} players:`, message.players)
           setPlayers(message.players)
           onPlayersUpdate?.(message.players)
+        } else {
+          console.log('👁️ SPECTATOR: Received currentPlayers but no players array')
         }
         break
         

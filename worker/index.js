@@ -421,8 +421,15 @@ async function handleWebSocketSession(websocket, env) {
           break
           
         case 'spectate':
-          // Spectator mode - just send current players, no sprite creation
+          // Spectator mode - mark as spectator and send current players
           console.log(`👁️ Spectator joined: ${playerId}`)
+          
+          // Mark session as spectator
+          const spectatorSession = webSocketSessions.get(playerId)
+          if (spectatorSession) {
+            spectatorSession.isSpectator = true
+            spectatorSession.lastSeen = Date.now()
+          }
           
           // Send current players to spectator
           const players = []
@@ -432,6 +439,7 @@ async function handleWebSocketSession(websocket, env) {
             }
           }
           
+          console.log(`👁️ Sending ${players.length} current players to spectator`)
           websocket.send(JSON.stringify({
             type: 'currentPlayers',
             players
@@ -458,10 +466,11 @@ async function handleWebSocketSession(websocket, env) {
             sprite: randomSprite
           }
           
-          // Update session
+          // Update session - upgrade from spectator to player
           const session = webSocketSessions.get(playerId)
           if (session) {
             session.playerData = playerData
+            session.isSpectator = false // No longer a spectator
             session.lastSeen = Date.now()
           }
           
