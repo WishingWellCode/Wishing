@@ -45,7 +45,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const updatePlayerPosition = (x: number, y: number) => {
-    // DISABLED: Old position updates - using new multiplayer system
+    // Send to new multiplayer system via global hook
+    if (typeof window !== 'undefined' && (window as any).updateMultiplayerPosition) {
+      ;(window as any).updateMultiplayerPosition(x, y)
+    }
   }
 
   const throwCoins = async (amount: number): Promise<any> => {

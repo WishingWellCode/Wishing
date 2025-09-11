@@ -1594,11 +1594,8 @@ export class TestScene extends Phaser.Scene {
   update(time: number, delta: number) {
     // Only proceed if player exists
     if (!this.testPlayer) {
-      // Try to create player if wallet is connected but player doesn't exist
-      if (typeof window !== 'undefined' && (window as any).solana?.isConnected) {
-        console.log('🔄 Wallet connected but no player, attempting to create...')
-        this.createPlayer()
-      }
+      // Skip - player should be created by scene switching logic
+      // Don't try to auto-create here as it causes sync issues
       return
     }
     
@@ -1717,20 +1714,19 @@ export class TestScene extends Phaser.Scene {
   private multiplayerRetryTimer: any = null
   
   private updateMultiplayerPosition(x: number, y: number) {
-    // Send position to multiplayer manager
-    if (typeof window !== 'undefined') {
-      const mm = (window as any).multiplayerManager
-      if (mm && mm.updatePosition && mm.isConnected) {
-        mm.updatePosition(x, y)
+    // Use the game context to update player position
+    try {
+      const gameContext = this.registry.get('gameContext')
+      if (gameContext && gameContext.updatePlayerPosition) {
+        gameContext.updatePlayerPosition(x, y)
         // Only log movement occasionally to reduce spam
-        if (Math.random() < 0.05) {
-          console.log('📡 Position synced with multiplayer')
+        if (Math.random() < 0.02) {
+          console.log('📡 Position synced with multiplayer via game context')
         }
-      } else if (!mm || !mm.isConnected) {
-        // Multiplayer not ready - try to reinitialize player position when it connects
+      } else {
+        // Game context not ready yet - this is normal during initialization
         if (!this.multiplayerRetryTimer) {
-          console.log('⏳ Multiplayer not ready, scheduling retry...')
-          this.multiplayerRetryTimer = this.time.delayedCall(500, () => {
+          this.multiplayerRetryTimer = this.time.delayedCall(1000, () => {
             this.multiplayerRetryTimer = null
             if (this.testPlayer) {
               this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
@@ -1738,6 +1734,8 @@ export class TestScene extends Phaser.Scene {
           })
         }
       }
+    } catch (error) {
+      console.error('❌ Error updating multiplayer position:', error)
     }
   }
 }

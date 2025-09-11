@@ -223,7 +223,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const handleMultiplayerMessage = (message: any) => {
-    // Only log important events, not movement spam
+    // Always log spectator messages and important events, skip movement spam
     if (message.type !== 'playerMoved') {
       console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
     }
@@ -361,6 +361,18 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       result
     }))
   }
+
+  // Expose updatePosition globally for GameContext
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ;(window as any).updateMultiplayerPosition = updatePosition
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        ;(window as any).updateMultiplayerPosition = null
+      }
+    }
+  }, [connected, publicKey, isConnected])
 
   // Expose methods for external use
   useEffect(() => {
