@@ -53,7 +53,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
           console.log('🔍 DEBUG: Forcing player creation in TestScene')
           ;(testScene as any).createPlayer()
         }
-      }, 100)
+      }, 500) // Increased delay to ensure scene is fully ready
     } else {
       console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
       sceneManager.start('LandingScene')
@@ -161,7 +161,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       if (gameRef.current && gameRef.current.scene && !isHandshakingRef.current) {
         handleSceneSwitching(isWalletConnected)
       }
-    }, 50) // Reduced debounce delay
+    }, 200) // Increased delay to ensure proper initialization
 
     return () => clearTimeout(debounceTimer)
   }, [isWalletConnected])

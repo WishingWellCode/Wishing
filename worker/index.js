@@ -410,6 +410,34 @@ async function handleWebSocketSession(websocket, env) {
       console.log(`🎮 Received message from ${playerId}:`, message)
       
       switch (message.type) {
+        case 'ping':
+          // Keep-alive ping - respond with pong
+          websocket.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }))
+          // Update last seen
+          const pingSession = webSocketSessions.get(playerId)
+          if (pingSession) {
+            pingSession.lastSeen = Date.now()
+          }
+          break
+          
+        case 'spectate':
+          // Spectator mode - just send current players, no sprite creation
+          console.log(`👁️ Spectator joined: ${playerId}`)
+          
+          // Send current players to spectator
+          const players = []
+          for (const [id, session] of webSocketSessions) {
+            if (session.playerData) {
+              players.push(session.playerData)
+            }
+          }
+          
+          websocket.send(JSON.stringify({
+            type: 'currentPlayers',
+            players
+          }))
+          break
+          
         case 'join':
           // Format wallet address as username (first 3 + last 2 chars)
           const walletAddress = message.walletAddress

@@ -144,7 +144,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
               timestamp: Date.now() 
             }))
           }
-        }, 30000) // Ping every 30 seconds
+        }, 20000) // Ping every 20 seconds to prevent Cloudflare timeout
       }
       
       ws.onmessage = (event) => {
@@ -229,6 +229,20 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
     
     switch (message.type) {
+      case 'pong':
+        // Server responded to our ping - connection is alive
+        console.log('🎮 💓 Pong received - connection alive')
+        break
+        
+      case 'currentPlayers':
+        // Spectator mode - received current players
+        if (message.players) {
+          console.log(`👁️ SPECTATOR: Received ${message.players.length} players`)
+          setPlayers(message.players)
+          onPlayersUpdate?.(message.players)
+        }
+        break
+        
       case 'joined':
         playerIdRef.current = message.playerId
         if (message.allPlayers) {
