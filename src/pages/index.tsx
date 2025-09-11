@@ -42,6 +42,7 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* Game Canvas - Background layer */}
       <div 
         className="min-h-screen w-full relative"
         style={{
@@ -55,48 +56,10 @@ export default function Home() {
           backgroundColor: '#000'
         }}
       >
-        {/* Always show wallet button and help button - ABOVE game canvas */}
-        <div className="fixed top-4 left-4" style={{ zIndex: 10000 }}>
-          <WalletMultiButton 
-            className="!bg-purple-600 hover:!bg-purple-700"
-            style={{ fontSize: '14px' }}
-          />
-        </div>
-        
-        <div className="fixed bottom-4 right-4" style={{ zIndex: 10000 }}>
-          <button
-            onClick={() => setShowHelp(true)}
-            style={{
-              backgroundColor: '#9333ea',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 16px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              minWidth: 'auto',
-              width: 'auto',
-              display: 'inline-block'
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
-            }}
-          >
-            Help
-          </button>
-        </div>
+        <GameCanvas isWalletConnected={connected} />
 
         {/* Help overlay */}
         {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
-
-        {/* Game Canvas - Always render for background, but disable interaction when not connected */}
-        <GameCanvas isWalletConnected={connected} />
 
         {/* Multiplayer Manager - handles connection and data */}
         {connected && (
@@ -110,7 +73,45 @@ export default function Home() {
             }}
           />
         )}
+      </div>
 
+      {/* UI Buttons - COMPLETELY OUTSIDE main container with maximum z-index */}
+      <div className="fixed top-4 left-4" style={{ zIndex: 999999, position: 'fixed' }}>
+        <WalletMultiButton 
+          className="!bg-purple-600 hover:!bg-purple-700"
+          style={{ fontSize: '14px', position: 'relative', zIndex: 999999 }}
+        />
+      </div>
+      
+      <div className="fixed bottom-4 right-4" style={{ zIndex: 999999, position: 'fixed' }}>
+        <button
+          onClick={() => setShowHelp(true)}
+          style={{
+            backgroundColor: '#9333ea',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            minWidth: 'auto',
+            width: 'auto',
+            display: 'inline-block',
+            position: 'relative',
+            zIndex: 999999
+          }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
+          }}
+        >
+          Help
+        </button>
       </div>
 
       {/* Multiplayer Overlay - OUTSIDE main container to be above everything */}
