@@ -7,28 +7,28 @@ interface PreWalletOverlayProps {
 export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
   return (
     <>
+      <div className="overlay-backdrop" />
       <style jsx>{`
-        .pre-wallet-bg::before {
-          content: '';
+        .overlay-backdrop {
           position: fixed;
           inset: 0;
           background: url('/assets/backgrounds/Realbackground.jpg') center/cover no-repeat fixed;
-          z-index: -1;
+          z-index: 2147483645;
         }
-        .pre-wallet-bg::after {
+        .overlay-backdrop::after {
           content: '';
-          position: fixed;
+          position: absolute;
           inset: 0;
           background: rgba(0, 0, 0, 0.45);
-          z-index: -1;
         }
       `}</style>
       
       <div 
-        className="pre-wallet-bg fixed inset-0"
+        className="fixed inset-0"
         style={{ 
-          zIndex: 999999,
-          pointerEvents: 'auto'
+          zIndex: 2147483647,
+          pointerEvents: 'auto',
+          isolation: 'isolate'
         }}
       >
       {/* Centered layout container */}
@@ -49,25 +49,25 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
             position: 'relative',
             maxWidth: '520px',
             width: '85%',
-            maxHeight: '80vh',
-            overflowY: 'auto',
+            maxHeight: '75vh',
             background: 'rgba(20, 10, 30, 0.98)',
             border: '3px solid rgba(147, 51, 234, 0.8)',
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
             fontFamily: '"Times New Roman", serif',
             color: '#fff',
-            padding: '50px 25px 25px 25px',
-            borderRadius: '12px'
+            padding: '70px 25px 25px 25px',
+            borderRadius: '12px',
+            marginTop: '30px'
           }}
         >
           {/* Connect Wallet Button - positioned at top center of the box */}
           <div 
             style={{
               position: 'absolute',
-              top: '-22px',
+              top: '15px',
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 1000000
+              zIndex: 2147483648
             }}
           >
             <WalletMultiButton 
@@ -87,7 +87,11 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
           </div>
 
           {/* Box Content */}
-          <div>
+          <div style={{
+            maxHeight: 'calc(75vh - 100px)',
+            overflowY: 'auto',
+            paddingRight: '10px'
+          }}>
             
             {/* Welcome message */}
             <div className="mb-6 text-center">
