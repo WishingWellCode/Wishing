@@ -26,7 +26,18 @@ export default function Home() {
       </Head>
 
       {/* Full screen container */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: '#000' }}>
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100vw', 
+        height: '100vh', 
+        backgroundColor: '#000',
+        backgroundImage: 'url(/assets/backgrounds/Realbackground.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
         {/* Game Canvas - Background */}
         <GameCanvas isWalletConnected={connected} />
         
@@ -79,7 +90,7 @@ export default function Home() {
         style={{
           position: 'fixed',
           bottom: '16px',
-          right: '16px',
+          left: '16px',
           zIndex: 99999,
           pointerEvents: 'auto'
         }}

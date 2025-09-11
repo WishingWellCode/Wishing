@@ -43,7 +43,8 @@
       "Bash(timeout 30 wrangler pages deploy out --project-name=\"wishing-well\")",
       "Read(//c/Users/Kimberly/Downloads/**)",
       "Bash(wrangler kv namespace:*)",
-      "Bash(wrangler secret:*)"
+      "Bash(wrangler secret:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
