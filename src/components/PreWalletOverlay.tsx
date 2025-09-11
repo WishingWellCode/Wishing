@@ -25,8 +25,11 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
       `}</style>
       
       <div 
-        className="pre-wallet-bg fixed inset-0 z-50"
-        style={{ zIndex: 10000 }}
+        className="pre-wallet-bg fixed inset-0"
+        style={{ 
+          zIndex: 999999,
+          pointerEvents: 'auto'
+        }}
       >
       {/* Centered layout container */}
       <div 
@@ -44,14 +47,17 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
         <div 
           style={{
             position: 'relative',
-            maxWidth: '650px',
-            width: '90%',
-            background: 'rgba(20, 10, 30, 0.95)',
+            maxWidth: '520px',
+            width: '85%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            background: 'rgba(20, 10, 30, 0.98)',
             border: '3px solid rgba(147, 51, 234, 0.8)',
             boxShadow: '0 0 50px rgba(147, 51, 234, 0.6), inset 0 0 30px rgba(147, 51, 234, 0.2)',
             fontFamily: '"Times New Roman", serif',
             color: '#fff',
-            padding: '60px 30px 30px 30px'
+            padding: '50px 25px 25px 25px',
+            borderRadius: '12px'
           }}
         >
           {/* Connect Wallet Button - positioned at top center of the box */}
@@ -61,7 +67,7 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
               top: '-22px',
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 10
+              zIndex: 1000000
             }}
           >
             <WalletMultiButton 
@@ -84,14 +90,14 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
           <div>
             
             {/* Welcome message */}
-            <div className="mb-8 text-center">
+            <div className="mb-6 text-center">
               <p className="text-cyan-400 font-bold" style={{ 
-                fontSize: '18px', 
-                lineHeight: '1.6', 
+                fontSize: '16px', 
+                lineHeight: '1.5', 
                 fontFamily: '"Times New Roman", serif', 
                 fontWeight: 'bold',
                 textShadow: '0 0 20px rgba(34, 211, 238, 0.5)',
-                letterSpacing: '0.5px'
+                letterSpacing: '0.3px'
               }}>
                 Connect your Phantom wallet to enter the magical realm and play with other users!
               </p>
@@ -101,34 +107,34 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
             <div className="space-y-4">
               
               {/* How to Play section */}
-              <div className="mb-6" style={{ 
-                padding: '16px',
+              <div className="mb-5" style={{ 
+                padding: '12px',
                 background: 'rgba(16, 185, 129, 0.1)',
                 border: '1px solid rgba(16, 185, 129, 0.3)',
                 borderRadius: '8px'
               }}>
-                <h3 className="text-green-400 font-bold mb-3 flex items-center gap-2" style={{ 
-                  fontSize: '20px', 
+                <h3 className="text-green-400 font-bold mb-2 flex items-center gap-2" style={{ 
+                  fontSize: '17px', 
                   fontWeight: 'bold',
                   fontFamily: '"Times New Roman", serif',
                   textShadow: '0 0 15px rgba(16, 185, 129, 0.5)'
                 }}>
                   🎮 How to Play!
                 </h3>
-                <div className="text-gray-200 space-y-2" style={{ 
-                  fontSize: '16px',
-                  lineHeight: '1.8',
+                <div className="text-gray-200 space-y-1" style={{ 
+                  fontSize: '14px',
+                  lineHeight: '1.6',
                   fontFamily: '"Times New Roman", serif',
-                  paddingLeft: '20px'
+                  paddingLeft: '16px'
                 }}>
                   <p className="flex items-center gap-2">
                     <span style={{ color: '#10b981' }}>▸</span>
                     Use <kbd style={{
                       background: 'rgba(147, 51, 234, 0.3)',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
+                      padding: '1px 4px',
+                      borderRadius: '3px',
                       border: '1px solid rgba(147, 51, 234, 0.5)',
-                      fontSize: '14px'
+                      fontSize: '12px'
                     }}>WASD</kbd> or arrow keys to move around
                   </p>
                   <p className="flex items-center gap-2">
@@ -143,25 +149,25 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
               </div>
               
               {/* Portals section */}
-              <div className="mb-6" style={{ 
-                padding: '16px',
+              <div className="mb-5" style={{ 
+                padding: '12px',
                 background: 'rgba(147, 51, 234, 0.1)',
                 border: '1px solid rgba(147, 51, 234, 0.3)',
                 borderRadius: '8px'
               }}>
-                <h3 className="text-purple-400 font-bold mb-3 flex items-center gap-2" style={{ 
-                  fontSize: '20px', 
+                <h3 className="text-purple-400 font-bold mb-2 flex items-center gap-2" style={{ 
+                  fontSize: '17px', 
                   fontWeight: 'bold',
                   fontFamily: '"Times New Roman", serif',
                   textShadow: '0 0 15px rgba(147, 51, 234, 0.5)'
                 }}>
                   🚪 Portals!
                 </h3>
-                <div className="text-gray-200 space-y-2" style={{ 
-                  fontSize: '16px',
-                  lineHeight: '1.8',
+                <div className="text-gray-200 space-y-1" style={{ 
+                  fontSize: '14px',
+                  lineHeight: '1.6',
                   fontFamily: '"Times New Roman", serif',
-                  paddingLeft: '20px'
+                  paddingLeft: '16px'
                 }}>
                   <p className="flex items-center gap-2">
                     <span style={{ color: '#a855f7' }}>▸</span>
@@ -179,13 +185,13 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
                     <span style={{ color: '#a855f7' }}>▸</span>
                     <span style={{ color: '#ef4444', fontWeight: 'bold' }}>Upgrades</span> - Enhance your house
                   </p>
-                  <div className="mt-3 pt-3 border-t border-purple-800/30 flex items-center justify-center gap-4">
-                    <span className="flex items-center gap-2">
+                  <div className="mt-2 pt-2 border-t border-purple-800/30 flex items-center justify-center gap-3 flex-wrap">
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px' }}>
                       <span>🎮</span>
                       <span style={{ color: '#a855f7', fontWeight: 'bold' }}>Multiplayer Gaming</span>
                     </span>
-                    <span style={{ color: '#4b5563' }}>•</span>
-                    <span className="flex items-center gap-2">
+                    <span style={{ color: '#4b5563', fontSize: '12px' }}>•</span>
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px' }}>
                       <span>💰</span>
                       <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>Crypto Rewards</span>
                     </span>
@@ -197,24 +203,24 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
             
             {/* Return to Game button - only show if onClose is provided */}
             {onClose && (
-              <div className="text-center mt-8">
+              <div className="text-center mt-6">
                 <button
                   onClick={onClose}
                   className="relative group"
                   style={{ 
-                    fontSize: '18px', 
+                    fontSize: '16px', 
                     fontFamily: '"Times New Roman", serif',
                     fontWeight: 'bold',
                     background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%)',
                     color: '#ffffff',
-                    padding: '14px 32px',
+                    padding: '12px 28px',
                     border: '2px solid rgba(248, 113, 113, 0.5)',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 30px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    boxShadow: '0 8px 25px rgba(239, 68, 68, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     textTransform: 'uppercase',
-                    letterSpacing: '1px',
+                    letterSpacing: '0.5px',
                     position: 'relative',
                     overflow: 'hidden'
                   }}
