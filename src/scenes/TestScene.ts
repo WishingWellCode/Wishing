@@ -109,13 +109,9 @@ export class TestScene extends Phaser.Scene {
     // Setup wallet connection listeners for efficient player creation
     this.setupWalletListeners()
     
-    // Only create player if wallet is already connected
-    const wallet = (window as any).solana
-    if (wallet?.isConnected) {
-      this.createPlayer()
-    } else {
-      console.log('⏳ Waiting for wallet connection to spawn player...')
-    }
+    // Create player immediately - we're in TestScene so wallet must be connected
+    console.log('🎮 TestScene started - creating player')
+    this.createPlayer()
     
     // Instructions removed - game is now production ready
     

@@ -46,6 +46,14 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     if (walletConnected) {
       console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
       sceneManager.start('TestScene')
+      // Ensure TestScene knows wallet is connected and creates player
+      setTimeout(() => {
+        const testScene = sceneManager.getScene('TestScene')
+        if (testScene && !(testScene as any).testPlayer) {
+          console.log('🔍 DEBUG: Forcing player creation in TestScene')
+          ;(testScene as any).createPlayer()
+        }
+      }, 100)
     } else {
       console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
       sceneManager.start('LandingScene')

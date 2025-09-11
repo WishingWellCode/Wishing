@@ -58,14 +58,23 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
   }, [isActive, connected, publicKey])
 
-  // Handle wallet address changes specifically (wallet switching)
+  // Handle wallet address changes specifically (wallet switching or connecting)
   useEffect(() => {
-    // If publicKey changes and we had a previous connection, disconnect immediately
-    if (playerIdRef.current && wsRef.current) {
-      console.log('🎮 🔄 Wallet address changed, forcing immediate disconnect...')
-      disconnectMultiplayer()
-      // Clear players immediately to remove old wallet's sprite
-      setPlayers([])
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      if (publicKey) {
+        // Wallet just connected - upgrade from spectator to player
+        console.log('🎮 Wallet connected - upgrading to player mode')
+        const joinMessage = {
+          type: 'join',
+          walletAddress: publicKey.toString()
+        }
+        wsRef.current.send(JSON.stringify(joinMessage))
+      } else if (playerIdRef.current) {
+        // Wallet disconnected - downgrade to spectator
+        console.log('🎮 Wallet disconnected - switching to spectator mode')
+        disconnectMultiplayer()
+        setPlayers([])
+      }
     }
   }, [publicKey?.toString()])
 
