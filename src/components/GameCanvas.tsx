@@ -42,29 +42,23 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       sceneManager.stop('TestScene')
     }
     
-    // Wait a moment for scenes to fully stop
-    setTimeout(() => {
-      if (walletConnected) {
-        console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
-        sceneManager.start('TestScene')
-      } else {
-        console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
-        sceneManager.start('LandingScene')
-        // Ensure LandingScene knows wallet is disconnected
-        setTimeout(() => {
-          const newLandingScene = sceneManager.getScene('LandingScene')
-          if (newLandingScene && (newLandingScene as any).setWalletConnection) {
-            ;(newLandingScene as any).setWalletConnection(false)
-          }
-        }, 100)
+    // Start new scene immediately after stopping
+    if (walletConnected) {
+      console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
+      sceneManager.start('TestScene')
+    } else {
+      console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
+      sceneManager.start('LandingScene')
+      // Ensure LandingScene knows wallet is disconnected
+      const newLandingScene = sceneManager.getScene('LandingScene')
+      if (newLandingScene && (newLandingScene as any).setWalletConnection) {
+        ;(newLandingScene as any).setWalletConnection(false)
       }
-      
-      // Complete handshake after transition
-      setTimeout(() => {
-        isHandshakingRef.current = false
-        console.log('🎮 Scene switch complete - only one scene active')
-      }, 200)
-    }, 100)
+    }
+    
+    // Complete handshake immediately
+    isHandshakingRef.current = false
+    console.log('🎮 Scene switch complete - only one scene active')
   }
 
   useEffect(() => {
@@ -159,7 +153,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       if (gameRef.current && gameRef.current.scene && !isHandshakingRef.current) {
         handleSceneSwitching(isWalletConnected)
       }
-    }, 150) // Debounce rapid connection changes
+    }, 50) // Reduced debounce delay
 
     return () => clearTimeout(debounceTimer)
   }, [isWalletConnected])

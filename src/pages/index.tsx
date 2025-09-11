@@ -11,26 +11,9 @@ const MultiplayerOverlay = dynamic(() => import('@/components/MultiplayerOverlay
 
 export default function Home() {
   const { publicKey, connected } = useWallet()
-  const [isGameReady, setIsGameReady] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [players, setPlayers] = useState([])
   const [currentPlayerId, setCurrentPlayerId] = useState(null)
   const [showHelp, setShowHelp] = useState(false)
-
-  useEffect(() => {
-    if (connected && publicKey) {
-      setIsGameReady(true)
-    } else {
-      setIsGameReady(false)
-      setPlayers([])
-      setCurrentPlayerId(null)
-    }
-  }, [connected, publicKey])
-
-  // Remove loading delay completely
-  useEffect(() => {
-    setIsLoading(false)
-  }, [])
 
   return (
     <>
@@ -46,18 +29,56 @@ export default function Home() {
         {/* Game Canvas */}
         <GameCanvas isWalletConnected={connected} />
 
-        {/* UI Buttons - Overlaid on top */}
-        <div className="absolute top-4 left-4 z-50">
+        {/* UI Buttons - Always visible on top */}
+        <div 
+          className="absolute top-4 left-4" 
+          style={{ 
+            zIndex: 10000,
+            position: 'absolute',
+            pointerEvents: 'auto'
+          }}
+        >
           <WalletMultiButton 
             className="!bg-purple-600 hover:!bg-purple-700"
-            style={{ fontSize: '14px' }}
+            style={{ 
+              fontSize: '14px',
+              position: 'relative',
+              zIndex: 10001
+            }}
           />
         </div>
         
-        <div className="absolute bottom-4 right-4 z-50">
+        <div 
+          className="absolute bottom-4 right-4"
+          style={{ 
+            zIndex: 10000,
+            position: 'absolute',
+            pointerEvents: 'auto'
+          }}
+        >
           <button
             onClick={() => setShowHelp(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white border-none rounded px-4 py-2 text-sm font-semibold cursor-pointer transition-all shadow"
+            style={{
+              backgroundColor: '#9333ea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              position: 'relative',
+              zIndex: 10001,
+              pointerEvents: 'auto'
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.backgroundColor = '#7c3aed'
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.backgroundColor = '#9333ea'
+            }}
           >
             Help
           </button>
