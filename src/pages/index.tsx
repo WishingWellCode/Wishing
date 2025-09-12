@@ -54,11 +54,11 @@ export default function Home() {
           }}
         />
 
-        {/* Multiplayer Overlay - Always show to see other players */}
-        <MultiplayerOverlay 
+        {/* Multiplayer Overlay - DISABLED: WorldRenderer now handles all sprites */}
+        {/* <MultiplayerOverlay 
           players={players}
           currentPlayerId={currentPlayerId}
-        />
+        /> */}
 
         {/* Help overlay */}
         {showHelp && <PreWalletOverlay onClose={() => setShowHelp(false)} />}
