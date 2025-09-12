@@ -12,12 +12,13 @@ A pixel-art multiplayer game where players throw $WNDR tokens into a magical fou
 
 ## 🎲 Gambling Probabilities
 
-- 60% - Lose all tokens
-- 39% - Break even or small gain (1000-1500 $WNDR)
-- 0.5% - Medium win (5,000 $WNDR)
-- 0.35% - Large win (10,000 $WNDR)
-- 0.14999% - Major win (100,000 $WNDR)
-- 0.00001% - JACKPOT (1,000,000 $WNDR)
+- 65% - Lose all tokens
+- 28.86% - Break even (1,000 $WNDR)
+- 3.50% - Win 3× (3,000 $WNDR)
+- 1.50% - Win 5× (5,000 $WNDR)
+- 0.80% - Big Win 10× (10,000 $WNDR)
+- 0.30% - Mega Win 25× (25,000 $WNDR)
+- 0.04% - JACKPOT 100× (100,000 $WNDR)
 
 ## 🚀 Setup Instructions
 

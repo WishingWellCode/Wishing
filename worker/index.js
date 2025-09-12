@@ -897,12 +897,12 @@ async function calculateGamblingResult(serverSeed, clientSeed, blockHash, houseB
   }
   
   // New payout structure with clean RNG buckets (0-9999)
-  // RTP ≈ 91.36%, House edge ≈ 8.64%
-  if (rngValue <= 3999) {
-    // Bust: 40.00% (0000-3999) - 4000 buckets
+  // Updated odds: House edge increased
+  if (rngValue <= 6499) {
+    // Bust: 65.00% (0000-6499) - 6500 buckets
     return { tier: 'BUST', multiplier: 0 }
   } else if (rngValue <= 9385) {
-    // Break even: 53.86% (4000-9385) - 5386 buckets  
+    // Break even: 28.86% (6500-9385) - 2886 buckets  
     return { tier: 'BREAK EVEN', multiplier: 1 }
   } else if (rngValue <= 9735) {
     // Win 3×: 3.50% (9386-9735) - 350 buckets

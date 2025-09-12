@@ -250,7 +250,7 @@ export default function Upgrades() {
       await fetchUserHousingData()
       
       console.log(`Successfully purchased ${house.name}!`)
-      alert(`🎉 Successfully purchased ${house.name}!\\n\\nYou now have ${house.boostPercent}% increased win odds!`)
+      // Removed alert notification - purchase succeeded silently
       
     } catch (error: any) {
       console.error('Error purchasing house:', error)
@@ -281,26 +281,10 @@ export default function Upgrades() {
     return sum + HOUSE_LEVELS[level - 1].boostPercent
   }, 0)
 
-  if (loading) {
-    return (
-      <>
-        <style jsx global>{`
-          body {
-            overflow: auto !important;
-            overflow-x: hidden !important;
-          }
-          .bg-gradient-radial {
-            background: radial-gradient(circle, var(--tw-gradient-stops));
-          }
-        `}</style>
-        <div className="min-h-screen relative overflow-hidden flex items-center justify-center fallback-container">
-          <div className="relative z-10 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
-            <div className="text-2xl font-bold text-white">Loading Housing District...</div>
-          </div>
-        </div>
-      </>
-    )
+  // Skip loading screen - directly show content or wallet connect prompt
+  if (loading && !connected) {
+    // Only show loading for initial render when not connected
+    return null
   }
 
   if (!connected) {
