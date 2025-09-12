@@ -19,22 +19,12 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
   const [loadedSprites, setLoadedSprites] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    // Show ALL players including current player (don't filter out current player)
-    // and ensure players are within reasonable bounds and have valid sprite data
+    // Show ALL players - don't filter based on bounds for spectator mode
     const filtered = players.filter(player => {
       const hasValidData = player.x !== undefined && player.y !== undefined && player.username && player.sprite
-      // Expand bounds significantly since we might have coordinate system differences
-      const isInBounds = player.x >= -500 && player.x <= window.innerWidth + 500 &&
-                        player.y >= -500 && player.y <= window.innerHeight + 500
-      
-      if (hasValidData) {
-        console.log(`👁️ Player ${player.username} at (${player.x}, ${player.y}) - inBounds: ${isInBounds}`)
-      }
-      
-      return hasValidData && isInBounds
+      return hasValidData
     })
     
-    console.log(`👁️ Filtered ${filtered.length} visible players from ${players.length} total`)
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
@@ -68,12 +58,11 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       }}
     >
       {visiblePlayers.map((player) => {
-        // Scale coordinates - TestScene uses different coordinate system
-        // For now, try direct mapping but log the values
-        const scaledX = player.x
-        const scaledY = player.y
-        
-        console.log(`👁️ Rendering player ${player.username} at screen (${scaledX}, ${scaledY})`)
+        // Convert server coordinates to screen coordinates
+        // Server spawns at x: 100-800, y: 100-600
+        // Map to screen coordinates proportionally
+        const screenX = (player.x / 800) * window.innerWidth   // Scale from 800 to screen width
+        const screenY = (player.y / 600) * window.innerHeight  // Scale from 600 to screen height
         
         return (
         <div
@@ -81,14 +70,12 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
           className="pointer-events-none"
           style={{
             position: 'fixed',
-            left: `${scaledX}px`,
-            top: `${scaledY}px`,
+            left: `${screenX}px`,
+            top: `${screenY}px`,
             transform: 'translate(-50%, -50%)',
             transition: 'left 0.033s linear, top 0.033s linear',
-            zIndex: 0, // Behind popups
-            pointerEvents: 'none', // Ensure sprite doesn't block portal interactions
-            border: '2px solid red', // DEBUG: Make sprites visible with red border
-            backgroundColor: 'rgba(255,0,0,0.2)' // DEBUG: Semi-transparent red background
+            zIndex: 45, // High z-index to appear above everything
+            pointerEvents: 'none'
           }}
         >
           {/* Player sprite */}
