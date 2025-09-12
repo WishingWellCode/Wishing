@@ -39,21 +39,53 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
     
     if (testScene?.scene.isActive()) {
       console.log('🔍 DEBUG: Stopping TestScene')
+      // Clean up TestScene player too
+      if ((testScene as any).testPlayer) {
+        ;(testScene as any).testPlayer.destroy()
+        ;(testScene as any).testPlayer = null
+      }
       sceneManager.stop('TestScene')
     }
     
-    // Start new scene immediately after stopping
+    // Small delay to ensure clean scene stop
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Start new scene after ensuring clean state
     if (walletConnected) {
       console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
       sceneManager.start('TestScene')
-      // Ensure TestScene knows wallet is connected and creates player
-      setTimeout(() => {
-        const testScene = sceneManager.getScene('TestScene')
-        if (testScene && !(testScene as any).testPlayer) {
-          console.log('🔍 DEBUG: Forcing player creation in TestScene')
-          ;(testScene as any).createPlayer()
+      
+      // Wait for multiplayer to be ready before creating player
+      const waitForMultiplayer = async () => {
+        let attempts = 0
+        const maxAttempts = 10
+        
+        while (attempts < maxAttempts) {
+          const mm = (window as any).multiplayerManager
+          if (mm && mm.isConnected) {
+            console.log('🔍 DEBUG: Multiplayer ready, creating player')
+            const testScene = sceneManager.getScene('TestScene')
+            if (testScene && !(testScene as any).testPlayer) {
+              ;(testScene as any).createPlayer()
+            }
+            break
+          }
+          attempts++
+          console.log(`🔍 DEBUG: Waiting for multiplayer... attempt ${attempts}/${maxAttempts}`)
+          await new Promise(resolve => setTimeout(resolve, 200))
         }
-      }, 500) // Increased delay to ensure scene is fully ready
+        
+        // Create player anyway if multiplayer doesn't connect
+        if (attempts >= maxAttempts) {
+          console.log('🔍 DEBUG: Multiplayer timeout, creating player anyway')
+          const testScene = sceneManager.getScene('TestScene')
+          if (testScene && !(testScene as any).testPlayer) {
+            ;(testScene as any).createPlayer()
+          }
+        }
+      }
+      
+      waitForMultiplayer()
     } else {
       console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
       sceneManager.start('LandingScene')
@@ -64,7 +96,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       }
     }
     
-    // Complete handshake immediately
+    // Complete handshake
     isHandshakingRef.current = false
     console.log('🎮 Scene switch complete - only one scene active')
   }

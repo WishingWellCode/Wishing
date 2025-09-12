@@ -145,6 +145,11 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
             }))
           }
         }, 20000) // Ping every 20 seconds to prevent Cloudflare timeout
+        
+        // Notify scenes that connection is established
+        window.dispatchEvent(new CustomEvent('multiplayerConnected', {
+          detail: { isConnected: true, mode: publicKey ? 'player' : 'spectator' }
+        }))
       }
       
       ws.onmessage = (event) => {
@@ -385,7 +390,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         players,
         isConnected,
         playerId: playerIdRef.current,
-        reconnect: connectMultiplayer  // Add reconnect method
+        reconnect: connectMultiplayer,  // Add reconnect method
+        walletAddress: publicKey?.toString() || null
       }
       
       // Log when multiplayer manager is ready
@@ -393,11 +399,21 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         console.log('🎮 ✅ MultiplayerManager exposed to window:', {
           isConnected,
           playerId: playerIdRef.current,
-          playerCount: players.length
+          playerCount: players.length,
+          walletAddress: publicKey?.toString() || 'spectator'
         })
+        
+        // Dispatch event to notify scenes that multiplayer is ready
+        window.dispatchEvent(new CustomEvent('multiplayerReady', {
+          detail: {
+            isConnected,
+            playerId: playerIdRef.current,
+            players
+          }
+        }))
       }
     }
-  }, [players, isConnected])
+  }, [players, isConnected, publicKey])
 
   return (
     <div className="absolute top-2 left-2 z-50">

@@ -109,9 +109,9 @@ export class TestScene extends Phaser.Scene {
     // Setup wallet connection listeners for efficient player creation
     this.setupWalletListeners()
     
-    // Create player immediately - we're in TestScene so wallet must be connected
-    console.log('🎮 TestScene started - creating player')
-    this.createPlayer()
+    // Don't create player immediately - let GameCanvas or multiplayer handle it
+    console.log('🎮 TestScene started - waiting for multiplayer connection')
+    // Player creation will be triggered by GameCanvas after multiplayer is ready
     
     // Instructions removed - game is now production ready
     
@@ -1238,39 +1238,39 @@ export class TestScene extends Phaser.Scene {
   }
 
   setupWalletListeners() {
-    // Listen for wallet connection events
-    window.addEventListener('walletConnected', () => {
+    // Listen for multiplayer ready event
+    window.addEventListener('multiplayerReady', (event: any) => {
+      console.log('🎮 Multiplayer ready event received:', event.detail)
       if (!this.testPlayer) {
         this.createPlayer()
+      }
+    })
+    
+    // Listen for multiplayer connection event
+    window.addEventListener('multiplayerConnected', (event: any) => {
+      console.log('🎮 Multiplayer connected event received:', event.detail)
+      if (!this.testPlayer) {
+        // Small delay to ensure everything is initialized
+        this.time.delayedCall(200, () => {
+          this.createPlayer()
+        })
+      }
+    })
+    
+    // Listen for wallet connection events as backup
+    window.addEventListener('walletConnected', () => {
+      if (!this.testPlayer) {
+        console.log('👛 Wallet connected event - will create player when multiplayer is ready')
+        // Don't create immediately - wait for multiplayer
       }
     })
     
     // Listen for custom wallet connection events from React components
     window.addEventListener('solanaWalletConnected', () => {
       if (!this.testPlayer) {
-        this.createPlayer()
+        console.log('👛 Solana wallet connected event - will create player when multiplayer is ready')
+        // Don't create immediately - wait for multiplayer
       }
-    })
-    
-    // Set up polling with debounce for wallet connection (fallback)
-    let lastWalletCheck = false
-    const checkWallet = () => {
-      const wallet = (window as any).solana
-      const isConnected = wallet?.isConnected || false
-      
-      if (isConnected !== lastWalletCheck) {
-        lastWalletCheck = isConnected
-        if (isConnected && !this.testPlayer) {
-          this.createPlayer()
-        }
-      }
-    }
-    
-    // Check every 2 seconds instead of every frame (much more efficient)
-    this.time.addEvent({
-      delay: 2000,
-      callback: checkWallet,
-      loop: true
     })
   }
 
@@ -1291,32 +1291,54 @@ export class TestScene extends Phaser.Scene {
     this.playerCreating = true
     console.log('🎮 Creating invisible player for movement tracking...')
     
+    // Ensure multiplayer is connected first
+    const mm = (window as any).multiplayerManager
+    if (!mm || !mm.isConnected) {
+      console.log('⚠️ Multiplayer not connected yet, deferring player creation')
+      this.playerCreating = false
+      
+      // Retry in a moment
+      this.time.delayedCall(500, () => {
+        this.createPlayer()
+      })
+      return
+    }
+    
+    // Use random spawn position to avoid stuck positions
+    const spawnX = this.cameras.main.centerX + Phaser.Math.Between(-50, 50)
+    const spawnY = this.cameras.main.centerY + 100 + Phaser.Math.Between(-20, 20)
+    
     // Create an invisible player for position tracking - visible player handled by multiplayer system
     this.testPlayer = this.add.rectangle(
-      this.cameras.main.centerX, 
-      this.cameras.main.centerY + 100, // Start below fountain
+      spawnX, 
+      spawnY,
       32, 32, 0x00ff00
     )
     this.testPlayer.setDepth(1)
     this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
     console.log('✅ Invisible player spawned for portal detection at', this.testPlayer.x, this.testPlayer.y)
-    this.playerCreating = false
     
-    // Try to sync with multiplayer system multiple times with increasing delays
-    const syncAttempts = [100, 500, 1000, 2000]
-    syncAttempts.forEach((delay) => {
+    // Force multiple position updates to ensure sprite spawns
+    this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+    console.log('📍 Initial position synced with multiplayer:', this.testPlayer.x, this.testPlayer.y)
+    
+    // Send multiple updates with small movements to force sprite visibility
+    const forceSpawnUpdates = [50, 100, 200, 500, 1000]
+    forceSpawnUpdates.forEach((delay) => {
       this.time.delayedCall(delay, () => {
-        if (this.testPlayer && typeof window !== 'undefined') {
-          const mm = (window as any).multiplayerManager
-          if (mm && mm.isConnected) {
-            this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
-            console.log(`📍 [${delay}ms] Successfully synced position with multiplayer:`, this.testPlayer.x, this.testPlayer.y)
-          } else {
-            console.log(`⏳ [${delay}ms] Multiplayer not ready yet, will retry...`)
-          }
+        if (this.testPlayer) {
+          // Add tiny movement to force update
+          const offsetX = delay === 50 ? 1 : 0
+          const offsetY = delay === 100 ? 1 : 0
+          this.testPlayer.x += offsetX
+          this.testPlayer.y += offsetY
+          this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
+          console.log(`📍 [${delay}ms] Force sync position:`, this.testPlayer.x, this.testPlayer.y)
         }
       })
     })
+    
+    this.playerCreating = false
   }
 
   async startGambling() {
