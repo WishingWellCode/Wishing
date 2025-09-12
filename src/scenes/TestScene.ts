@@ -1333,7 +1333,7 @@ export class TestScene extends Phaser.Scene {
     })
     
     if (localPlayer) {
-      localPlayer.setScale(2) // Scale for TestScene
+      // WorldRenderer already sets the correct scale (2)
       console.log('🎮 Local player sprite created through WorldRenderer')
     }
     

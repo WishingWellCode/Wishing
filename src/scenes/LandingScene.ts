@@ -68,7 +68,7 @@ export class LandingScene extends Phaser.Scene {
     
     if (localPlayer) {
       this.player = localPlayer
-      this.player.setScale(0.13) // Adjust scale for LandingScene
+      // WorldRenderer already sets the correct scale (2)
       
       // Store initial position
       this.lastPosition.x = this.player.x
