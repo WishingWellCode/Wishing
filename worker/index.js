@@ -487,11 +487,11 @@ async function handleWebSocketSession(websocket, env) {
             allPlayers: allPlayers
           }))
           
-          // Broadcast to other players
+          // Broadcast to other players AND spectators
           broadcastToOthers(playerId, {
             type: 'playerJoined',
             player: playerData
-          })
+          }, true) // Include spectators
           
           console.log(`🎮 Player ${username} joined with sprite ${randomSprite}`)
           break
@@ -508,13 +508,13 @@ async function handleWebSocketSession(websocket, env) {
               session.lastSeen = Date.now()
             }
             
-            // Broadcast position update to other players
+            // Broadcast position update to other players AND spectators
             broadcastToOthers(playerId, {
               type: 'playerMoved',
               playerId,
               x: message.x,
               y: message.y
-            })
+            }, true) // Include spectators
           }
           break
           
@@ -539,12 +539,12 @@ async function handleWebSocketSession(websocket, env) {
   websocket.addEventListener('close', async () => {
     console.log(`🎮 WebSocket closed: ${playerId}`)
     
-    // Broadcast player left
+    // Broadcast player left to everyone including spectators
     if (playerData) {
       broadcastToOthers(playerId, {
         type: 'playerLeft',
         playerId
-      })
+      }, true) // Include spectators
     }
     
     // Remove from sessions
@@ -583,19 +583,26 @@ function broadcast(message) {
   console.log(`📡 Broadcast sent to ${sent} players, ${failed} failed`)
 }
 
-// Broadcast to all players except sender
-function broadcastToOthers(excludePlayerId, message) {
+// Broadcast to all players except sender (and optionally include spectators)
+function broadcastToOthers(excludePlayerId, message, includeSpectators = true) {
   const messageStr = JSON.stringify(message)
   let sent = 0
   let failed = 0
+  let spectatorsSent = 0
   
   for (const [playerId, session] of webSocketSessions) {
     if (playerId === excludePlayerId) continue
+    
+    // Skip non-spectators if we're not including them
+    // Always send to spectators for movement updates
+    const isSpectator = session.isSpectator === true
+    if (!includeSpectators && !session.playerData && !isSpectator) continue
     
     try {
       if (session.websocket.readyState === 1) { // 1 = OPEN
         session.websocket.send(messageStr)
         sent++
+        if (isSpectator) spectatorsSent++
       } else {
         failed++
         webSocketSessions.delete(playerId)
@@ -607,7 +614,11 @@ function broadcastToOthers(excludePlayerId, message) {
     }
   }
   
-  console.log(`📡 Broadcast sent to ${sent} others, ${failed} failed`)
+  if (spectatorsSent > 0) {
+    console.log(`📡 Broadcast sent to ${sent} others (including ${spectatorsSent} spectators), ${failed} failed`)
+  } else {
+    console.log(`📡 Broadcast sent to ${sent} others, ${failed} failed`)
+  }
 }
 
 async function handleFountainStart(request, env) {

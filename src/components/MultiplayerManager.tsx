@@ -70,13 +70,24 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         }
         wsRef.current.send(JSON.stringify(joinMessage))
       } else if (playerIdRef.current) {
-        // Wallet disconnected - downgrade to spectator
-        console.log('🎮 Wallet disconnected - switching to spectator mode')
-        disconnectMultiplayer()
-        setPlayers([])
+        // Wallet disconnected - switch to spectator mode but STAY CONNECTED
+        console.log('🎮 Wallet disconnected - switching to spectator mode (staying connected)')
+        playerIdRef.current = null
+        
+        // Send spectate message to switch to spectator mode
+        const spectatorMessage = {
+          type: 'spectate'
+        }
+        console.log('🎮 📤 SENDING SPECTATE MESSAGE (wallet disconnected):', spectatorMessage)
+        wsRef.current.send(JSON.stringify(spectatorMessage))
+        // DO NOT disconnect or clear players - we want to keep watching!
       }
+    } else if (!wsRef.current && isActive) {
+      // If no connection but should be active, connect as spectator
+      console.log('🎮 No connection but should be active - connecting as spectator')
+      connectMultiplayer()
     }
-  }, [publicKey?.toString()])
+  }, [publicKey?.toString(), isActive])
 
   const connectMultiplayer = () => {
     // Allow connection even without publicKey (spectator mode)
