@@ -38,7 +38,8 @@ export class WorldRenderer {
     // Create sprite for remote player
     const spriteName = data.sprite || 'default'
     const sprite = this.scene.add.sprite(data.x, data.y, spriteName)
-    sprite.setScale(2)
+    // Scale to match MultiplayerOverlay size (48px)
+    sprite.setDisplaySize(48, 48)
     
     // Create username label
     const username = data.username || id.slice(0, 5)
@@ -122,7 +123,8 @@ export class WorldRenderer {
     // Create local player sprite
     const spriteName = data.sprite || 'default'
     this.localPlayer = this.scene.add.sprite(data.x, data.y, spriteName)
-    this.localPlayer.setScale(2)
+    // Scale to match MultiplayerOverlay size (48px)
+    this.localPlayer.setDisplaySize(48, 48)
     this.localPlayer.setDepth(150) // Above remote players
     
     this.localPlayerId = data.id
