@@ -158,7 +158,7 @@ export default function House() {
     return (
       <>
         <Head>
-          <title>Your House - $WISH Wishing Well</title>
+          <title>Your House - $WNDR Wishing Well</title>
           <meta name="description" content="Visit your house in the Housing District!" />
         </Head>
         
@@ -204,7 +204,7 @@ export default function House() {
     return (
       <>
         <Head>
-          <title>No House Owned - $WISH Wishing Well</title>
+          <title>No House Owned - $WNDR Wishing Well</title>
         </Head>
         
         <div className="bg-page" style={{
@@ -264,7 +264,7 @@ export default function House() {
     return (
       <>
         <Head>
-          <title>House Not Owned - $WISH Wishing Well</title>
+          <title>House Not Owned - $WNDR Wishing Well</title>
         </Head>
         
         <div className="bg-page" style={{
@@ -450,7 +450,7 @@ export default function House() {
             </div>
             <div className="bg-black/50 p-2 rounded">
               <div className="text-lg font-pixel text-blue-400 mb-1">{currentHouse.cost.toLocaleString()}</div>
-              <div className="text-xs font-pixel text-white">$WISH Cost</div>
+              <div className="text-xs font-pixel text-white">$WNDR Cost</div>
             </div>
           </div>
           

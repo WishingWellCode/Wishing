@@ -307,7 +307,7 @@ export default function Upgrades() {
     return (
       <>
         <Head>
-          <title>Housing Upgrades - $WISH Wishing Well</title>
+          <title>Housing Upgrades - $WNDR Wishing Well</title>
           <meta name="description" content="Upgrade your housing to boost your gambling odds!" />
         </Head>
         
@@ -337,7 +337,7 @@ export default function Upgrades() {
   return (
     <>
       <Head>
-        <title>Housing Upgrades - $WISH Wishing Well</title>
+        <title>Housing Upgrades - $WNDR Wishing Well</title>
         <meta name="description" content="Upgrade your housing to boost your gambling odds!" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -752,7 +752,7 @@ export default function Upgrades() {
                 </h3>
                 <p className="text-gray-300 leading-relaxed">
                   Houses must be purchased in order, and higher levels require you to have
-                  burned a certain amount of $WISH tokens through gambling to unlock.
+                  burned a certain amount of $WNDR tokens through gambling to unlock.
                 </p>
               </div>
             </div>

@@ -1,23 +1,23 @@
-# $WISH Wishing Well - Multiplayer Solana Game
+# $WNDR Wishing Well - Multiplayer Solana Game
 
-A pixel-art multiplayer game where players throw $WISH tokens into a magical fountain for a chance to win big!
+A pixel-art multiplayer game where players throw $WNDR tokens into a magical fountain for a chance to win big!
 
 ## 🎮 Game Features
 
 - **Multiplayer Hub World**: See other players in real-time
 - **WASD Movement**: Classic top-down RPG controls
-- **Gambling Mechanic**: Throw 1000 $WISH tokens with varying win probabilities
+- **Gambling Mechanic**: Throw 1000 $WNDR tokens with varying win probabilities
 - **Phantom Wallet Integration**: Seamless Solana blockchain connectivity
 - **Real-time Updates**: Live fountain pool and winner displays
 
 ## 🎲 Gambling Probabilities
 
 - 60% - Lose all tokens
-- 39% - Break even or small gain (1000-1500 $WISH)
-- 0.5% - Medium win (5,000 $WISH)
-- 0.35% - Large win (10,000 $WISH)
-- 0.14999% - Major win (100,000 $WISH)
-- 0.00001% - JACKPOT (1,000,000 $WISH)
+- 39% - Break even or small gain (1000-1500 $WNDR)
+- 0.5% - Medium win (5,000 $WNDR)
+- 0.35% - Large win (10,000 $WNDR)
+- 0.14999% - Major win (100,000 $WNDR)
+- 0.00001% - JACKPOT (1,000,000 $WNDR)
 
 ## 🚀 Setup Instructions
 
@@ -27,7 +27,7 @@ A pixel-art multiplayer game where players throw $WISH tokens into a magical fou
 - Cloudflare account
 - GitHub account
 - Phantom wallet
-- $WISH token contract address
+- $WNDR token contract address
 
 ### Installation
 
@@ -50,7 +50,7 @@ cp .env.local.example .env.local
 Edit `.env.local` with your values:
 - `NEXT_PUBLIC_RPC_URL`: Solana RPC endpoint
 - `NEXT_PUBLIC_WORKER_URL`: Your Cloudflare Worker URL
-- `NEXT_PUBLIC_WISH_TOKEN_MINT`: $WISH token mint address
+- `NEXT_PUBLIC_WISH_TOKEN_MINT`: $WNDR token mint address
 - `NEXT_PUBLIC_DEV_WALLET_PUBLIC_KEY`: Dev wallet for payouts
 
 ### Cloudflare Worker Setup
@@ -126,7 +126,7 @@ See `ART_ASSETS_REQUIREMENTS.md` for detailed specifications.
 ### Solana Wallet Setup
 
 1. Create a dev wallet for game payouts
-2. Fund it with $WISH tokens
+2. Fund it with $WNDR tokens
 3. Store private key securely in Cloudflare secrets:
 ```bash
 wrangler secret put DEV_WALLET_PRIVATE_KEY
@@ -150,7 +150,7 @@ Access game statistics at:
 
 - **Frontend**: Next.js, React, Phaser.js
 - **Backend**: Cloudflare Workers, Durable Objects
-- **Blockchain**: Solana, $WISH token
+- **Blockchain**: Solana, $WNDR token
 - **Multiplayer**: WebSockets
 - **Styling**: Tailwind CSS
 
@@ -198,7 +198,7 @@ MIT License - See LICENSE file
 
 ## 💰 Token Information
 
-$WISH token details:
+$WNDR token details:
 - Network: Solana Mainnet
 - Launched on: pump.fun
 - Contract: [YOUR_TOKEN_ADDRESS]
@@ -213,4 +213,4 @@ $WISH token details:
 
 ---
 
-Built with 💜 for the $WISH community
+Built with 💜 for the $WNDR community

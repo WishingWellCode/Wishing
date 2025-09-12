@@ -3,11 +3,11 @@
 ## Pre-deployment Checklist
 
 ### 1. Token Configuration
-Before deploying, you need to configure your $WISH token details:
+Before deploying, you need to configure your $WNDR token details:
 
 **Update `.env.local`:**
 ```env
-NEXT_PUBLIC_WISH_TOKEN_MINT=your_actual_token_mint_address
+NEXT_PUBLIC_WNDR_TOKEN_MINT=your_actual_token_mint_address
 NEXT_PUBLIC_WORKER_URL=https://wish-well-worker.your-subdomain.workers.dev
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 ```
@@ -16,7 +16,7 @@ NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 Create a dedicated pool wallet for payouts:
 
 1. Generate a new Solana wallet specifically for payouts
-2. Fund it with $WISH tokens for payouts (recommended: at least 1M tokens)
+2. Fund it with $WNDR tokens for payouts (recommended: at least 1M tokens)
 3. Keep the private key secure - you'll need it for the Worker
 
 ### 3. Cloudflare Workers Configuration
@@ -25,7 +25,7 @@ Create a dedicated pool wallet for payouts:
 ```toml
 [vars]
 SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
-WISH_TOKEN_MINT = "your_actual_token_mint_address"
+WNDR_TOKEN_MINT = "your_actual_token_mint_address"
 BURN_ADDRESS = "11111111111111111111111111111111"
 POOL_WALLET_PUBLIC = "your_pool_wallet_public_key"
 ```
@@ -69,7 +69,7 @@ npm run build
 ### Development Testing
 1. Connect Phantom wallet with test tokens
 2. Approach the fountain in the game
-3. Click "Throw 1,000 $WISH"
+3. Click "Throw 1,000 $WNDR"
 4. Sign the burn transaction
 5. Verify payout is received (if won)
 

@@ -69,8 +69,8 @@ export default function Links() {
   return (
     <>
       <Head>
-        <title>Community Links - $WISH Wishing Well</title>
-        <meta name="description" content="Connect with the $WISH community through our social media channels" />
+        <title>Community Links - $WNDR Wishing Well</title>
+        <meta name="description" content="Connect with the $WNDR community through our social media channels" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -272,7 +272,7 @@ export default function Links() {
               Community Links
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto fallback-subtitle">
-              Connect with the $WISH community through our social media channels and stay updated on the latest developments.
+              Connect with the $WNDR community through our social media channels and stay updated on the latest developments.
             </p>
           </div>
 

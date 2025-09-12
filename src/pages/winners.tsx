@@ -84,7 +84,7 @@ export default function Winners() {
   return (
     <>
       <Head>
-        <title>Winners - $WISH Wishing Well</title>
+        <title>Winners - $WNDR Wishing Well</title>
         <meta name="description" content="View all winning wishes from the magical fountain!" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

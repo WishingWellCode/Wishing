@@ -28,9 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Pool wallet address (replace with your actual pool wallet)
     const POOL_WALLET = process.env.POOL_WALLET_PUBLIC || "8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTBcXWnCv"
-    const WISH_TOKEN_MINT = process.env.WISH_TOKEN_MINT || "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjidkWBQv"
+    const WNDR_TOKEN_MINT = process.env.WNDR_TOKEN_MINT || "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjidkWBQv"
     
-    console.log(`Purchase request: Level ${houseLevel}, Cost: ${houseCost} $WISH, Wallet: ${walletAddress}`)
+    console.log(`Purchase request: Level ${houseLevel}, Cost: ${houseCost} $WNDR, Wallet: ${walletAddress}`)
     
     // Create the transaction (this is a template - you'll need to sign it on the frontend)
     const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
@@ -39,12 +39,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Get token accounts
     const fromTokenAccount = await getAssociatedTokenAddress(
-      new PublicKey(WISH_TOKEN_MINT),
+      new PublicKey(WNDR_TOKEN_MINT),
       wallet
     )
     
     const toTokenAccount = await getAssociatedTokenAddress(
-      new PublicKey(WISH_TOKEN_MINT),
+      new PublicKey(WNDR_TOKEN_MINT),
       new PublicKey(POOL_WALLET)
     )
     
@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fromTokenAccount,
       toTokenAccount,
       wallet,
-      houseCost * Math.pow(10, 6), // Assuming 6 decimal places for $WISH token
+      houseCost * Math.pow(10, 6), // Assuming 6 decimal places for $WNDR token
       [],
       TOKEN_PROGRAM_ID
     )
@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     res.status(200).json({ 
       success: true,
-      message: `Successfully prepared purchase of Level ${houseLevel} house for ${houseCost} $WISH`,
+      message: `Successfully prepared purchase of Level ${houseLevel} house for ${houseCost} $WNDR`,
       transaction: serializedTransaction,
       // TODO: Update user housing data in your database/worker
       newHousingData: {

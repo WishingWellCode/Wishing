@@ -18,8 +18,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>$WISH Wishing Well</title>
-        <meta name="description" content="Throw your $WISH tokens into the magical fountain!" />
+        <title>$WNDR Wishing Well</title>
+        <meta name="description" content="Throw your $WNDR tokens into the magical fountain!" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />

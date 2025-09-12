@@ -241,7 +241,7 @@ export class HubWorldScene extends Phaser.Scene {
     this.interactPrompt = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY + 120,
-      'Press [E] to throw 1000 $WISH',
+      'Press [E] to throw 1000 $WNDR',
       {
         fontSize: '14px',
         fontFamily: 'Courier',
@@ -274,7 +274,7 @@ export class HubWorldScene extends Phaser.Scene {
     poolBorder.setScrollFactor(0)
     poolBorder.setDepth(1000)
     
-    const poolText = this.add.text(20, 30, 'POOL: 0 $WISH', {
+    const poolText = this.add.text(20, 30, 'POOL: 0 $WNDR', {
       fontSize: '14px',
       fontFamily: 'Courier',
       color: '#00ff00'
@@ -288,7 +288,7 @@ export class HubWorldScene extends Phaser.Scene {
       delay: 1000,
       callback: () => {
         if (this.gameContext?.gameState?.fountainPool) {
-          poolText.setText(`POOL: ${this.gameContext.gameState.fountainPool} $WISH`)
+          poolText.setText(`POOL: ${this.gameContext.gameState.fountainPool} $WNDR`)
         }
       },
       loop: true
@@ -457,7 +457,7 @@ export class HubWorldScene extends Phaser.Scene {
       
       // Re-enable interaction
       setTimeout(() => {
-        this.interactPrompt.setText('Press [E] to throw 1000 $WISH')
+        this.interactPrompt.setText('Press [E] to throw 1000 $WNDR')
         this.interactPrompt.setColor('#00ff00')
       }, 2000)
       
@@ -466,7 +466,7 @@ export class HubWorldScene extends Phaser.Scene {
       this.interactPrompt.setText('ERROR! TRY AGAIN...')
       this.interactPrompt.setColor('#ff0000')
       setTimeout(() => {
-        this.interactPrompt.setText('Press [E] to throw 1000 $WISH')
+        this.interactPrompt.setText('Press [E] to throw 1000 $WNDR')
         this.interactPrompt.setColor('#00ff00')
       }, 2000)
     }
@@ -518,7 +518,7 @@ export class HubWorldScene extends Phaser.Scene {
     const winText = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY - 100,
-      `+${amount} $WISH`,
+      `+${amount} $WNDR`,
       {
         fontSize: '28px',
         fontFamily: 'Courier',

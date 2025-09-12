@@ -693,7 +693,7 @@ async function handleFountainStart(request, env) {
     clientSeed: finalClientSeed,
     burnAddress: env.BURN_ADDRESS || '11111111111111111111111111111111', // Null address for burn
     exactStake: 1000,
-    message: 'Send exactly 1000 $WISH tokens to burn address, then call /resolve'
+    message: 'Send exactly 1000 $WNDR tokens to burn address, then call /resolve'
   }), {
     headers: { 
       'Content-Type': 'application/json',
@@ -777,7 +777,7 @@ async function handleFountainResolve(request, env) {
   // Send payout if won (from pool wallet) - DON'T wait for confirmation
   let payoutTx = null
   if (payout > 0) {
-    console.log(`💰 Attempting to send ${payout} $WISH payout to ${session.walletAddress}`)
+    console.log(`💰 Attempting to send ${payout} $WNDR payout to ${session.walletAddress}`)
     
     try {
       // Send payout asynchronously to avoid delays
@@ -1250,7 +1250,7 @@ async function sendPayout(env, recipientWalletAddress, amount) {
   const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
   
   // Get token accounts
-  const tokenMint = new PublicKey(env.WISH_TOKEN_MINT)
+  const tokenMint = new PublicKey(env.WNDR_TOKEN_MINT)
   const recipientWallet = new PublicKey(recipientWalletAddress)
   
   const poolTokenAccount = await getAssociatedTokenAddress(tokenMint, poolWallet.publicKey)
@@ -1335,7 +1335,7 @@ async function sendPayoutAsync(env, recipientWalletAddress, amount) {
 
 // Fast payout that doesn't wait for confirmation
 async function sendPayoutFast(env, recipientWalletAddress, amount) {
-  console.log(`🚀 Sending fast payout of ${amount} $WISH to ${recipientWalletAddress}`)
+  console.log(`🚀 Sending fast payout of ${amount} $WNDR to ${recipientWalletAddress}`)
   
   // Check various possible environment variable names
   const privateKey = env.POOL_WALLET_PRIVATE_KEY || 
@@ -1362,7 +1362,7 @@ async function sendPayoutFast(env, recipientWalletAddress, amount) {
   const poolWallet = Keypair.fromSecretKey(poolWalletPrivateKey)
   
   // Get token accounts
-  const tokenMint = new PublicKey(env.WISH_TOKEN_MINT)
+  const tokenMint = new PublicKey(env.WNDR_TOKEN_MINT)
   const recipientPubkey = new PublicKey(recipientWalletAddress)
   
   const poolTokenAccount = await getAssociatedTokenAddress(
@@ -1614,7 +1614,7 @@ async function handleHousePurchase(request, env) {
     // Check burn requirement
     if (housingData.totalBurned < house.burnRequirement) {
       return new Response(JSON.stringify({ 
-        error: `Need ${house.burnRequirement - housingData.totalBurned} more $WISH burned` 
+        error: `Need ${house.burnRequirement - housingData.totalBurned} more $WNDR burned` 
       }), {
         status: 400,
         headers: {

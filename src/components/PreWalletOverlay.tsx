@@ -149,7 +149,7 @@ export default function PreWalletOverlay({ onClose }: PreWalletOverlayProps) {
                   </p>
                   <p className="flex items-center gap-2">
                     <span style={{ color: '#10b981' }}>▸</span>
-                    Click the fountain to throw <span style={{ color: '#a855f7', fontWeight: 'bold' }}>WISH</span> tokens
+                    Click the fountain to throw <span style={{ color: '#a855f7', fontWeight: 'bold' }}>WNDR</span> tokens
                   </p>
                   <p className="flex items-center gap-2">
                     <span style={{ color: '#10b981' }}>▸</span>

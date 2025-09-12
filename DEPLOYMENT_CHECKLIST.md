@@ -3,14 +3,14 @@
 ## Pre-Launch Requirements ✅
 
 ### 1. Token Contract Deployment
-- [ ] Deploy your real $WISH token on Solana
+- [ ] Deploy your real $WNDR token on Solana
 - [ ] Get the Contract Address (CA) from the deployment
 - [ ] Verify token has correct decimals (usually 6 or 9)
 - [ ] Test token transfers work correctly
 
 ### 2. Wallet Setup
 - [ ] Your real dev wallet is funded with SOL for gas fees
-- [ ] Your real dev wallet has sufficient $WISH tokens for payouts
+- [ ] Your real dev wallet has sufficient $WNDR tokens for payouts
 - [ ] Backup your real dev wallet private key securely
 
 ## Configuration Updates 🔧
@@ -23,7 +23,7 @@
 
 ### 4. Update Wrangler Configuration  
 **File: `wrangler.toml`**
-- [ ] Update `WISH_TOKEN_MINT = "YOUR_REAL_TOKEN_CA"`
+- [ ] Update `WNDR_TOKEN_MINT = "YOUR_REAL_TOKEN_CA"`
 - [ ] Update `POOL_WALLET_PUBLIC = "YOUR_REAL_DEV_WALLET_PUBLIC_KEY"`
 
 ### 5. Update Cloudflare Worker Secrets

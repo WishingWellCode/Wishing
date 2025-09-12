@@ -228,7 +228,7 @@ export class TestScene extends Phaser.Scene {
     gambButton.setStrokeStyle(2, 0xffffff)
     gambButton.setInteractive()
     
-    const gambText = this.add.text(0, 15, 'Throw 1,000 $WISH', {
+    const gambText = this.add.text(0, 15, 'Throw 1,000 $WNDR', {
       fontSize: '12px',
       fontFamily: '"Times New Roman", serif',
       color: '#000000'
@@ -898,7 +898,7 @@ export class TestScene extends Phaser.Scene {
     const message = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY - 20,
-      'Welcome to the Community Hub!\n\nConnect with the $WISH community\nthrough our social media channels.\n\nWould you like to visit our\nLinks page now?',
+      'Welcome to the Community Hub!\n\nConnect with the $WNDR community\nthrough our social media channels.\n\nWould you like to visit our\nLinks page now?',
       {
         fontSize: '16px',
         color: '#ffffff',
@@ -1386,7 +1386,7 @@ export class TestScene extends Phaser.Scene {
         text.setText('Connect wallet first!')
         this.time.delayedCall(2000, () => {
           button.setFillStyle(0x4ade80)
-          text.setText('Throw 1,000 $WISH')
+          text.setText('Throw 1,000 $WNDR')
           button.setInteractive()
         })
         return
@@ -1495,7 +1495,7 @@ export class TestScene extends Phaser.Scene {
       
       // Re-enable button
       button.setFillStyle(0x4ade80)
-      text.setText('Throw 1,000 $WISH')
+      text.setText('Throw 1,000 $WNDR')
       button.setInteractive()
       
     } catch (error: any) {
@@ -1504,7 +1504,7 @@ export class TestScene extends Phaser.Scene {
       // Show error message
       let errorMessage = 'Error - Try again'
       if (error?.message?.includes('insufficient')) {
-        errorMessage = 'Insufficient $WISH'
+        errorMessage = 'Insufficient $WNDR'
       } else if (error?.message?.includes('rejected')) {
         errorMessage = 'Transaction rejected'
       }
@@ -1514,7 +1514,7 @@ export class TestScene extends Phaser.Scene {
       button.setInteractive()
       
       this.time.delayedCall(3000, () => {
-        text.setText('Throw 1,000 $WISH')
+        text.setText('Throw 1,000 $WNDR')
       })
     }
   }
@@ -1606,7 +1606,7 @@ export class TestScene extends Phaser.Scene {
     messageText.setOrigin(0.5)
     
     const payoutText = this.add.text(0, 35, 
-      result.multiplier > 0 ? `Won: ${Math.floor(1000 * result.multiplier)} $WISH` : 'Lost: 1,000 $WISH', {
+      result.multiplier > 0 ? `Won: ${Math.floor(1000 * result.multiplier)} $WNDR` : 'Lost: 1,000 $WNDR', {
       fontSize: '16px',
       fontFamily: '"Times New Roman", serif',
       color: tierColor,

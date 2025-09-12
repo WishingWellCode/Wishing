@@ -92,17 +92,17 @@ export class WishGamblingAPI {
       actualDecimals = mintInfo.decimals
     } catch (error) {
       console.error('Error getting mint info, using default decimals:', error)
-      actualDecimals = 6 // Default to 6 decimals for WISH token
+      actualDecimals = 6 // Default to 6 decimals for WNDR token
     }
 
     // Check if user token account exists
     try {
       const userAccount = await getAccount(this.connection, userTokenAccount)
       if (userAccount.amount < BigInt(amount * Math.pow(10, actualDecimals))) {
-        throw new Error(`Insufficient WISH tokens. You need ${amount} WISH but only have ${Number(userAccount.amount) / Math.pow(10, actualDecimals)} WISH`)
+        throw new Error(`Insufficient WNDR tokens. You need ${amount} WNDR but only have ${Number(userAccount.amount) / Math.pow(10, actualDecimals)} WNDR`)
       }
     } catch (error) {
-      if (error.message.includes('Insufficient WISH tokens')) {
+      if (error.message.includes('Insufficient WNDR tokens')) {
         throw error
       }
       console.log('User token account does not exist, creating...')
@@ -137,7 +137,7 @@ export class WishGamblingAPI {
     const memoInstruction = new TransactionInstruction({
       keys: [],
       programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
-      data: Buffer.from('WISH Wishing Well - House Purchase', 'utf8')
+      data: Buffer.from('WNDR Wishing Well - House Purchase', 'utf8')
     })
     transaction.add(memoInstruction)
 

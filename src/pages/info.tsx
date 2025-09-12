@@ -66,7 +66,7 @@ export default function InfoPage() {
             participate in on-chain gambling mechanics, and build their housing portfolio.
           </p>
           <p>
-            The game revolves around the $WISH token and provides transparent, verifiable gameplay 
+            The game revolves around the $WNDR token and provides transparent, verifiable gameplay 
             through blockchain technology. Every interaction is recorded on-chain for complete transparency.
           </p>
         </div>
@@ -86,7 +86,7 @@ export default function InfoPage() {
                 <li>Portal 1: Housing District & Upgrades</li>
                 <li>Portal 3: Recent Winners & Statistics</li>
                 <li>Portal 4: Information & Help (this page)</li>
-                <li>Fountain Area: $WISH Token Gambling</li>
+                <li>Fountain Area: $WNDR Token Gambling</li>
               </ul>
             </li>
             <li>Move to the fountain center to participate in gambling mechanics</li>
@@ -108,7 +108,7 @@ export default function InfoPage() {
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
-              <span className="font-bold">Minimum bet: 1,000 $WISH tokens</span>
+              <span className="font-bold">Minimum bet: 1,000 $WNDR tokens</span>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-400">✓</span>
@@ -139,7 +139,7 @@ export default function InfoPage() {
           
           <div className="bg-black/30 p-4">
             <h4 className="text-cyan-400 font-bold mb-2">What if I encounter errors?</h4>
-            <p className="font-bold">Most errors are related to wallet connection or insufficient token balance. Ensure your wallet is connected and you have enough $WISH tokens for transactions.</p>
+            <p className="font-bold">Most errors are related to wallet connection or insufficient token balance. Ensure your wallet is connected and you have enough $WNDR tokens for transactions.</p>
           </div>
           
           <div className="bg-black/30 p-4">
@@ -159,7 +159,7 @@ export default function InfoPage() {
   return (
     <>
       <Head>
-        <title>Information Center - $WISH Wishing Well</title>
+        <title>Information Center - $WNDR Wishing Well</title>
         <meta name="description" content="Learn about Wishing gameplay, housing system, and verifiable gambling mechanics!" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -633,7 +633,7 @@ export default function InfoPage() {
               <div className="trust-card">
                 <div className="trust-icon">💰</div>
                 <h4 className="trust-title">AMOUNT</h4>
-                <p className="trust-desc">Exact $WISH amounts won, verified on-chain</p>
+                <p className="trust-desc">Exact $WNDR amounts won, verified on-chain</p>
               </div>
               
               <div className="trust-card">
