@@ -19,9 +19,13 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
   const [loadedSprites, setLoadedSprites] = useState<Set<string>>(new Set())
 
   useEffect(() => {
+    console.log('🎮 MultiplayerOverlay received players:', players)
+    console.log('🎮 MultiplayerOverlay currentPlayerId:', currentPlayerId)
+    
     // Show ALL players - don't filter based on bounds for spectator mode
     const filtered = players.filter(player => {
       const hasValidData = player.x !== undefined && player.y !== undefined && player.username && player.sprite
+      console.log(`🎮 Player ${player.id}: username=${player.username}, sprite=${player.sprite}, pos=(${player.x},${player.y}), valid=${hasValidData}`)
       return hasValidData
     })
     
@@ -49,15 +53,34 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     <div 
       className="fixed inset-0 pointer-events-none" 
       style={{ 
-        zIndex: 0, // Behind popups but above canvas background
+        zIndex: 9998, // Higher z-index to ensure visibility
         position: 'fixed', // Force new stacking context
         top: 0,
         left: 0,
         width: '100vw',
         height: '100vh',
-        pointerEvents: 'none' // Ensure no pointer interference
+        pointerEvents: 'none', // Ensure no pointer interference
+        backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug: slight red tint to see overlay bounds
       }}
     >
+      {/* Debug info at top of screen */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '100px',
+          right: '16px',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '8px',
+          fontSize: '12px',
+          fontFamily: 'monospace',
+          zIndex: 10000,
+          borderRadius: '4px'
+        }}
+      >
+        Overlay Active: {visiblePlayers.length} players visible
+      </div>
+      
       {visiblePlayers.map((player) => {
         // Use direct coordinates - TestScene and LandingScene should use same coordinate system
         const screenX = player.x
