@@ -1702,10 +1702,10 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.y += deltaY
     
     // Update local player sprite through WorldRenderer
-    const localPlayer = this.worldRenderer.getLocalPlayer()
-    if (localPlayer && (deltaX !== 0 || deltaY !== 0)) {
-      localPlayer.x = this.testPlayer.x
-      localPlayer.y = this.testPlayer.y
+    const localPlayerSprite = this.worldRenderer.getLocalPlayer()
+    if (localPlayerSprite && (deltaX !== 0 || deltaY !== 0)) {
+      localPlayerSprite.x = this.testPlayer.x
+      localPlayerSprite.y = this.testPlayer.y
     }
     
     // Update multiplayer position so visible sprite follows
@@ -1758,10 +1758,10 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
     
     // Update local player sprite position after clamping
-    const localPlayer = this.worldRenderer.getLocalPlayer()
-    if (localPlayer) {
-      localPlayer.x = this.testPlayer.x
-      localPlayer.y = this.testPlayer.y
+    const localPlayerSprite2 = this.worldRenderer.getLocalPlayer()
+    if (localPlayerSprite2) {
+      localPlayerSprite2.x = this.testPlayer.x
+      localPlayerSprite2.y = this.testPlayer.y
     }
     
   }
