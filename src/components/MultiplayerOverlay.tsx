@@ -25,6 +25,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       return hasValidData
     })
     
+    console.log(`👁️ SPECTATOR: Showing ${filtered.length} players:`, filtered.map(p => `${p.username} at (${p.x},${p.y})`))
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
@@ -58,11 +59,9 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       }}
     >
       {visiblePlayers.map((player) => {
-        // Convert server coordinates to screen coordinates
-        // Server spawns at x: 100-800, y: 100-600
-        // Map to screen coordinates proportionally
-        const screenX = (player.x / 800) * window.innerWidth   // Scale from 800 to screen width
-        const screenY = (player.y / 600) * window.innerHeight  // Scale from 600 to screen height
+        // Use direct coordinates - TestScene and LandingScene should use same coordinate system
+        const screenX = player.x
+        const screenY = player.y
         
         return (
         <div
@@ -74,7 +73,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             top: `${screenY}px`,
             transform: 'translate(-50%, -50%)',
             transition: 'left 0.033s linear, top 0.033s linear',
-            zIndex: 45, // High z-index to appear above everything
+            zIndex: 9999, // Very high z-index to appear above everything
             pointerEvents: 'none'
           }}
         >
@@ -85,8 +84,8 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
               alt={`Player ${player.username}`}
               className="drop-shadow-lg"
               style={{
-                width: '45px',
-                height: '45px',
+                width: '48px',
+                height: '48px',
                 imageRendering: 'pixelated',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
                 opacity: 1,  // Always visible - no fade in needed
