@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { WishGamblingAPI, GamblingSession, GamblingResult } from '../lib/solanaUtils'
 import { PublicKey } from '@solana/web3.js'
 import { getPortalConfig, trackPortalEvent } from '../lib/portalHelpers'
+import { WorldRenderer } from '../game/WorldRenderer'
 
 export class TestScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
@@ -18,6 +19,7 @@ export class TestScene extends Phaser.Scene {
   private currentPortal: string | null = null
   private lastPortalDebug: number = 0
   private lastUpdateDebug: number = 0
+  private worldRenderer!: WorldRenderer
   private winnersOverlay: {
     background: Phaser.GameObjects.Rectangle
     title: Phaser.GameObjects.Text
@@ -129,6 +131,10 @@ export class TestScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
+    
+    // Initialize WorldRenderer for consistent multiplayer rendering
+    this.worldRenderer = new WorldRenderer(this)
+    console.log('🌍 WorldRenderer initialized in TestScene')
   }
 
   handleResize(gameSize: any) {
@@ -1318,6 +1324,19 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.setVisible(false) // Hide since multiplayer overlay shows the real sprite
     console.log('✅ Invisible player spawned for portal detection at', this.testPlayer.x, this.testPlayer.y)
     
+    // Spawn local player through WorldRenderer
+    const localPlayer = this.worldRenderer.spawnLocalPlayer({
+      id: 'local-player',
+      x: this.testPlayer.x,
+      y: this.testPlayer.y,
+      sprite: 'default'
+    })
+    
+    if (localPlayer) {
+      localPlayer.setScale(2) // Scale for TestScene
+      console.log('🎮 Local player sprite created through WorldRenderer')
+    }
+    
     // Force multiple position updates to ensure sprite spawns
     this.updateMultiplayerPosition(this.testPlayer.x, this.testPlayer.y)
     console.log('📍 Initial position synced with multiplayer:', this.testPlayer.x, this.testPlayer.y)
@@ -1682,6 +1701,13 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x += deltaX
     this.testPlayer.y += deltaY
     
+    // Update local player sprite through WorldRenderer
+    const localPlayer = this.worldRenderer.getLocalPlayer()
+    if (localPlayer && (deltaX !== 0 || deltaY !== 0)) {
+      localPlayer.x = this.testPlayer.x
+      localPlayer.y = this.testPlayer.y
+    }
+    
     // Update multiplayer position so visible sprite follows
     if (deltaX !== 0 || deltaY !== 0) {
       // Only log occasionally to reduce spam
@@ -1731,6 +1757,13 @@ export class TestScene extends Phaser.Scene {
     this.testPlayer.x = Phaser.Math.Clamp(this.testPlayer.x, 16, width - 16)
     this.testPlayer.y = Phaser.Math.Clamp(this.testPlayer.y, 16, height - 16)
     
+    // Update local player sprite position after clamping
+    const localPlayer = this.worldRenderer.getLocalPlayer()
+    if (localPlayer) {
+      localPlayer.x = this.testPlayer.x
+      localPlayer.y = this.testPlayer.y
+    }
+    
   }
   
   private multiplayerRetryTimer: any = null
@@ -1758,6 +1791,60 @@ export class TestScene extends Phaser.Scene {
       }
     } catch (error) {
       console.error('❌ Error updating multiplayer position:', error)
+    }
+  }
+  
+  // Handle multiplayer messages from remote players
+  public handleMultiplayerMessage(data: any) {
+    switch (data.type) {
+      case 'playerMoved':
+        if (data.player && data.player.id !== 'local-player') {
+          this.worldRenderer.updateRemotePlayer(data.player.id, {
+            x: data.player.x,
+            y: data.player.y,
+            anim: data.player.anim
+          })
+        }
+        break
+        
+      case 'playerJoined':
+        if (data.player && data.player.id !== 'local-player') {
+          this.worldRenderer.addRemotePlayer(data.player.id, {
+            x: data.player.x,
+            y: data.player.y,
+            username: data.player.username,
+            sprite: data.player.sprite
+          })
+        }
+        break
+        
+      case 'playerLeft':
+        if (data.playerId !== 'local-player') {
+          this.worldRenderer.removeRemotePlayer(data.playerId)
+        }
+        break
+        
+      case 'stateSnapshot':
+        if (data.players) {
+          this.worldRenderer.handleStateSnapshot(data.players)
+        }
+        break
+    }
+  }
+  
+  // Get player count for UI
+  public getPlayerCount(): number {
+    return this.worldRenderer.getPlayerCount()
+  }
+  
+  // Clear all players when scene shuts down
+  shutdown() {
+    console.log('🔍 DEBUG: TestScene shutdown - cleaning up all players')
+    this.worldRenderer.clearAllPlayers()
+    
+    // Clear local references
+    if (this.testPlayer) {
+      this.testPlayer = null as any
     }
   }
 }

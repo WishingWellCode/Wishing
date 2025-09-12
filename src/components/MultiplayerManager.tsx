@@ -238,6 +238,37 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     console.log('🎮 ✅ Disconnected from multiplayer and cleared all player data')
   }
 
+  // Forward multiplayer messages to active Phaser scenes for WorldRenderer handling
+  const forwardMessageToScenes = (message: any) => {
+    // Get the current active scene from Phaser
+    try {
+      // Try to get the current scene and forward the message
+      const scenes = ['LandingScene', 'TestScene']
+      let messageForwarded = false
+      
+      for (const sceneName of scenes) {
+        // Check if the scene exists in the global Phaser game instance
+        if (typeof window !== 'undefined' && (window as any).game) {
+          const game = (window as any).game
+          const scene = game.scene.getScene(sceneName)
+          
+          if (scene && scene.scene.isActive() && scene.handleMultiplayerMessage) {
+            console.log(`📤 Forwarding message to active scene: ${sceneName}`, message.type)
+            scene.handleMultiplayerMessage(message)
+            messageForwarded = true
+            break
+          }
+        }
+      }
+      
+      if (!messageForwarded) {
+        console.log(`⚠️ No active scene found to forward message:`, message.type)
+      }
+    } catch (error) {
+      console.error('Error forwarding message to scenes:', error)
+    }
+  }
+
   const handleMultiplayerMessage = (message: any) => {
     // Log all messages for spectators (when not connected), skip movement spam for players
     if (message.type !== 'playerMoved' || !connected) {
@@ -251,14 +282,30 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         break
         
       case 'currentPlayers':
-        // Spectator mode - received current players
+        // Legacy spectator mode - received current players (keeping for compatibility)
         console.log(`👁️ SPECTATOR: Received currentPlayers message`, message)
         if (message.players && Array.isArray(message.players)) {
           console.log(`👁️ SPECTATOR: Setting ${message.players.length} players:`, message.players)
           setPlayers(message.players)
           onPlayersUpdate?.(message.players)
+          // Forward to scenes for WorldRenderer
+          forwardMessageToScenes(message)
         } else {
           console.log('👁️ SPECTATOR: Invalid players array in currentPlayers message:', message.players)
+        }
+        break
+        
+      case 'stateSnapshot':
+        // New spectator mode - received game state snapshot
+        console.log(`👁️ SPECTATOR: Received stateSnapshot message`, message)
+        if (message.players && Array.isArray(message.players)) {
+          console.log(`👁️ SPECTATOR: Setting ${message.players.length} players:`, message.players)
+          setPlayers(message.players)
+          onPlayersUpdate?.(message.players)
+          // Forward to scenes for WorldRenderer
+          forwardMessageToScenes(message)
+        } else {
+          console.log('👁️ SPECTATOR: Invalid players array in stateSnapshot message:', message.players)
         }
         break
         
@@ -272,6 +319,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           })
           setPlayers(message.allPlayers)
           onPlayersUpdate?.(message.allPlayers)
+          // Forward to scenes for WorldRenderer
+          forwardMessageToScenes(message)
         }
         console.log(`🎮 🆔 YOU ARE PLAYER: ${message.playerId} with sprite ${message.player.sprite} and username ${message.player.username}`)
         break
@@ -285,6 +334,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           onPlayersUpdate?.(updated)
           return updated
         })
+        
+        // Forward to scenes for WorldRenderer
+        forwardMessageToScenes(message)
         break
         
       case 'playerLeft':
@@ -295,39 +347,54 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           onPlayersUpdate?.(updated)
           return updated
         })
+        
+        // Forward to scenes for WorldRenderer
+        forwardMessageToScenes(message)
         break
         
       case 'playerMoved':
-        // Reduced movement logging to prevent spam
+        // Handle player movement for both spectator and player modes
+        const playerData = message.player || {
+          id: message.playerId,
+          x: message.x,
+          y: message.y,
+          username: message.username || message.playerId?.slice(0, 5) || 'Unknown',
+          sprite: message.sprite || 'default',
+          walletAddress: message.walletAddress || 'unknown'
+        }
+        
         setPlayers(prev => {
           // Check if player exists in our list
-          const playerExists = prev.some(p => p.id === message.playerId)
+          const playerExists = prev.some(p => p.id === playerData.id)
           
           if (playerExists) {
             // Update existing player position
             const updated = prev.map(p => 
-              p.id === message.playerId 
-                ? { ...p, x: message.x, y: message.y }
+              p.id === playerData.id 
+                ? { ...p, x: playerData.x, y: playerData.y }
                 : p
             )
             onPlayersUpdate?.(updated)
             return updated
           } else {
             // Player not in our list (spectator mode) - add them with provided info
-            console.log(`👁️ SPECTATOR: Adding new player ${message.playerId} to list`)
+            console.log(`👁️ SPECTATOR: Adding new player ${playerData.id} to list`)
             const newPlayer = {
-              id: message.playerId,
-              walletAddress: message.walletAddress || 'unknown',
-              username: message.username || message.playerId.slice(0, 5),
-              x: message.x,
-              y: message.y,
-              sprite: message.sprite || 'default'
+              id: playerData.id,
+              walletAddress: playerData.walletAddress,
+              username: playerData.username,
+              x: playerData.x,
+              y: playerData.y,
+              sprite: playerData.sprite
             }
             const updated = [...prev, newPlayer]
             onPlayersUpdate?.(updated)
             return updated
           }
         })
+        
+        // Forward movement to scenes for WorldRenderer
+        forwardMessageToScenes(message)
         break
         
       case 'fountainUpdate':
@@ -453,9 +520,12 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span>{isConnected ? 'Multiplayer Connected' : 'Connecting...'}</span>
+            {!connected && isConnected && (
+              <span className="text-cyan-400">[SPECTATOR]</span>
+            )}
           </div>
           <div className="mt-1">
-            Players online: {players.length}
+            {connected ? 'Players' : 'Spectating'}: {players.length} online
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { WorldRenderer } from '../game/WorldRenderer'
 
 export class LandingScene extends Phaser.Scene {
   private instructions!: Phaser.GameObjects.Text
@@ -8,6 +9,7 @@ export class LandingScene extends Phaser.Scene {
   private lastPosition = { x: 0, y: 0 }
   private positionUpdateTimer = 0
   private isWalletConnected = false
+  private worldRenderer!: WorldRenderer
   
   constructor() {
     super({ key: 'LandingScene' })
@@ -44,20 +46,34 @@ export class LandingScene extends Phaser.Scene {
     
     // Camera setup
     this.cameras.main.setZoom(1)
+    
+    // Initialize WorldRenderer for consistent multiplayer rendering
+    this.worldRenderer = new WorldRenderer(this)
+    console.log('🌍 WorldRenderer initialized in LandingScene')
   }
   
   private createPlayer() {
     if (this.player) return // Don't create if already exists
     
-    // Create visible player sprite
-    this.player = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'default')
-    this.player.setVisible(true) // Make player visible
-    this.player.setDepth(100) // High depth to show above background
-    this.player.setScale(0.13) // Small size like the green placeholder
+    const spawnX = this.cameras.main.centerX
+    const spawnY = this.cameras.main.centerY
     
-    // Store initial position
-    this.lastPosition.x = this.player.x
-    this.lastPosition.y = this.player.y
+    // Create local player through WorldRenderer for consistency
+    const localPlayer = this.worldRenderer.spawnLocalPlayer({
+      id: 'local-player',
+      x: spawnX,
+      y: spawnY,
+      sprite: 'default'
+    })
+    
+    if (localPlayer) {
+      this.player = localPlayer
+      this.player.setScale(0.13) // Adjust scale for LandingScene
+      
+      // Store initial position
+      this.lastPosition.x = this.player.x
+      this.lastPosition.y = this.player.y
+    }
   }
   
   public setWalletConnection(connected: boolean) {
@@ -67,6 +83,8 @@ export class LandingScene extends Phaser.Scene {
     } else if (!connected && this.player) {
       this.player.destroy()
       this.player = null as any
+      // Clear local player from WorldRenderer
+      this.worldRenderer.clearLocalPlayer()
     }
   }
   
@@ -121,11 +139,56 @@ export class LandingScene extends Phaser.Scene {
     }
   }
   
+  // Handle multiplayer messages from remote players
+  public handleMultiplayerMessage(data: any) {
+    switch (data.type) {
+      case 'playerMoved':
+        if (data.player && data.player.id !== 'local-player') {
+          this.worldRenderer.updateRemotePlayer(data.player.id, {
+            x: data.player.x,
+            y: data.player.y,
+            anim: data.player.anim
+          })
+        }
+        break
+        
+      case 'playerJoined':
+        if (data.player && data.player.id !== 'local-player') {
+          this.worldRenderer.addRemotePlayer(data.player.id, {
+            x: data.player.x,
+            y: data.player.y,
+            username: data.player.username,
+            sprite: data.player.sprite
+          })
+        }
+        break
+        
+      case 'playerLeft':
+        if (data.playerId !== 'local-player') {
+          this.worldRenderer.removeRemotePlayer(data.playerId)
+        }
+        break
+        
+      case 'stateSnapshot':
+        if (data.players) {
+          this.worldRenderer.handleStateSnapshot(data.players)
+        }
+        break
+    }
+  }
+  
+  // Get player count for UI
+  public getPlayerCount(): number {
+    return this.worldRenderer.getPlayerCount()
+  }
+  
   shutdown() {
     console.log('🔍 DEBUG: LandingScene shutdown - cleaning up player sprite')
-    // Properly destroy the player sprite to prevent duplicate sprites
+    // Clear all players through WorldRenderer
+    this.worldRenderer.clearAllPlayers()
+    
+    // Clear local references
     if (this.player) {
-      this.player.destroy()
       this.player = null as any
     }
   }

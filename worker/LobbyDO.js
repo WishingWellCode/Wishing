@@ -4,6 +4,7 @@ export class LobbyDO {
     this.env = env
     this.sessions = new Map() // playerId -> WebSocket
     this.players = new Map() // playerId -> player state
+    this.spectators = new Map() // spectatorId -> spectator session
     this.lastTickTime = Date.now()
     this.tickInterval = null
     this.broadcastInterval = null
@@ -74,6 +75,10 @@ export class LobbyDO {
 
   async handleMessage(playerId, message) {
     switch (message.type) {
+      case 'spectate':
+        // Handle spectator mode
+        await this.handleSpectate(playerId, message)
+        break
       case 'join':
         await this.handleJoin(playerId, message)
         break
@@ -87,6 +92,16 @@ export class LobbyDO {
       case 'ping':
         // Respond to ping for connection health
         this.sendToPlayer(playerId, { type: 'pong', timestamp: message.timestamp })
+        
+        // Update last seen time for both players and spectators
+        const player = this.players.get(playerId)
+        const spectator = this.spectators.get(playerId)
+        
+        if (player) {
+          player.lastSeen = Date.now()
+        } else if (spectator) {
+          spectator.lastSeen = Date.now()
+        }
         break
     }
   }
@@ -100,13 +115,23 @@ export class LobbyDO {
     player.y = message.y
     player.lastSeen = Date.now()
 
-    // Broadcast position update to other players
-    this.broadcast({
+    // Broadcast position update to other players AND spectators
+    const moveMessage = {
       type: 'playerMoved',
-      playerId,
-      x: message.x,
-      y: message.y
-    }, playerId)
+      player: {
+        id: playerId,
+        x: message.x,
+        y: message.y,
+        username: player.username,
+        sprite: player.spriteName,
+        walletAddress: player.walletAddress
+      }
+    }
+    
+    // Send to all players except sender
+    this.broadcast(moveMessage, playerId)
+    // Also send to all spectators
+    this.broadcastToSpectators(moveMessage)
   }
 
   async handleJoin(playerId, message) {
@@ -173,6 +198,9 @@ export class LobbyDO {
     this.players.set(playerId, player)
     
     console.log(`🎮 ✅ Player ${username} joined with sprite ${spriteName}`)
+    
+    // Remove from spectators if was spectating
+    this.spectators.delete(playerId)
 
     // Convert player data to match client expectations
     const clientPlayer = {
@@ -202,11 +230,13 @@ export class LobbyDO {
       allPlayers: allPlayersClient
     })
 
-    // Broadcast new player to others (matching client expectations)
-    this.broadcast({
+    // Broadcast new player to others AND spectators (matching client expectations)
+    const joinMessage = {
       type: 'playerJoined',
       player: clientPlayer
-    }, playerId)
+    }
+    this.broadcast(joinMessage, playerId)
+    this.broadcastToSpectators(joinMessage)
   }
 
   async handleInput(playerId, message) {
@@ -313,29 +343,45 @@ export class LobbyDO {
     const now = Date.now()
     const timeout = 60000 // 60 second timeout (longer to avoid false positives)
 
+    // Clean up inactive players
     for (const [playerId, player] of this.players) {
       if (now - player.lastSeen > timeout) {
         console.log(`🎮 Cleaning up inactive player ${player.username} (${playerId.slice(0,8)})`)
         this.handleDisconnect(playerId)
       }
     }
+    
+    // Clean up inactive spectators
+    for (const [spectatorId, spectator] of this.spectators) {
+      if (now - spectator.lastSeen > timeout) {
+        console.log(`👁️ Cleaning up inactive spectator (${spectatorId.slice(0,8)})`)
+        this.handleDisconnect(spectatorId)
+      }
+    }
   }
 
   handleDisconnect(playerId) {
     const player = this.players.get(playerId)
+    const wasSpectator = this.spectators.has(playerId)
+    
     if (player) {
       console.log(`🎮 Player ${player.username} disconnected`)
       
-      // Broadcast player left (matching client expectations)
-      this.broadcast({
+      // Broadcast player left to others AND spectators (matching client expectations)
+      const leftMessage = {
         type: 'playerLeft',
         playerId
-      }, playerId)
+      }
+      this.broadcast(leftMessage, playerId)
+      this.broadcastToSpectators(leftMessage)
+    } else if (wasSpectator) {
+      console.log(`👁️ Spectator disconnected`)
     }
 
     // Clean up
     this.sessions.delete(playerId)
     this.players.delete(playerId)
+    this.spectators.delete(playerId)
 
     // Stop game loop if no players
     if (this.players.size === 0) {
@@ -402,5 +448,68 @@ export class LobbyDO {
     if (sent > 0) {
       console.log(`📡 Broadcast sent to ${sent} players, ${failed} failed`)
     }
+  }
+  
+  // Handle spectator connections
+  async handleSpectate(spectatorId, message) {
+    console.log(`👁️ Spectator joined: ${spectatorId}`)
+    
+    // Mark as spectator
+    this.spectators.set(spectatorId, {
+      id: spectatorId,
+      joinTime: Date.now(),
+      lastSeen: Date.now()
+    })
+    
+    // Get all current players in client format
+    const currentPlayers = Array.from(this.players.values()).map(p => ({
+      id: p.id,
+      walletAddress: p.walletAddress,
+      username: p.username,
+      x: p.x,
+      y: p.y,
+      sprite: p.spriteName
+    }))
+    
+    console.log(`👁️ Sending ${currentPlayers.length} current players to spectator`)
+    
+    // Send current game state to spectator
+    this.sendToPlayer(spectatorId, {
+      type: 'stateSnapshot',
+      players: currentPlayers,
+      isSpectator: true
+    })
+  }
+  
+  // Broadcast message to all spectators
+  broadcastToSpectators(message) {
+    const messageStr = JSON.stringify(message)
+    let sent = 0, failed = 0
+    
+    for (const [spectatorId, spectator] of this.spectators) {
+      const session = this.sessions.get(spectatorId)
+      if (session && session.readyState === 1) { // 1 = OPEN
+        try {
+          session.send(messageStr)
+          sent++
+        } catch (error) {
+          console.error(`Failed to send to spectator ${spectatorId}:`, error)
+          this.handleDisconnect(spectatorId)
+          failed++
+        }
+      } else {
+        failed++
+        this.handleDisconnect(spectatorId)
+      }
+    }
+    
+    if (sent > 0) {
+      console.log(`👁️ Sent to ${sent} spectators, ${failed} failed`)
+    }
+  }
+  
+  // Get total player count (active players + spectators)
+  getTotalConnectedCount() {
+    return this.players.size + this.spectators.size
   }
 }
