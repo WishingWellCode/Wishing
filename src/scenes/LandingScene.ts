@@ -144,11 +144,24 @@ export class LandingScene extends Phaser.Scene {
     switch (data.type) {
       case 'playerMoved':
         if (data.player && data.player.id !== 'local-player') {
-          this.worldRenderer.updateRemotePlayer(data.player.id, {
-            x: data.player.x,
-            y: data.player.y,
-            anim: data.player.anim
-          })
+          console.log('🎮 Player moved:', data.player.id, 'username:', data.player.username, 'sprite:', data.player.sprite)
+          // Check if player exists, if not add them first
+          if (!this.worldRenderer.hasRemotePlayer(data.player.id)) {
+            console.log('🆕 Adding missing player during move:', data.player.username)
+            this.worldRenderer.addRemotePlayer(data.player.id, {
+              x: data.player.x,
+              y: data.player.y,
+              username: data.player.username,
+              sprite: data.player.sprite
+            })
+          } else {
+            // Just update position
+            this.worldRenderer.updateRemotePlayer(data.player.id, {
+              x: data.player.x,
+              y: data.player.y,
+              anim: data.player.anim
+            })
+          }
         }
         break
         

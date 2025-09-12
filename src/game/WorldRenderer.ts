@@ -194,6 +194,11 @@ export class WorldRenderer {
   public getPlayerCount(): number {
     return this.remotePlayersById.size + (this.hasLocalPlayer ? 1 : 0)
   }
+  
+  // Check if remote player exists
+  public hasRemotePlayer(id: string): boolean {
+    return this.remotePlayersById.has(id)
+  }
 
   // Get local player sprite
   public getLocalPlayer(): Phaser.GameObjects.Sprite | null {
