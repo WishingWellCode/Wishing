@@ -91,7 +91,6 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             backgroundColor: 'rgba(255,0,0,0.2)' // DEBUG: Semi-transparent red background
           }}
         >
-      })}
           {/* Player sprite */}
           <div className="relative">
             <img
