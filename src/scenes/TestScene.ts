@@ -70,6 +70,14 @@ export class TestScene extends Phaser.Scene {
 
   preload() {
     // No background loading needed - using CSS background
+    
+    // Load custom multiplayer sprites for WorldRenderer
+    this.load.image('blue', '/assets/sprites/Multiplayer-sprites/blue.png')
+    this.load.image('default', '/assets/sprites/Multiplayer-sprites/default.png')
+    this.load.image('grey', '/assets/sprites/Multiplayer-sprites/grey.png')
+    this.load.image('lime', '/assets/sprites/Multiplayer-sprites/lime.png')
+    this.load.image('ping', '/assets/sprites/Multiplayer-sprites/ping.png')
+    this.load.image('red', '/assets/sprites/Multiplayer-sprites/red.png')
   }
 
   create() {

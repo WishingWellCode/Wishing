@@ -87,13 +87,12 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       
       waitForMultiplayer()
     } else {
-      console.log('🔍 DEBUG: Starting ONLY LandingScene (no wallet)')
-      sceneManager.start('LandingScene')
-      // Ensure LandingScene knows wallet is disconnected
-      const newLandingScene = sceneManager.getScene('LandingScene')
-      if (newLandingScene && (newLandingScene as any).setWalletConnection) {
-        ;(newLandingScene as any).setWalletConnection(false)
-      }
+      console.log('🔍 DEBUG: Starting TestScene in spectator mode (no wallet)')
+      // Use TestScene for both spectator and player mode to avoid scene conflicts
+      sceneManager.start('TestScene')
+      
+      // TestScene will automatically be in spectator mode since no wallet is connected
+      console.log('👁️ TestScene started in spectator mode - will see other players via WorldRenderer')
     }
     
     // Complete handshake
