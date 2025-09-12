@@ -130,6 +130,8 @@ export class WorldRenderer {
     // Scale to match MultiplayerOverlay size (48px)
     this.localPlayer.setDisplaySize(48, 48)
     this.localPlayer.setDepth(150) // Above remote players
+    // Hide the Phaser sprite since MultiplayerOverlay handles visual rendering
+    this.localPlayer.setVisible(false)
     
     this.localPlayerId = data.id
     this.hasLocalPlayer = true

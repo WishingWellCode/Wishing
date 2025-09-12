@@ -19,18 +19,13 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
   const [loadedSprites, setLoadedSprites] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    // Filter out current player - you shouldn't see your own multiplayer sprite
+    // Show ALL players INCLUDING yourself - MultiplayerOverlay handles the visual display
     const filtered = players.filter(player => {
-      // Skip current player (don't show your own sprite)
-      if (currentPlayerId && player.id === currentPlayerId) {
-        return false
-      }
-      
       const hasValidData = player.x !== undefined && player.y !== undefined && player.username && player.sprite
       return hasValidData
     })
     
-    console.log(`👁️ MultiplayerOverlay: Showing ${filtered.length} players (excluding self)`)
+    console.log(`👁️ MultiplayerOverlay: Showing ${filtered.length} players`)
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
