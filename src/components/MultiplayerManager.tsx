@@ -300,13 +300,33 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       case 'playerMoved':
         // Reduced movement logging to prevent spam
         setPlayers(prev => {
-          const updated = prev.map(p => 
-            p.id === message.playerId 
-              ? { ...p, x: message.x, y: message.y }
-              : p
-          )
-          onPlayersUpdate?.(updated)
-          return updated
+          // Check if player exists in our list
+          const playerExists = prev.some(p => p.id === message.playerId)
+          
+          if (playerExists) {
+            // Update existing player position
+            const updated = prev.map(p => 
+              p.id === message.playerId 
+                ? { ...p, x: message.x, y: message.y }
+                : p
+            )
+            onPlayersUpdate?.(updated)
+            return updated
+          } else {
+            // Player not in our list (spectator mode) - add them with provided info
+            console.log(`👁️ SPECTATOR: Adding new player ${message.playerId} to list`)
+            const newPlayer = {
+              id: message.playerId,
+              walletAddress: message.walletAddress || 'unknown',
+              username: message.username || message.playerId.slice(0, 5),
+              x: message.x,
+              y: message.y,
+              sprite: message.sprite || 'default'
+            }
+            const updated = [...prev, newPlayer]
+            onPlayersUpdate?.(updated)
+            return updated
+          }
         })
         break
         

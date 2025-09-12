@@ -509,11 +509,16 @@ async function handleWebSocketSession(websocket, env) {
             }
             
             // Broadcast position update to other players AND spectators
+            // Include more player data for spectators who might not have the player info
             broadcastToOthers(playerId, {
               type: 'playerMoved',
               playerId,
               x: message.x,
-              y: message.y
+              y: message.y,
+              // Include extra data for spectators
+              username: playerData.username,
+              sprite: playerData.sprite,
+              walletAddress: playerData.walletAddress
             }, true) // Include spectators
           }
           break
