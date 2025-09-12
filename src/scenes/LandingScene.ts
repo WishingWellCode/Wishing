@@ -68,7 +68,8 @@ export class LandingScene extends Phaser.Scene {
     
     if (localPlayer) {
       this.player = localPlayer
-      // WorldRenderer already sets the correct scale (2)
+      // Hide the Phaser sprite since MultiplayerOverlay handles visual rendering
+      this.player.setVisible(false)
       
       // Store initial position
       this.lastPosition.x = this.player.x

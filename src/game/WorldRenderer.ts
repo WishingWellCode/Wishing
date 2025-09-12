@@ -40,6 +40,8 @@ export class WorldRenderer {
     const sprite = this.scene.add.sprite(data.x, data.y, spriteName)
     // Scale to match MultiplayerOverlay size (48px)
     sprite.setDisplaySize(48, 48)
+    // Hide the Phaser sprite since MultiplayerOverlay handles visual rendering
+    sprite.setVisible(false)
     
     // Create username label
     const username = data.username || id.slice(0, 5)
@@ -51,6 +53,8 @@ export class WorldRenderer {
       padding: { x: 4, y: 2 }
     })
     nameLabel.setOrigin(0.5)
+    // Hide the Phaser username label since MultiplayerOverlay handles visual rendering
+    nameLabel.setVisible(false)
     
     // Add to container
     this.playersLayer.add([sprite, nameLabel])
