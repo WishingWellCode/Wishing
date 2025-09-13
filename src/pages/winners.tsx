@@ -5,11 +5,10 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
 
 interface WinnerEntry {
-  id: string
-  date: Date
-  amountWon: number
-  solscanLink: string
-  winnerAddress: string
+  winner: string
+  amount: string
+  tx: string
+  ts: string
 }
 
 export default function Winners() {
@@ -18,53 +17,30 @@ export default function Winners() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate loading winners data
-    // In production, this would fetch from your backend/blockchain
-    const mockWinners: WinnerEntry[] = [
-      {
-        id: '1',
-        date: new Date('2025-01-06T14:30:00'),
-        amountWon: 150.5,
-        solscanLink: 'https://solscan.io/tx/example1',
-        winnerAddress: '7xKXtg...3Jwb'
-      },
-      {
-        id: '2',
-        date: new Date('2025-01-06T12:15:00'),
-        amountWon: 75.25,
-        solscanLink: 'https://solscan.io/tx/example2',
-        winnerAddress: '9mNPt2...8Kpl'
-      },
-      {
-        id: '3',
-        date: new Date('2025-01-05T18:45:00'),
-        amountWon: 500.0,
-        solscanLink: 'https://solscan.io/tx/example3',
-        winnerAddress: '3sFGh5...2Qwe'
-      },
-      {
-        id: '4',
-        date: new Date('2025-01-05T09:20:00'),
-        amountWon: 25.75,
-        solscanLink: 'https://solscan.io/tx/example4',
-        winnerAddress: '8kLMn9...7Ytr'
-      },
-      {
-        id: '5',
-        date: new Date('2025-01-04T22:10:00'),
-        amountWon: 1250.0,
-        solscanLink: 'https://solscan.io/tx/example5',
-        winnerAddress: '4pQRs6...5Zxc'
-      }
-    ]
-
-    setTimeout(() => {
-      setWinners(mockWinners)
-      setIsLoading(false)
-    }, 1000)
+    fetchWinners()
   }, [])
 
-  const formatDate = (date: Date) => {
+  const fetchWinners = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/stats/latest?limit=20')
+      if (response.ok) {
+        const data = await response.json()
+        setWinners(data)
+      } else {
+        console.error('Failed to fetch winners data')
+        setWinners([])
+      }
+    } catch (error) {
+      console.error('Error fetching winners:', error)
+      setWinners([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const formatDate = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp) * 1000)
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -79,6 +55,12 @@ export default function Winners() {
       return `${address.slice(0, 6)}...${address.slice(-4)}`
     }
     return address
+  }
+
+  const formatAmount = (amount: string) => {
+    // WNDR has 9 decimals like SOL (pumpfun token)
+    const amountNum = parseFloat(amount) / 1000000000 // Convert to WNDR with 9 decimals
+    return amountNum.toFixed(2)
   }
 
   return (
@@ -173,7 +155,7 @@ export default function Winners() {
                         </th>
                         <th className="text-right py-4 px-4 text-purple-300" 
                             style={{ fontFamily: '"Press Start 2P"', fontSize: '12px' }}>
-                          Won (SOL)
+                          Won (WNDR)
                         </th>
                         <th className="text-center py-4 px-4 text-purple-300" 
                             style={{ fontFamily: '"Press Start 2P"', fontSize: '12px' }}>
@@ -188,20 +170,20 @@ export default function Winners() {
                     <tbody>
                       {winners.map((winner, index) => (
                         <tr 
-                          key={winner.id}
+                          key={`${winner.tx}-${index}`}
                           className="border-b border-purple-500/20 hover:bg-purple-500/10 transition-colors"
                         >
                           <td className="py-4 px-4 text-gray-300" 
                               style={{ fontFamily: 'monospace', fontSize: '14px' }}>
-                            {formatDate(winner.date)}
+                            {formatDate(winner.ts)}
                           </td>
                           <td className="text-right py-4 px-4 text-green-400 font-bold" 
                               style={{ fontFamily: '"Press Start 2P"', fontSize: '14px' }}>
-                            {winner.amountWon.toFixed(2)}
+                            {formatAmount(winner.amount)}
                           </td>
                           <td className="text-center py-4 px-4">
                             <a 
-                              href={winner.solscanLink}
+                              href={`https://solscan.io/tx/${winner.tx}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
@@ -216,7 +198,7 @@ export default function Winners() {
                           </td>
                           <td className="text-right py-4 px-4 text-pink-300" 
                               style={{ fontFamily: 'monospace', fontSize: '14px' }}>
-                            {winner.winnerAddress}
+                            {formatAddress(winner.winner)}
                           </td>
                         </tr>
                       ))}

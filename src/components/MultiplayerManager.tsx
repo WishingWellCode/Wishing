@@ -135,7 +135,28 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
               walletAddress: publicKey.toString()
             }
             console.log('🎮 📤 SENDING JOIN MESSAGE (player):', joinMessage)
+            console.log('🔍 DEBUG: Wallet address being sent:', publicKey.toString())
+            console.log('🔍 DEBUG: Message JSON:', JSON.stringify(joinMessage))
             ws.send(JSON.stringify(joinMessage))
+            
+            // Set a timeout to check if we get a response
+            setTimeout(() => {
+              if (!playerIdRef.current) {
+                console.error('🎮 ❌ TIMEOUT: No joined message received after 5 seconds')
+                console.log('🔍 DEBUG: Current playerIdRef:', playerIdRef.current)
+                console.log('🔍 DEBUG: Current wsRef state:', ws.readyState)
+                console.log('🔍 DEBUG: Trying spectator mode as fallback...')
+                
+                // Try spectator mode as fallback
+                try {
+                  const spectatorMessage = { type: 'spectate' }
+                  console.log('🎮 📤 SENDING SPECTATE MESSAGE (fallback):', spectatorMessage)
+                  ws.send(JSON.stringify(spectatorMessage))
+                } catch (error) {
+                  console.error('🎮 ❌ Error sending spectator fallback:', error)
+                }
+              }
+            }, 5000)
           } else {
             // Join as spectator without wallet
             const spectatorMessage = {
@@ -280,9 +301,12 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   }
 
   const handleMultiplayerMessage = (message: any) => {
-    // Log all messages for spectators (when not connected), skip movement spam for players
-    if (message.type !== 'playerMoved' || !connected) {
-      console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
+    // Log ALL messages to debug join issue
+    console.log('🎮 📥 RECEIVED MESSAGE:', message.type, message)
+    
+    // Special debug for join-related messages
+    if (message.type === 'joined' || message.type === 'error' || message.type === 'spectate') {
+      console.log('🔍 DEBUG JOIN MESSAGE:', JSON.stringify(message, null, 2))
     }
     
     switch (message.type) {

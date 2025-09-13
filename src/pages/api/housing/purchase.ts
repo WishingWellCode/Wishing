@@ -26,9 +26,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // For now, simulate a successful purchase
     // TODO: Implement actual Solana transaction logic to send tokens to pool wallet
     
-    // Pool wallet address (replace with your actual pool wallet)
-    const POOL_WALLET = process.env.POOL_WALLET_PUBLIC || "8i8xRFD3HoQzgY623r2K88rWdqjKxUPczSRFTBcXWnCv"
-    const WNDR_TOKEN_MINT = process.env.WNDR_TOKEN_MINT || "4ijaKXxNvEurES66hFsRqLysz9YK2grAMA1AjidkWBQv"
+    // Pool wallet address (from wrangler.toml)
+    const POOL_WALLET = process.env.POOL_WALLET_PUBLIC || "3Vb7GcmDC2uwakUXMeg2PPEiXaGdjUdPywKF6BnGV9Kx"
+    const WNDR_TOKEN_MINT = process.env.NEXT_PUBLIC_WNDR_TOKEN_MINT || "ASajWWYDv5QDCjVBQbxT9ThhvGptaTJBZUSAfK5opump"
     
     console.log(`Purchase request: Level ${houseLevel}, Cost: ${houseCost} $WNDR, Wallet: ${walletAddress}`)
     
@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fromTokenAccount,
       toTokenAccount,
       wallet,
-      houseCost * Math.pow(10, 6), // Assuming 6 decimal places for $WNDR token
+      houseCost * Math.pow(10, 9), // WNDR has 9 decimal places (pumpfun token)
       [],
       TOKEN_PROGRAM_ID
     )
