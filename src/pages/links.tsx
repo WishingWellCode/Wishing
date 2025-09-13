@@ -28,17 +28,17 @@ export default function Links() {
   const socialLinks: SocialLink[] = [
     {
       name: 'Twitter',
-      url: 'https://x.com/wishdotgl',
+      url: 'https://x.com/wndrSOL',
       icon: '𝕏',
       color: '#1DA1F2',
       description: 'Follow us for the latest updates, announcements, and community highlights'
     },
     {
-      name: 'Telegram',
-      url: 'https://t.me/wishdotgl',
-      icon: '✈️',
-      color: '#0088cc',
-      description: 'Join our community chat for real-time discussions and support'
+      name: 'Documentation',
+      url: 'https://medium.com/@wndrsol/wndr-brings-progressive-multiplayer-on-chain-gaming-to-solana-475a14fcd215',
+      icon: '📖',
+      color: '#00D084',
+      description: 'Read our comprehensive documentation and learn about WNDR gaming'
     },
     {
       name: 'Discord',
