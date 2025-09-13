@@ -415,6 +415,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const lastSentPosition = useRef({ x: 0, y: 0 })
   const lastSendTime = useRef(0)
 
+  // Create a stable reference to the current function that always accesses the latest refs
+  const updatePositionRef = useRef<(x: number, y: number) => void>()
+  
   const updatePosition = (x: number, y: number) => {
     console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnected}, playerId: ${playerIdRef.current}`)
     console.log(`🔍 DEBUG wsRef details:`, {
@@ -475,6 +478,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
   }
 
+  // Keep the updatePositionRef updated with the latest function
+  updatePositionRef.current = updatePosition
+
   const sendGamblingUpdate = (result: any) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
     
@@ -487,7 +493,13 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   // Expose updatePosition globally for GameContext
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      ;(window as any).updateMultiplayerPosition = updatePosition
+      console.log('🔍 DEBUG: Updating global updateMultiplayerPosition function, wsRef exists:', !!wsRef.current)
+      // Use a stable wrapper that always calls the latest updatePosition
+      ;(window as any).updateMultiplayerPosition = (x: number, y: number) => {
+        if (updatePositionRef.current) {
+          updatePositionRef.current(x, y)
+        }
+      }
     }
     return () => {
       if (typeof window !== 'undefined') {
@@ -500,14 +512,20 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   useEffect(() => {
     // Attach to window for Phaser scenes to access
     if (typeof window !== 'undefined') {
-      (window as any).multiplayerManager = {
-        updatePosition,
+      console.log('🔍 DEBUG: Updating multiplayerManager on window, wsRef exists:', !!wsRef.current)
+      ;(window as any).multiplayerManager = {
+        updatePosition: (x: number, y: number) => {
+          if (updatePositionRef.current) {
+            updatePositionRef.current(x, y)
+          }
+        },
         sendGamblingUpdate,
         players,
         isConnected,
         playerId: playerIdRef.current,
         reconnect: connectMultiplayer,  // Add reconnect method
-        walletAddress: publicKey?.toString() || null
+        walletAddress: publicKey?.toString() || null,
+        wsRef: wsRef.current  // Expose wsRef for debugging
       }
       
       // Log when multiplayer manager is ready
