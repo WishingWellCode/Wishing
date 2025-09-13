@@ -19,6 +19,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const { publicKey, connected } = useWallet()
   const [players, setPlayers] = useState<Player[]>([])
   const [isConnected, setIsConnected] = useState(false)
+  const isConnectedRef = useRef(false)
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
   const mountedRef = useRef(false)
@@ -122,6 +123,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         console.log('🎮 ✅ CONNECTED to multiplayer server at:', workerUrl)
         console.log('🔍 DEBUG: WebSocket opened, setting wsRef.current =', ws)
         console.log('🔍 DEBUG: WebSocket readyState =', ws.readyState)
+        isConnectedRef.current = true
         setIsConnected(true)
         
         // Join the game (as player or spectator)
@@ -188,6 +190,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
           pingIntervalRef.current = null
         }
         
+        isConnectedRef.current = false
         setIsConnected(false)
         wsRef.current = null
         playerIdRef.current = null
@@ -195,9 +198,11 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       
       ws.onerror = (error) => {
         console.error('🎮 💥 WEBSOCKET ERROR:', error, 'URL:', workerUrl)
+        isConnectedRef.current = false
         setIsConnected(false)
       }
       
+      // Set wsRef FIRST before any state updates that cause re-renders
       wsRef.current = ws
       console.log('🔍 DEBUG: wsRef.current set to:', wsRef.current)
       console.log('🔍 DEBUG: wsRef.current readyState:', wsRef.current?.readyState)
@@ -235,6 +240,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     }
     
     // Clear all state immediately
+    isConnectedRef.current = false
     setIsConnected(false)
     setPlayers([])
     playerIdRef.current = null
@@ -415,11 +421,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const lastSentPosition = useRef({ x: 0, y: 0 })
   const lastSendTime = useRef(0)
 
-  // Create a stable reference to the current function that always accesses the latest refs
-  const updatePositionRef = useRef<(x: number, y: number) => void>()
-  
-  const updatePosition = (x: number, y: number) => {
-    console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnected}, playerId: ${playerIdRef.current}`)
+  // Create a stable updatePosition function that always accesses current refs
+  const updatePosition = useRef((x: number, y: number) => {
+    console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnectedRef.current}, playerId: ${playerIdRef.current}`)
     console.log(`🔍 DEBUG wsRef details:`, {
       wsRefExists: !!wsRef.current,
       wsRefValue: wsRef.current,
@@ -427,8 +431,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       webSocketOpen: wsRef.current?.readyState === WebSocket.OPEN
     })
     
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !playerIdRef.current || !isConnected) {
-      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, wsReadyState=${wsRef.current?.readyState}, playerId=${playerIdRef.current}, connected=${isConnected}`)
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !playerIdRef.current || !isConnectedRef.current) {
+      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, wsReadyState=${wsRef.current?.readyState}, playerId=${playerIdRef.current}, connected=${isConnectedRef.current}`)
       return
     }
     
@@ -476,10 +480,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         }
       }
     }
-  }
-
-  // Keep the updatePositionRef updated with the latest function
-  updatePositionRef.current = updatePosition
+  }).current
 
   const sendGamblingUpdate = (result: any) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
@@ -494,19 +495,15 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log('🔍 DEBUG: Updating global updateMultiplayerPosition function, wsRef exists:', !!wsRef.current)
-      // Use a stable wrapper that always calls the latest updatePosition
-      ;(window as any).updateMultiplayerPosition = (x: number, y: number) => {
-        if (updatePositionRef.current) {
-          updatePositionRef.current(x, y)
-        }
-      }
+      // Use the stable updatePosition ref directly
+      ;(window as any).updateMultiplayerPosition = updatePosition
     }
     return () => {
       if (typeof window !== 'undefined') {
         ;(window as any).updateMultiplayerPosition = null
       }
     }
-  }, [connected, publicKey, isConnected])
+  }, [])
 
   // Expose methods for external use
   useEffect(() => {
@@ -514,11 +511,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     if (typeof window !== 'undefined') {
       console.log('🔍 DEBUG: Updating multiplayerManager on window, wsRef exists:', !!wsRef.current)
       ;(window as any).multiplayerManager = {
-        updatePosition: (x: number, y: number) => {
-          if (updatePositionRef.current) {
-            updatePositionRef.current(x, y)
-          }
-        },
+        updatePosition: updatePosition,
         sendGamblingUpdate,
         players,
         isConnected,
