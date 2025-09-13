@@ -465,11 +465,16 @@ export class TestScene extends Phaser.Scene {
     if (!this.winnersOverlay) return
 
     // Filter out losing transactions (amount = 0 or tier = LOSE)
-    const filteredWinners = winnersData.filter(winner => {
+    let filteredWinners = winnersData.filter(winner => {
       const tier = winner.tier
       // Only show actual wins and break-even
       return tier !== 'LOSE'
     })
+    
+    // Remove the 3 oldest wins (keep only the most recent ones)
+    if (filteredWinners.length > 3) {
+      filteredWinners = filteredWinners.slice(0, filteredWinners.length - 3)
+    }
 
     const tableStartY = overlayBg.y - overlayBg.height/2 + 80
     const rowHeight = 25
