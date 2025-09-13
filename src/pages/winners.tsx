@@ -23,10 +23,16 @@ export default function Winners() {
   const fetchWinners = async () => {
     try {
       setIsLoading(true)
+      setWinners([]) // Always start fresh
       const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/stats/latest?limit=20')
       if (response.ok) {
         const data = await response.json()
-        setWinners(data)
+        // Only set if we have valid data
+        if (Array.isArray(data)) {
+          setWinners(data)
+        } else {
+          setWinners([])
+        }
       } else {
         console.error('Failed to fetch winners data')
         setWinners([])
@@ -116,7 +122,7 @@ export default function Winners() {
             </h1>
             
             <p 
-              className="text-center text-pink-300 mb-12"
+              className="text-center text-pink-300 mb-4"
               style={{ 
                 fontFamily: '"Press Start 2P"',
                 fontSize: '12px',
@@ -125,6 +131,18 @@ export default function Winners() {
             >
               Verified on-chain winning wishes
             </p>
+
+            {/* Refresh button */}
+            <div className="text-center mb-8">
+              <button
+                onClick={fetchWinners}
+                disabled={isLoading}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white rounded transition-colors"
+                style={{ fontFamily: '"Press Start 2P"', fontSize: '10px' }}
+              >
+                {isLoading ? 'LOADING...' : 'REFRESH'}
+              </button>
+            </div>
 
             {/* Winners table */}
             <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 border-2 border-purple-500/50 shadow-2xl"
