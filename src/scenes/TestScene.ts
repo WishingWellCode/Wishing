@@ -1777,17 +1777,17 @@ export class TestScene extends Phaser.Scene {
   private multiplayerRetryTimer: any = null
   
   private updateMultiplayerPosition(x: number, y: number) {
-    // Use the game context to update player position
+    // Update via exposed multiplayer manager directly
     try {
-      const gameContext = this.registry.get('gameContext')
-      if (gameContext && gameContext.updatePlayerPosition) {
-        gameContext.updatePlayerPosition(x, y)
+      if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
+        (window as any).multiplayerManager.updatePosition(x, y)
         // Only log movement occasionally to reduce spam
         if (Math.random() < 0.02) {
-          console.log('📡 Position synced with multiplayer via game context')
+          console.log('📡 Position synced with multiplayer')
         }
       } else {
-        // Game context not ready yet - this is normal during initialization
+        // Multiplayer manager not ready yet - retry
+        console.log('⚠️ MultiplayerManager not available, retrying...')
         if (!this.multiplayerRetryTimer) {
           this.multiplayerRetryTimer = this.time.delayedCall(1000, () => {
             this.multiplayerRetryTimer = null

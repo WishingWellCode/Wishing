@@ -25,7 +25,8 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
       return hasValidData
     })
     
-    console.log(`👁️ MultiplayerOverlay: Showing ${filtered.length} players`)
+    console.log(`👁️ MultiplayerOverlay: Showing ${filtered.length} players, currentPlayerId: ${currentPlayerId}`)
+    console.log('Players data:', filtered)
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
