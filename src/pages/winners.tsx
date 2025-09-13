@@ -25,12 +25,6 @@ export default function Winners() {
       setIsLoading(true)
       setWinners([]) // Always start fresh
       
-      // TEMPORARILY DISABLED - Remove this when you want to show real data
-      // Just uncomment the code below and remove these two lines:
-      setIsLoading(false)
-      return
-      
-      /* UNCOMMENT THIS WHEN READY TO SHOW REAL DATA:
       const response = await fetch('https://wish-well-worker.stealthbundlebot.workers.dev/api/stats/latest?limit=20')
       if (response.ok) {
         const data = await response.json()
@@ -44,7 +38,6 @@ export default function Winners() {
         console.error('Failed to fetch winners data')
         setWinners([])
       }
-      */
     } catch (error) {
       console.error('Error fetching winners:', error)
       setWinners([])

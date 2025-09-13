@@ -407,10 +407,8 @@ export class TestScene extends Phaser.Scene {
     }
 
     try {
-      // TEMPORARILY DISABLED - Return empty array to show "No winners yet"
-      // Uncomment the line below when ready to show real data:
-      // const winnersData = await this.gamblingAPI.getWinnersData(100)
-      const winnersData: any[] = [] // Empty array for launch
+      // Fetch real winners data - up to 100 entries
+      const winnersData = await this.gamblingAPI.getWinnersData(100)
       
       // Remove loading text
       loadingText.destroy()
