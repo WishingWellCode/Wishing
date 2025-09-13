@@ -1781,10 +1781,8 @@ export class TestScene extends Phaser.Scene {
     try {
       if (typeof window !== 'undefined' && (window as any).multiplayerManager) {
         (window as any).multiplayerManager.updatePosition(x, y)
-        // Only log movement occasionally to reduce spam
-        if (Math.random() < 0.02) {
-          console.log('📡 Position synced with multiplayer')
-        }
+        // Log every movement for debugging
+        console.log('📡 Position synced with multiplayer:', x, y)
       } else {
         // Multiplayer manager not ready yet - retry
         console.log('⚠️ MultiplayerManager not available, retrying...')

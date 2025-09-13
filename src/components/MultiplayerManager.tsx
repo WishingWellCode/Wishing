@@ -412,18 +412,25 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const lastSendTime = useRef(0)
 
   const updatePosition = (x: number, y: number) => {
-    if (!wsRef.current || !playerIdRef.current || !isConnected) return
+    console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnected}, playerId: ${playerIdRef.current}`)
+    if (!wsRef.current || !playerIdRef.current || !isConnected) {
+      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, playerId=${playerIdRef.current}, connected=${isConnected}`)
+      return
+    }
     
     const roundedX = Math.round(x)
     const roundedY = Math.round(y)
     
     // Update local player position in state immediately for smooth movement
     setPlayers(prev => {
+      console.log(`📍 Updating position for player ${playerIdRef.current} to (${roundedX}, ${roundedY})`)
+      console.log(`Current players:`, prev.map(p => `${p.id} at (${p.x},${p.y})`))
       const updated = prev.map(p => 
         p.id === playerIdRef.current 
           ? { ...p, x: roundedX, y: roundedY }
           : p
       )
+      console.log(`Updated players:`, updated.map(p => `${p.id} at (${p.x},${p.y})`))
       onPlayersUpdate?.(updated)
       return updated
     })
