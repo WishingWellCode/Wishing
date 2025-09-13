@@ -120,6 +120,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       
       ws.onopen = () => {
         console.log('🎮 ✅ CONNECTED to multiplayer server at:', workerUrl)
+        console.log('🔍 DEBUG: WebSocket opened, setting wsRef.current =', ws)
+        console.log('🔍 DEBUG: WebSocket readyState =', ws.readyState)
         setIsConnected(true)
         
         // Join the game (as player or spectator)
@@ -197,6 +199,8 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
       }
       
       wsRef.current = ws
+      console.log('🔍 DEBUG: wsRef.current set to:', wsRef.current)
+      console.log('🔍 DEBUG: wsRef.current readyState:', wsRef.current?.readyState)
       
     } catch (error) {
       console.error('Error connecting to multiplayer:', error)
@@ -413,8 +417,15 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
 
   const updatePosition = (x: number, y: number) => {
     console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnected}, playerId: ${playerIdRef.current}`)
-    if (!wsRef.current || !playerIdRef.current || !isConnected) {
-      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, playerId=${playerIdRef.current}, connected=${isConnected}`)
+    console.log(`🔍 DEBUG wsRef details:`, {
+      wsRefExists: !!wsRef.current,
+      wsRefValue: wsRef.current,
+      wsRefReadyState: wsRef.current?.readyState,
+      webSocketOpen: wsRef.current?.readyState === WebSocket.OPEN
+    })
+    
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !playerIdRef.current || !isConnected) {
+      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, wsReadyState=${wsRef.current?.readyState}, playerId=${playerIdRef.current}, connected=${isConnected}`)
       return
     }
     
