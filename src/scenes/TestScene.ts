@@ -1855,6 +1855,11 @@ export class TestScene extends Phaser.Scene {
           this.worldRenderer.handleStateSnapshot(data.players)
         }
         break
+        
+      case 'clearLocalPlayer':
+        console.log('🧹 Clearing local player from TestScene')
+        this.worldRenderer.clearLocalPlayer()
+        break
     }
   }
   

@@ -46,10 +46,13 @@ export default function Home() {
           isActive={true}  // Always connect to see other players
           onPlayersUpdate={(players) => {
             setPlayers(players)
-            // Find current player in the list only if wallet connected
-            if (connected && publicKey) {
+            // Find current player in the list if wallet is available
+            if (publicKey) {
               const currentPlayer = players.find(p => p.walletAddress === publicKey?.toString())
               setCurrentPlayerId(currentPlayer?.id || null)
+              console.log('🎮 Updated currentPlayerId:', currentPlayer?.id || 'null', 'for wallet:', publicKey?.toString())
+            } else {
+              setCurrentPlayerId(null)
             }
           }}
         />

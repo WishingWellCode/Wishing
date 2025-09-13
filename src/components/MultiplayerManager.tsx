@@ -75,6 +75,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         console.log('🎮 Wallet disconnected - switching to spectator mode (staying connected)')
         playerIdRef.current = null
         
+        // Clear local player from Phaser scenes so it can be respawned on reconnect
+        forwardMessageToScenes({ type: 'clearLocalPlayer' })
+        
         // Send spectate message to switch to spectator mode
         const spectatorMessage = {
           type: 'spectate'

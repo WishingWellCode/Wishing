@@ -188,6 +188,11 @@ export class LandingScene extends Phaser.Scene {
           this.worldRenderer.handleStateSnapshot(data.players)
         }
         break
+        
+      case 'clearLocalPlayer':
+        console.log('🧹 Clearing local player from LandingScene')
+        this.worldRenderer.clearLocalPlayer()
+        break
     }
   }
   

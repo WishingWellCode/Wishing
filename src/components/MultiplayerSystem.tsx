@@ -206,7 +206,7 @@ export default function MultiplayerSystem({ isActive }: MultiplayerSystemProps) 
               left: `${player.x}px`,
               top: `${player.y}px`,
               transition: player.id === localPlayer?.id ? 'none' : 'left 0.1s ease-out, top 0.1s ease-out',
-              zIndex: player.id === localPlayer?.id ? 45 : 44
+              zIndex: player.id === localPlayer?.id ? 15 : 14
             }}
           >
             {/* Player Sprite */}

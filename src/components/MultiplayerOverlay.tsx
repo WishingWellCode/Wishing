@@ -27,6 +27,14 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     
     console.log(`👁️ MultiplayerOverlay: Showing ${filtered.length} players, currentPlayerId: ${currentPlayerId}`)
     console.log('Players data:', filtered)
+    
+    // Debug current player specifically
+    if (currentPlayerId) {
+      const currentPlayer = filtered.find(p => p.id === currentPlayerId)
+      console.log('🎮 Current player in overlay:', currentPlayer ? 
+        `${currentPlayer.username} at (${currentPlayer.x},${currentPlayer.y}) sprite:${currentPlayer.sprite}` : 
+        'NOT FOUND in filtered list')
+    }
     setVisiblePlayers(filtered)
   }, [players, currentPlayerId])
 
@@ -50,7 +58,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
     <div 
       className="fixed inset-0 pointer-events-none" 
       style={{ 
-        zIndex: 9998, // Higher z-index to ensure visibility
+        zIndex: 10, // Very low z-index to stay behind all Phaser elements
         position: 'fixed', // Force new stacking context
         top: 0,
         left: 0,
@@ -75,7 +83,7 @@ export default function MultiplayerOverlay({ players, currentPlayerId }: Multipl
             top: `${screenY}px`,
             transform: 'translate(-50%, -50%)',
             transition: 'left 0.033s linear, top 0.033s linear',
-            zIndex: 9999, // Very high z-index to appear above everything
+            zIndex: 11, // Very low z-index to stay behind all Phaser elements
             pointerEvents: 'none'
           }}
         >
