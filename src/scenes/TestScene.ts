@@ -1423,7 +1423,7 @@ export class TestScene extends Phaser.Scene {
       
       // Create burn transaction
       text.setText('Preparing burn...')
-      const tokenMintAddress = 'DgSwxG6JdFn8CZWqkJpRbmeaHZ11UUg2KmJ4btanpump'
+      const tokenMintAddress = 'ASajWWYDv5QDCjVBQbxT9ThhvGptaTJBZUSAfK5opump' // WNDR token
       const tokenMint = new PublicKey(tokenMintAddress)
       
       // Real burn transaction
