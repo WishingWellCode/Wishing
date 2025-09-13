@@ -7,9 +7,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 SOLANA_RPC_URL = "https://solana-mainnet.g.alchemy.com/v2/SYEG70FAIl_t9bDEkh4ki"
-WNDR_TOKEN_MINT = "DgSwxG6JdFn8CZWqkJpRbmeaHZ11UUg2KmJ4btanpump"
+WNDR_TOKEN_MINT = "ASajWWYDv5QDCjVBQbxT9ThhvGptaTJBZUSAfK5opump"
 BURN_ADDRESS = "11111111111111111111111111111111"
-POOL_WALLET_PUBLIC = "3A16eieUnz9tSjCwS528MLdoE6uuqJMqL7hQaQs5qYDu"
+POOL_WALLET_PUBLIC = "3Vb7GcmDC2uwakUXMeg2PPEiXaGdjUdPywKF6BnGV9Kx"
 
 # Secrets (set via: wrangler secret put SECRET_NAME)
 # POOL_WALLET_PRIVATE_KEY = "your-pool-wallet-private-key-base58"

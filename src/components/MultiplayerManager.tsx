@@ -57,7 +57,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         disconnectMultiplayer()
       }
     }
-  }, [isActive, connected, publicKey])
+  }, [isActive])
 
   // Handle wallet address changes specifically (wallet switching or connecting)
   useEffect(() => {
