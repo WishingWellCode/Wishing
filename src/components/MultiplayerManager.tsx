@@ -421,8 +421,9 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const lastSentPosition = useRef({ x: 0, y: 0 })
   const lastSendTime = useRef(0)
 
-  // Create a stable updatePosition function that always accesses current refs
-  const updatePosition = useRef((x: number, y: number) => {
+  // Create a completely stable updatePosition function that bypasses closure issues
+  const updatePosition = useRef<(x: number, y: number) => void>()
+  updatePosition.current = (x: number, y: number) => {
     console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnectedRef.current}, playerId: ${playerIdRef.current}`)
     console.log(`🔍 DEBUG wsRef details:`, {
       wsRefExists: !!wsRef.current,
@@ -480,7 +481,7 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
         }
       }
     }
-  }).current
+  }
 
   const sendGamblingUpdate = (result: any) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
@@ -495,8 +496,12 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log('🔍 DEBUG: Updating global updateMultiplayerPosition function, wsRef exists:', !!wsRef.current)
-      // Use the stable updatePosition ref directly
-      ;(window as any).updateMultiplayerPosition = updatePosition
+      // Use a wrapper that calls the current function
+      ;(window as any).updateMultiplayerPosition = (x: number, y: number) => {
+        if (updatePosition.current) {
+          updatePosition.current(x, y)
+        }
+      }
     }
     return () => {
       if (typeof window !== 'undefined') {
@@ -511,7 +516,11 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
     if (typeof window !== 'undefined') {
       console.log('🔍 DEBUG: Updating multiplayerManager on window, wsRef exists:', !!wsRef.current)
       ;(window as any).multiplayerManager = {
-        updatePosition: updatePosition,
+        updatePosition: (x: number, y: number) => {
+          if (updatePosition.current) {
+            updatePosition.current(x, y)
+          }
+        },
         sendGamblingUpdate,
         players,
         isConnected,
