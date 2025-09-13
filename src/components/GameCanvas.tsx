@@ -12,7 +12,11 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
   const isHandshakingRef = useRef(false)
 
   const handleSceneSwitching = async (walletConnected: boolean) => {
-    if (!gameRef.current || !gameRef.current.scene || isHandshakingRef.current) return
+    console.log('🔍 DEBUG: handleSceneSwitching called, connected:', walletConnected, 'timestamp:', Date.now())
+    if (!gameRef.current || !gameRef.current.scene || isHandshakingRef.current) {
+      console.log('🔍 DEBUG: handleSceneSwitching early return - gameRef:', !!gameRef.current, 'scene:', !!gameRef.current?.scene, 'handshaking:', isHandshakingRef.current)
+      return
+    }
     
     const sceneManager = gameRef.current.scene
     
@@ -164,6 +168,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
       sceneManager.stop('TestScene')
       
       console.log('🔍 DEBUG: All scenes stopped. Starting single scene based on wallet state.')
+      console.log('🔍 DEBUG: isWalletConnected =', isWalletConnected)
       
       if (isWalletConnected) {
         console.log('🔍 DEBUG: Starting ONLY TestScene (wallet connected)')
@@ -186,7 +191,7 @@ export default function GameCanvas({ isWalletConnected = false }: GameCanvasProp
 
   // Debounced wallet connection change handler to prevent rapid switches
   useEffect(() => {
-    console.log('🔍 DEBUG: Wallet connection useEffect triggered, wallet:', isWalletConnected, 'gameRef exists:', !!gameRef.current)
+    console.log('🔍 DEBUG: Wallet connection useEffect triggered, wallet:', isWalletConnected, 'gameRef exists:', !!gameRef.current, 'timestamp:', Date.now())
     
     const debounceTimer = setTimeout(() => {
       if (gameRef.current && gameRef.current.scene && !isHandshakingRef.current) {
