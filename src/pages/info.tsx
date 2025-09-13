@@ -695,7 +695,6 @@ export default function InfoPage() {
                         </div>
                         <div className="text-xs space-y-1" style={{color: '#ffffff'}}>
                           <div>• 5% Pool Wallet for ongoing liquidity</div>
-                          <div>• 5% Locked for future Gambling pool</div>
                         </div>
                       </div>
                     </div>
