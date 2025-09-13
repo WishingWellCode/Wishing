@@ -421,62 +421,74 @@ export default function MultiplayerManager({ isActive, onPlayersUpdate }: Multip
   const lastSentPosition = useRef({ x: 0, y: 0 })
   const lastSendTime = useRef(0)
 
-  // Create a completely stable updatePosition function that bypasses closure issues
+  // Create a single stable updatePosition function that uses refs to avoid closure issues
   const updatePosition = useRef<(x: number, y: number) => void>()
-  updatePosition.current = (x: number, y: number) => {
-    console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${isConnectedRef.current}, playerId: ${playerIdRef.current}`)
-    console.log(`🔍 DEBUG wsRef details:`, {
-      wsRefExists: !!wsRef.current,
-      wsRefValue: wsRef.current,
-      wsRefReadyState: wsRef.current?.readyState,
-      webSocketOpen: wsRef.current?.readyState === WebSocket.OPEN
-    })
-    
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !playerIdRef.current || !isConnectedRef.current) {
-      console.log(`⚠️ updatePosition failed: wsRef=${!!wsRef.current}, wsReadyState=${wsRef.current?.readyState}, playerId=${playerIdRef.current}, connected=${isConnectedRef.current}`)
-      return
-    }
-    
-    const roundedX = Math.round(x)
-    const roundedY = Math.round(y)
-    
-    // Update local player position in state immediately for smooth movement
-    setPlayers(prev => {
-      console.log(`📍 Updating position for player ${playerIdRef.current} to (${roundedX}, ${roundedY})`)
-      console.log(`Current players:`, prev.map(p => `${p.id} at (${p.x},${p.y})`))
-      const updated = prev.map(p => 
-        p.id === playerIdRef.current 
-          ? { ...p, x: roundedX, y: roundedY }
-          : p
-      )
-      console.log(`Updated players:`, updated.map(p => `${p.id} at (${p.x},${p.y})`))
-      onPlayersUpdate?.(updated)
-      return updated
-    })
-    
-    // Send updates immediately if position changed and enough time has passed
-    const now = Date.now()
-    const timeSinceLastSend = now - lastSendTime.current
-    
-    // Check if position actually changed significantly (at least 2 pixels)
-    const deltaX = Math.abs(lastSentPosition.current.x - roundedX)
-    const deltaY = Math.abs(lastSentPosition.current.y - roundedY)
-    
-    if (deltaX >= 2 || deltaY >= 2) {
-      // Send at 30fps (33ms) for smoother, less stuttery movement
-      if (timeSinceLastSend >= 33) {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-          try {
-            wsRef.current.send(JSON.stringify({
-              type: 'move',
-              x: roundedX,
-              y: roundedY
-            }))
-            lastSentPosition.current = { x: roundedX, y: roundedY }
-            lastSendTime.current = now
-          } catch (error) {
-            console.error('Error sending position update:', error)
-            setIsConnected(false)
+  
+  // Initialize the function ONCE and never reassign it
+  if (!updatePosition.current) {
+    updatePosition.current = (x: number, y: number) => {
+      // Get fresh references at execution time - no closure capture!
+      const currentWs = wsRef.current
+      const currentPlayerId = playerIdRef.current
+      const currentConnected = isConnectedRef.current
+      
+      console.log(`🎮 updatePosition called with (${x}, ${y}), connected: ${currentConnected}, playerId: ${currentPlayerId}`)
+      console.log(`🔍 DEBUG wsRef details:`, {
+        wsRefExists: !!currentWs,
+        wsRefValue: currentWs,
+        wsRefReadyState: currentWs?.readyState,
+        webSocketOpen: currentWs?.readyState === WebSocket.OPEN
+      })
+      
+      if (!currentWs || currentWs.readyState !== WebSocket.OPEN || !currentPlayerId || !currentConnected) {
+        console.log(`⚠️ updatePosition failed: wsRef=${!!currentWs}, wsReadyState=${currentWs?.readyState}, playerId=${currentPlayerId}, connected=${currentConnected}`)
+        return
+      }
+      
+      const roundedX = Math.round(x)
+      const roundedY = Math.round(y)
+      
+      // Update local player position in state immediately for smooth movement
+      setPlayers(prev => {
+        console.log(`📍 Updating position for player ${currentPlayerId} to (${roundedX}, ${roundedY})`)
+        console.log(`Current players:`, prev.map(p => `${p.id} at (${p.x},${p.y})`))
+        const updated = prev.map(p => 
+          p.id === currentPlayerId 
+            ? { ...p, x: roundedX, y: roundedY }
+            : p
+        )
+        console.log(`Updated players:`, updated.map(p => `${p.id} at (${p.x},${p.y})`))
+        onPlayersUpdate?.(updated)
+        return updated
+      })
+      
+      // Send updates immediately if position changed and enough time has passed
+      const now = Date.now()
+      const timeSinceLastSend = now - lastSendTime.current
+      
+      // Check if position actually changed significantly (at least 2 pixels)
+      const deltaX = Math.abs(lastSentPosition.current.x - roundedX)
+      const deltaY = Math.abs(lastSentPosition.current.y - roundedY)
+      
+      if (deltaX >= 2 || deltaY >= 2) {
+        // Send at 30fps (33ms) for smoother, less stuttery movement
+        if (timeSinceLastSend >= 33) {
+          // Get fresh WebSocket reference again just before sending
+          const sendWs = wsRef.current
+          if (sendWs && sendWs.readyState === WebSocket.OPEN) {
+            try {
+              sendWs.send(JSON.stringify({
+                type: 'move',
+                x: roundedX,
+                y: roundedY
+              }))
+              lastSentPosition.current = { x: roundedX, y: roundedY }
+              lastSendTime.current = now
+              console.log(`📡 SENT POSITION UPDATE: (${roundedX}, ${roundedY})`)
+            } catch (error) {
+              console.error('Error sending position update:', error)
+              setIsConnected(false)
+            }
           }
         }
       }
